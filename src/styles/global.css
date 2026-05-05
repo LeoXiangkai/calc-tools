@@ -12,9 +12,9 @@
   --r-lg: 12px;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --maxw: 1024px;
-  --maxw-reading: 1024px;
-  --maxw-tool: 1024px;
+  --maxw: 720px;
+  --maxw-reading: 720px;
+  --maxw-tool: 720px;
   --maxw-text: 720px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", sans-serif;
@@ -262,10 +262,10 @@ td:first-child {
   gap: 12px;
   align-items: start;
 }
-@media (min-width: 820px) {
+@media (min-width: 720px) {
   .split {
-    grid-template-columns: minmax(280px, 360px) 1fr;
-    gap: 16px;
+    grid-template-columns: minmax(240px, 280px) 1fr;
+    gap: 12px;
   }
   .split > .col-input {
     position: sticky;
@@ -287,13 +287,7 @@ td:first-child {
 .form-grid label > input,
 .form-grid label > select {
   margin-top: 3px;
-  max-width: 280px;
-}
-@media (max-width: 480px) {
-  .form-grid label > input,
-  .form-grid label > select {
-    max-width: 100%;
-  }
+  max-width: 100%;
 }
 
 .kv-grid {
