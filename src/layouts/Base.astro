@@ -10,13 +10,13 @@ interface Props {
 
 const { title, description, canonical, wide = false } = Astro.props;
 const pageUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
-const fullTitle = title === "在线计算器工具集"
+const fullTitle = title === "计算工具"
   ? title
-  : `${title} - 在线计算器工具集`;
+  : `${title} - 计算工具`;
 
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 const navItems = [
-  { href: "/", label: "计算器工具集", brand: true },
+  { href: "/", label: "计算工具", brand: true },
   { href: "/mortgage", label: "房贷" },
   { href: "/tax", label: "个税" },
   { href: "/transaction-tax", label: "买房税费" },

@@ -112,9 +112,11 @@ main {
   text-decoration: none;
 }
 .nav-link.brand {
-  font-weight: 600;
-  color: var(--c-text);
-  margin-right: 8px;
+  font-weight: 700;
+  color: var(--c-accent);
+  margin-right: 12px;
+  font-size: 16px;
+  letter-spacing: 0.5px;
 }
 .nav-link.active {
   color: var(--c-accent);
@@ -126,10 +128,11 @@ main {
   border-radius: 6px 6px 0 0;
 }
 .nav-link.brand.active {
-  color: var(--c-text);
+  color: var(--c-accent);
   background: transparent;
   padding-left: 2px;
   padding-right: 2px;
+  border-bottom-color: var(--c-accent);
 }
 
 .site-footer {
