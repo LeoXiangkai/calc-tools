@@ -24,6 +24,11 @@
   box-sizing: border-box;
 }
 
+html {
+  /* 始终保留滚动条空间，避免内容加载/分页切换时滚动条出现导致 viewport 宽度跳动 */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
 html,
 body {
   margin: 0;
