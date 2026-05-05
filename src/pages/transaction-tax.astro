@@ -11,18 +11,17 @@ import Base from "~/layouts/Base.astro";
     按 2025-12 起执行的全国契税新政计算契税、增值税及附加、个税。一手房通常只涉及契税。
   </p>
 
-  <div class="split">
+  <div class="tabs" role="tablist">
+    <button data-tab="new" role="tab" aria-selected="true">一手房（新房）</button>
+    <button data-tab="used" role="tab" aria-selected="false">二手房</button>
+  </div>
+
+  <input type="hidden" name="t-type" id="t-type-hidden" value="new" />
+
+  <div class="split" style="margin-top:8px;">
     <div class="col-input">
       <div class="card compact">
-        <h3>交易类型</h3>
-        <div class="btn-row">
-          <input type="radio" name="t-type" id="t-new" value="new" checked />
-          <label for="t-new">一手房</label>
-          <input type="radio" name="t-type" id="t-used" value="used" />
-          <label for="t-used">二手房</label>
-        </div>
-
-        <h3 style="margin-top:12px;">买方家庭住房序数</h3>
+        <h3>买方家庭住房序数</h3>
         <div class="btn-row">
           <input type="radio" name="t-order" id="t-first" value="first" checked />
           <label for="t-first">首套</label>
@@ -98,8 +97,20 @@ import Base from "~/layouts/Base.astro";
     const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
     const cny = (n: number) => `¥${fmtCny(n)}`;
 
+    // Tab switch (一手 / 二手)
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const typeHidden = $<HTMLInputElement>("t-type-hidden");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        typeHidden.value = t.dataset.tab ?? "new";
+        render();
+      }),
+    );
+
     function render(): void {
-      const type = (document.querySelector<HTMLInputElement>("input[name='t-type']:checked")?.value ?? "new") as TransactionType;
+      const type = (typeHidden.value ?? "new") as TransactionType;
       const order = (document.querySelector<HTMLInputElement>("input[name='t-order']:checked")?.value ?? "first") as HouseOrder;
       const totalPrice = Number($<HTMLInputElement>("t-price").value) * 10000;
       const area = Number($<HTMLInputElement>("t-area").value);
@@ -130,7 +141,7 @@ import Base from "~/layouts/Base.astro";
       }
     }
 
-    document.querySelectorAll<HTMLElement>("input[name='t-type'],input[name='t-order'],#t-price,#t-area,#t-hold,#t-only,#t-orig").forEach((el) => {
+    document.querySelectorAll<HTMLElement>("input[name='t-order'],#t-price,#t-area,#t-hold,#t-only,#t-orig").forEach((el) => {
       el.addEventListener("input", render);
       el.addEventListener("change", render);
     });

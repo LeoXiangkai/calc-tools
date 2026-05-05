@@ -270,10 +270,6 @@ td:first-child {
     grid-template-columns: minmax(240px, 280px) 1fr;
     gap: 12px;
   }
-  .split > .col-input {
-    position: sticky;
-    top: 100px;
-  }
 }
 .split > div > .card:first-child {
   margin-top: 0;
