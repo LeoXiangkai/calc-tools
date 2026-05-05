@@ -32,6 +32,14 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: 1.55;
 }
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+body > main {
+  flex: 1;
+}
 
 a {
   color: var(--c-accent);
@@ -132,6 +140,7 @@ main {
   border-top: 1px solid var(--c-border);
   background: #fff;
   margin-top: 48px;
+  flex-shrink: 0;
 }
 .site-footer-inner {
   max-width: var(--maxw-tool);
