@@ -5,9 +5,10 @@ interface Props {
   title: string;
   description: string;
   canonical?: string;
+  wide?: boolean;
 }
 
-const { title, description, canonical } = Astro.props;
+const { title, description, canonical, wide = false } = Astro.props;
 const pageUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
 const fullTitle = title === "在线计算器工具集"
   ? title
@@ -42,7 +43,7 @@ const fullTitle = title === "在线计算器工具集"
       </nav>
     </header>
 
-    <main>
+    <main class={wide ? "tool-main" : ""}>
       <slot />
     </main>
 

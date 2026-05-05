@@ -13,6 +13,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
   --maxw: 720px;
+  --maxw-tool: 1080px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", sans-serif;
 }
@@ -28,7 +29,7 @@ body {
   background: var(--c-bg);
   color: var(--c-text);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 a {
@@ -42,24 +43,27 @@ a:hover {
 main {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 20px 16px 40px;
+}
+main.tool-main {
+  max-width: var(--maxw-tool);
 }
 
 h1 {
   font-size: 24px;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 h2 {
-  font-size: 20px;
-  margin: 32px 0 12px;
+  font-size: 18px;
+  margin: 20px 0 8px;
 }
 h3 {
-  font-size: 16px;
-  margin: 24px 0 8px;
+  font-size: 15px;
+  margin: 14px 0 6px;
 }
 
 p {
-  margin: 12px 0;
+  margin: 8px 0;
   color: var(--c-text-soft);
 }
 
@@ -67,9 +71,16 @@ p {
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: var(--r-lg);
-  padding: 16px;
+  padding: 14px;
   box-shadow: var(--shadow-sm);
-  margin: 16px 0;
+  margin: 10px 0;
+}
+.card.compact {
+  padding: 12px;
+  margin: 8px 0;
+}
+.card h3:first-child {
+  margin-top: 0;
 }
 
 button {
@@ -80,12 +91,12 @@ button {
 input,
 select {
   font: inherit;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-md);
   background: #fff;
   width: 100%;
-  min-height: 44px;
+  min-height: 38px;
 }
 
 input:focus,
@@ -94,14 +105,19 @@ select:focus {
   border-color: var(--c-accent);
 }
 
+label {
+  font-size: 13px;
+  color: var(--c-text-soft);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 }
 th,
 td {
-  padding: 8px 6px;
+  padding: 6px 6px;
   border-bottom: 1px solid var(--c-border);
   text-align: right;
 }
@@ -114,13 +130,17 @@ td:first-child {
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--c-border);
-  margin: 16px 0 0;
+  margin: 12px 0 0;
   overflow-x: auto;
+  position: sticky;
+  top: 0;
+  background: var(--c-bg);
+  z-index: 5;
 }
 .tabs button {
   background: transparent;
   border: none;
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-size: 14px;
   color: var(--c-text-soft);
   border-bottom: 2px solid transparent;
@@ -133,41 +153,84 @@ td:first-child {
 }
 .tab-panel {
   display: none;
+  padding-top: 8px;
 }
 .tab-panel.active {
   display: block;
 }
 
+/* 双栏布局：左输入右结果。≥820px 自动并排 */
+.split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+}
+@media (min-width: 820px) {
+  .split {
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 16px;
+  }
+  .split > .col-input {
+    position: sticky;
+    top: 56px;
+  }
+}
+.split > div > .card:first-child {
+  margin-top: 0;
+}
+
+/* 紧凑表单：每条 label 贴近输入 */
+.form-grid {
+  display: grid;
+  gap: 8px;
+}
+.form-grid label {
+  display: block;
+}
+.form-grid label > input,
+.form-grid label > select {
+  margin-top: 3px;
+}
+
 .kv-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 .kv-grid > div > .label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--c-text-soft);
 }
 .kv-grid > div > .value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   margin-top: 2px;
+  word-break: break-word;
+}
+
+/* 高亮卡（关键结果） */
+.card.highlight {
+  background: var(--c-accent-soft);
+  border-color: var(--c-accent);
 }
 
 .btn-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .btn-row label {
   flex: 1 1 auto;
   text-align: center;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-md);
   cursor: pointer;
   background: #fff;
-  font-size: 14px;
-  min-width: 100px;
+  font-size: 13px;
+  min-width: 90px;
+  color: var(--c-text);
 }
 .btn-row input[type="radio"] {
   display: none;
@@ -180,15 +243,25 @@ td:first-child {
 }
 
 @media (max-width: 480px) {
+  main {
+    padding: 12px 12px 32px;
+  }
   h1 {
-    font-size: 22px;
+    font-size: 20px;
+  }
+  h2 {
+    font-size: 16px;
+    margin: 16px 0 6px;
   }
   th,
   td {
-    padding: 6px 4px;
-    font-size: 13px;
+    padding: 5px 4px;
+    font-size: 12px;
   }
   .kv-grid > div > .value {
-    font-size: 18px;
+    font-size: 16px;
+  }
+  .card {
+    padding: 12px;
   }
 }

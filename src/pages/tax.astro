@@ -2,15 +2,14 @@
 import Base from "~/layouts/Base.astro";
 ---
 <Base
+  wide
   title="个税计算器"
   description="覆盖工资月度预扣（累计预扣预缴法）、年度汇算、年终奖（单独/并入对比）、劳务报酬/稿酬/特许权使用费、个体经营所得的全场景个税计算。基于 2026 年现行税率表。"
 >
-  <h1>个税计算器</h1>
-  <p>
-    覆盖中国个人所得税几乎所有常见计算场景：每月预扣、年度汇算、年终奖最优计税、劳务/稿酬/特许权、经营所得。
-    所有计算在浏览器本地完成，<strong>不会上传</strong>。
-    搞不清专项附加扣除？看 <a href="/guides/tax-deductions">专项附加扣除完整指南</a>；
-    要查税率档，去 <a href="/tax-rate-tables">税率表速查</a>。
+  <h1 style="margin-bottom:4px;">个税计算器</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    覆盖月度预扣、年度汇算、年终奖、劳务稿酬、经营所得 5 大场景。数据本地处理，不上传。
+    入门：<a href="/guides/tax-deductions">专项附加扣除指南</a> · <a href="/tax-rate-tables">税率表</a>
   </p>
 
   <div class="tabs" role="tablist">
@@ -68,145 +67,181 @@ import Base from "~/layouts/Base.astro";
 
   {/* ==================== Tab 2: 年度汇算 ==================== */}
   <section class="tab-panel" data-panel="annual">
-    <h2>年度综合所得汇算</h2>
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      次年 3-6 月汇算清缴：把全年工资、劳务、稿酬、特许权一起算应纳税额，与已预扣对比，应退应补。
-      <strong>所有金额按年度填写。</strong>
-    </p>
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>综合所得收入（年度，税前）</h3>
+          <div class="form-grid">
+            <label>工资薪金合计<input id="y-salary" type="number" min="0" step="1000" value="240000" /></label>
+            <label>劳务报酬合计（80% 计入）<input id="y-labor" type="number" min="0" step="1000" value="0" /></label>
+            <label>稿酬合计（56% 计入）<input id="y-author" type="number" min="0" step="1000" value="0" /></label>
+            <label>特许权使用费合计（80%）<input id="y-royalty" type="number" min="0" step="1000" value="0" /></label>
+          </div>
+          <h3 style="margin-top:12px;">扣除（年度）</h3>
+          <div class="form-grid">
+            <label>五险一金（个人部分）<input id="y-social" type="number" min="0" step="1000" value="36000" /></label>
+            <label>专项附加扣除合计<input id="y-special" type="number" min="0" step="1000" value="14400" /></label>
+            <label>其他扣除（年金等）<input id="y-other" type="number" min="0" step="1000" value="0" /></label>
+            <label>公益慈善捐赠<input id="y-charity" type="number" min="0" step="1000" value="0" /></label>
+          </div>
+          <h3 style="margin-top:12px;">已预缴</h3>
+          <div class="form-grid">
+            <label>全年已预扣预缴税额<input id="y-withheld" type="number" min="0" step="100" value="0" /></label>
+          </div>
+        </div>
+      </div>
 
-    <div class="card">
-      <h3 style="margin-top:0;">综合所得收入（税前）</h3>
-      <label>工资薪金年度合计（元）<input id="y-salary" type="number" min="0" step="1000" value="240000" /></label>
-      <label>劳务报酬年度合计（按 80% 计入）<input id="y-labor" type="number" min="0" step="1000" value="0" /></label>
-      <label>稿酬年度合计（按 56% 计入）<input id="y-author" type="number" min="0" step="1000" value="0" /></label>
-      <label>特许权使用费年度合计（按 80% 计入）<input id="y-royalty" type="number" min="0" step="1000" value="0" /></label>
-
-      <h3>扣除</h3>
-      <label>全年五险一金（个人部分）<input id="y-social" type="number" min="0" step="1000" value="36000" /></label>
-      <label>全年专项附加扣除合计<input id="y-special" type="number" min="0" step="1000" value="14400" /></label>
-      <label>全年其他扣除（年金等）<input id="y-other" type="number" min="0" step="1000" value="0" /></label>
-      <label>全年公益慈善捐赠<input id="y-charity" type="number" min="0" step="1000" value="0" /></label>
-
-      <h3>已预缴</h3>
-      <label>全年已预扣预缴税额<input id="y-withheld" type="number" min="0" step="100" value="0" /></label>
-    </div>
-
-    <div class="card kv-grid">
-      <div><div class="label">综合所得收入额</div><div class="value" id="y-income">—</div></div>
-      <div><div class="label">总扣除（含 60000 起征）</div><div class="value" id="y-deduct">—</div></div>
-      <div><div class="label">应纳税所得额</div><div class="value" id="y-taxable">—</div></div>
-      <div><div class="label">适用税率</div><div class="value" id="y-rate">—</div></div>
-      <div><div class="label">全年应纳税额</div><div class="value" id="y-due" style="color:var(--c-danger);">—</div></div>
-      <div>
-        <div class="label">应退（-）/ 应补（+）</div>
-        <div class="value" id="y-refund" style="color:var(--c-accent);">—</div>
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">应退（-）/ 应补（+）</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="y-refund">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">综合所得收入额</div><div class="value" id="y-income">—</div></div>
+            <div><div class="label">总扣除</div><div class="value" id="y-deduct">—</div></div>
+            <div><div class="label">应纳税所得额</div><div class="value" id="y-taxable">—</div></div>
+            <div><div class="label">适用税率</div><div class="value" id="y-rate">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">全年应纳税额</div><div class="value" id="y-due" style="color:var(--c-danger);">—</div></div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">汇算时间：次年 3-6 月。"应退"代表预扣多了可退税。</p>
+        </div>
       </div>
     </div>
   </section>
 
   {/* ==================== Tab 3: 年终奖对比 ==================== */}
   <section class="tab-panel" data-panel="bonus">
-    <h2>年终奖：单独计税 vs 并入综合所得</h2>
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      自 2024 年起，年终奖可选两种计税方式：单独按月度税率表 / 并入年度综合所得。本工具同屏对比哪种更省。
-      <strong>需要先填本年度综合所得应纳税所得额（不含年终奖）。</strong>
-    </p>
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>年终奖金额（元）<input id="b-bonus" type="number" min="0" step="1000" value="50000" /></label>
+            <label>本年度综合应纳税所得额<br/>（不含年终奖）<input id="b-base" type="number" min="0" step="1000" value="138000" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            综合应纳税所得额 = 全年工资 − 60000 − 全年社保 − 专项附加扣除 − 其他。可在"年度汇算"算出。
+          </p>
+        </div>
+      </div>
 
-    <div class="card">
-      <label>年终奖金额（元）<input id="b-bonus" type="number" min="0" step="1000" value="50000" /></label>
-      <label>本年度综合应纳税所得额（不含年终奖，元）<input id="b-base" type="number" min="0" step="1000" value="138000" /></label>
-      <p style="font-size:13px;color:var(--c-text-soft);margin-top:8px;">
-        如何算"综合应纳税所得额"？= 全年工资 - 60000 - 全年社保 - 全年专项附加扣除 - 其他扣除。
-        可在"年度汇算" Tab 算出。
-      </p>
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">推荐方案</div>
+          <div style="font-size:22px;font-weight:600;color:var(--c-accent);" id="b-recommend">—</div>
+          <div style="font-size:12px;color:var(--c-text-soft);margin-top:4px;" id="b-saving"></div>
+        </div>
+        <div class="card compact">
+          <div style="font-weight:600;font-size:14px;margin-bottom:6px;">A：单独计税（月度税率表）</div>
+          <div class="kv-grid">
+            <div><div class="label">应纳税额</div><div class="value" id="b-sep-tax">—</div></div>
+            <div><div class="label">适用税率</div><div class="value" id="b-sep-rate">—</div></div>
+          </div>
+        </div>
+        <div class="card compact">
+          <div style="font-weight:600;font-size:14px;margin-bottom:6px;">B：并入综合所得</div>
+          <div class="kv-grid">
+            <div><div class="label">奖金税额增量</div><div class="value" id="b-com-inc">—</div></div>
+            <div><div class="label">适用税率</div><div class="value" id="b-com-rate">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">合计应纳税</div><div class="value" id="b-com-tax">—</div></div>
+          </div>
+        </div>
+        <p style="font-size:12px;margin:8px 0 0;color:var(--c-danger);">
+          ⚠️ 年终奖陷阱：36000→36001 元，单独计税从 1080→3390，多 1 元多税 2310 元。
+        </p>
+      </div>
     </div>
-
-    <div class="card kv-grid">
-      <div style="grid-column:1/-1;"><strong>方案 A：单独计税（按月度税率表）</strong></div>
-      <div><div class="label">应纳税额</div><div class="value" id="b-sep-tax">—</div></div>
-      <div><div class="label">适用税率</div><div class="value" id="b-sep-rate">—</div></div>
-    </div>
-
-    <div class="card kv-grid">
-      <div style="grid-column:1/-1;"><strong>方案 B：并入综合所得</strong></div>
-      <div><div class="label">合计应纳税</div><div class="value" id="b-com-tax">—</div></div>
-      <div><div class="label">奖金带来的税额增量</div><div class="value" id="b-com-inc">—</div></div>
-      <div><div class="label">适用税率</div><div class="value" id="b-com-rate">—</div></div>
-    </div>
-
-    <div class="card" style="background:var(--c-accent-soft);border-color:var(--c-accent);">
-      <div style="font-size:13px;color:var(--c-text-soft);">推荐方案</div>
-      <div style="font-size:22px;font-weight:600;color:var(--c-accent);" id="b-recommend">—</div>
-      <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px;" id="b-saving"></div>
-    </div>
-
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      <strong>年终奖陷阱</strong>：奖金从 36000→36001 元，单独计税额从 1080→3390，多 1 元税多 2310。
-      税率档跳跃区间附近一定要试算两种方式。
-    </p>
   </section>
 
   {/* ==================== Tab 4: 劳务/稿酬/特许权 ==================== */}
   <section class="tab-panel" data-panel="incidental">
-    <h2>劳务报酬 / 稿酬 / 特许权使用费</h2>
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      支付时由扣缴义务人按"次"或"月"预扣。年度汇算时按 80%（劳务/特许权）或 56%（稿酬）并入综合所得。
-      预扣不等于最终税额，年底可能多退少补。
-    </p>
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>本次税前收入（元）<input id="i-amount" type="number" min="0" step="100" value="10000" /></label>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">所得类型</div>
+            <div class="btn-row">
+              <input type="radio" name="i-type" id="i-labor" value="labor" checked />
+              <label for="i-labor">劳务</label>
+              <input type="radio" name="i-type" id="i-author" value="author" />
+              <label for="i-author">稿酬</label>
+              <input type="radio" name="i-type" id="i-royalty" value="royalty" />
+              <label for="i-royalty">特许权</label>
+            </div>
+          </div>
+          <p style="font-size:12px;margin:10px 0 0;">
+            预扣不等于最终税额，年度汇算时并入综合所得，可能多退少补。
+          </p>
+        </div>
+      </div>
 
-    <div class="card">
-      <label>本次税前收入（元）<input id="i-amount" type="number" min="0" step="100" value="10000" /></label>
-      <h3>所得类型</h3>
-      <div class="btn-row">
-        <input type="radio" name="i-type" id="i-labor" value="labor" checked />
-        <label for="i-labor">劳务报酬</label>
-        <input type="radio" name="i-type" id="i-author" value="author" />
-        <label for="i-author">稿酬</label>
-        <input type="radio" name="i-type" id="i-royalty" value="royalty" />
-        <label for="i-royalty">特许权</label>
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">本次到手</div>
+          <div style="font-size:22px;font-weight:600;color:var(--c-success);" id="i-net">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">应纳税所得</div><div class="value" id="i-taxable">—</div></div>
+            <div><div class="label">预扣率</div><div class="value" id="i-rate">—</div></div>
+            <div><div class="label">单次预扣税</div><div class="value" id="i-tax" style="color:var(--c-danger);">—</div></div>
+            <div><div class="label">年度并入综合</div><div class="value" id="i-annual">—</div></div>
+          </div>
+        </div>
+        <details class="card compact">
+          <summary style="cursor:pointer;font-weight:600;font-size:13px;">预扣率说明</summary>
+          <p style="font-size:12px;margin:6px 0 0;">
+            <strong>劳务报酬</strong>：≤2万 20% / 2-5万 30%（速扣 2000）/ &gt;5万 40%（速扣 7000）。<br/>
+            <strong>稿酬</strong>：减除费用 ×70% 后按 20% 预扣。<br/>
+            <strong>特许权</strong>：减除费用后按 20% 预扣。<br/>
+            减除费用：单次≤4000 减 800；&gt;4000 减 20%。
+          </p>
+        </details>
       </div>
     </div>
-
-    <div class="card kv-grid">
-      <div><div class="label">单次预扣应纳税所得</div><div class="value" id="i-taxable">—</div></div>
-      <div><div class="label">单次预扣税额</div><div class="value" id="i-tax" style="color:var(--c-danger);">—</div></div>
-      <div><div class="label">预扣率</div><div class="value" id="i-rate">—</div></div>
-      <div><div class="label">本次到手</div><div class="value" id="i-net" style="color:var(--c-success);">—</div></div>
-      <div><div class="label">年度并入综合所得（按比例）</div><div class="value" id="i-annual">—</div></div>
-    </div>
-
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      <strong>劳务报酬预扣率档位</strong>：≤2万 20% / 2-5万 30%（速扣 2000）/ &gt;5万 40%（速扣 7000）。
-      <strong>稿酬</strong>：减除费用后再 ×70% 后按 20% 预扣。
-      <strong>特许权</strong>：减除费用后按 20% 预扣。
-      减除费用：单次≤4000 减 800；&gt;4000 减 20%。
-    </p>
   </section>
 
   {/* ==================== Tab 5: 经营所得 ==================== */}
   <section class="tab-panel" data-panel="business">
-    <h2>个体经营所得（个体户 / 个独 / 合伙）</h2>
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      经营所得不并入综合所得，单独按 5%-35% 五级超额累进。业主本人可享受 5000/月起征点（按经营月数折算）。
-    </p>
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>年总收入（元）<input id="o-revenue" type="number" min="0" step="10000" value="500000" /></label>
+            <label>年总成本费用<input id="o-costs" type="number" min="0" step="10000" value="200000" /></label>
+            <label>其他可扣除（公益等）<input id="o-other" type="number" min="0" step="1000" value="0" /></label>
+            <label>本年实际经营月数<input id="o-months" type="number" min="1" max="12" step="1" value="12" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">业主本人享受 5000/月起征点，按经营月数折算。</p>
+        </div>
+      </div>
 
-    <div class="card">
-      <label>年总收入（元）<input id="o-revenue" type="number" min="0" step="10000" value="500000" /></label>
-      <label>年总成本费用（元）<input id="o-costs" type="number" min="0" step="10000" value="200000" /></label>
-      <label>其他可扣除（公益等，可选）<input id="o-other" type="number" min="0" step="1000" value="0" /></label>
-      <label>本年实际经营月数（1-12）<input id="o-months" type="number" min="1" max="12" step="1" value="12" /></label>
-    </div>
-
-    <div class="card kv-grid">
-      <div><div class="label">应纳税所得额</div><div class="value" id="o-taxable">—</div></div>
-      <div><div class="label">适用税率</div><div class="value" id="o-rate">—</div></div>
-      <div><div class="label">速算扣除数</div><div class="value" id="o-quick">—</div></div>
-      <div><div class="label">应纳税额</div><div class="value" id="o-tax" style="color:var(--c-danger);">—</div></div>
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">应纳税额</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-danger);" id="o-tax">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">应纳税所得</div><div class="value" id="o-taxable">—</div></div>
+            <div><div class="label">适用税率</div><div class="value" id="o-rate">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">速算扣除数</div><div class="value" id="o-quick">—</div></div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">5%-35% 五级超额累进，不并入综合所得。</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <h2>计算口径说明</h2>
-  <ul style="font-size:13px;color:var(--c-text-soft);">
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">计算口径说明</summary>
+    <ul style="font-size:13px;color:var(--c-text-soft);margin:8px 0 0;">
     <li>累计预扣预缴法（2019 年起）：每月按"截至当月累计应纳税所得额"查表算累计税，减去前期已预扣，得到本月预扣</li>
     <li>专项附加扣除标准：以 2023-08 调整后金额为准（子女教育/婴幼儿照护各 2000、独生赡养老人 3000）</li>
     <li>年终奖单独计税政策延续至 2027 年底，之后或并入综合所得</li>
@@ -214,6 +249,7 @@ import Base from "~/layouts/Base.astro";
     <li>本计算器不处理：股权激励、解除劳动关系一次性补偿、退休金等特殊场景，请咨询专业税务顾问</li>
     <li>结果仅供参考，最终以税务机关核定为准</li>
   </ul>
+  </details>
 
   <script>
     import {

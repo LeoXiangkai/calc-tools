@@ -2,84 +2,93 @@
 import Base from "~/layouts/Base.astro";
 ---
 <Base
+  wide
   title="买房税费计算器"
   description="一手房和二手房交易税费计算：契税（首套/二套×140㎡分档）、增值税、个税。按 2025 年 12 月起执行的全国统一新政计算。"
 >
-  <h1>买房税费计算器</h1>
-  <p>
-    根据 2025 年 12 月起执行的全国契税新政（首套/二套均以 140 ㎡ 为分档线），
-    自动计算契税、增值税及附加、个人所得税。一手房通常只涉及契税；二手房三项都可能涉及。
+  <h1 style="margin-bottom:4px;">买房税费计算器</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    按 2025-12 起执行的全国契税新政计算契税、增值税及附加、个税。一手房通常只涉及契税。
   </p>
 
-  <div class="card">
-    <h3 style="margin-top:0;">交易类型</h3>
-    <div class="btn-row">
-      <input type="radio" name="t-type" id="t-new" value="new" checked />
-      <label for="t-new">一手房（新房）</label>
-      <input type="radio" name="t-type" id="t-used" value="used" />
-      <label for="t-used">二手房</label>
+  <div class="split">
+    <div class="col-input">
+      <div class="card compact">
+        <h3>交易类型</h3>
+        <div class="btn-row">
+          <input type="radio" name="t-type" id="t-new" value="new" checked />
+          <label for="t-new">一手房</label>
+          <input type="radio" name="t-type" id="t-used" value="used" />
+          <label for="t-used">二手房</label>
+        </div>
+
+        <h3 style="margin-top:12px;">买方家庭住房序数</h3>
+        <div class="btn-row">
+          <input type="radio" name="t-order" id="t-first" value="first" checked />
+          <label for="t-first">首套</label>
+          <input type="radio" name="t-order" id="t-second" value="second" />
+          <label for="t-second">二套</label>
+        </div>
+
+        <div class="form-grid" style="margin-top:12px;">
+          <label>网签总价（万元）<input id="t-price" type="number" min="1" step="1" value="500" /></label>
+          <label>建筑面积（㎡）<input id="t-area" type="number" min="1" step="1" value="100" /></label>
+        </div>
+
+        <div id="t-used-fields" style="display:none;">
+          <h3 style="margin-top:12px;">二手房专属</h3>
+          <div class="form-grid">
+            <label>卖方持有年限
+              <select id="t-hold">
+                <option value="lt2">不满 2 年</option>
+                <option value="btw2_5">满 2 年不满 5 年</option>
+                <option value="gte5" selected>满 5 年</option>
+              </select>
+            </label>
+            <label>是否家庭唯一住房
+              <select id="t-only">
+                <option value="yes" selected>是</option>
+                <option value="no">否</option>
+              </select>
+            </label>
+            <label>原值（万元，可选）<input id="t-orig" type="number" min="0" step="1" value="" placeholder="留空按 1% 核定" /></label>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <h3>买方家庭名下住房序数</h3>
-    <div class="btn-row">
-      <input type="radio" name="t-order" id="t-first" value="first" checked />
-      <label for="t-first">首套</label>
-      <input type="radio" name="t-order" id="t-second" value="second" />
-      <label for="t-second">二套</label>
-    </div>
-
-    <div style="display:grid;gap:8px;margin-top:12px;">
-      <label>网签总价（万元）<input id="t-price" type="number" min="1" step="1" value="500" /></label>
-      <label>建筑面积（㎡）<input id="t-area" type="number" min="1" step="1" value="100" /></label>
-    </div>
-
-    <div id="t-used-fields" style="display:none;">
-      <h3>二手房专属</h3>
-      <label>卖方持有年限
-        <select id="t-hold">
-          <option value="lt2">不满 2 年</option>
-          <option value="btw2_5">满 2 年不满 5 年</option>
-          <option value="gte5" selected>满 5 年</option>
-        </select>
-      </label>
-      <label style="margin-top:8px;display:block;">是否家庭唯一住房
-        <select id="t-only">
-          <option value="yes" selected>是</option>
-          <option value="no">否</option>
-        </select>
-      </label>
-      <label style="margin-top:8px;display:block;">原值（万元，可选，用于差额个税）
-        <input id="t-orig" type="number" min="0" step="1" value="" placeholder="留空则按 1% 核定征收" />
-      </label>
+    <div class="col-result">
+      <div class="card compact highlight">
+        <div style="font-size:12px;color:var(--c-text-soft);">合计税费</div>
+        <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="r-total">—</div>
+      </div>
+      <div class="card compact">
+        <div class="kv-grid">
+          <div><div class="label">契税（买方）</div><div class="value" id="r-contract">—</div></div>
+          <div><div class="label">增值税及附加（卖方）</div><div class="value" id="r-vat">—</div></div>
+          <div style="grid-column:1/-1;"><div class="label">个税（卖方）</div><div class="value" id="r-income">—</div></div>
+        </div>
+      </div>
+      <div class="card compact">
+        <h3>明细</h3>
+        <div id="r-breakdown" style="font-size:13px;"></div>
+      </div>
     </div>
   </div>
 
-  <div class="card kv-grid">
-    <div><div class="label">契税（买方）</div><div class="value" id="r-contract">—</div></div>
-    <div><div class="label">增值税及附加（卖方）</div><div class="value" id="r-vat">—</div></div>
-    <div><div class="label">个人所得税（卖方）</div><div class="value" id="r-income">—</div></div>
-    <div>
-      <div class="label">合计税费</div>
-      <div class="value" id="r-total" style="color:var(--c-accent);">—</div>
-    </div>
-  </div>
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">计算口径</summary>
+    <ul style="font-size:13px;color:var(--c-text-soft);margin:8px 0 0;">
+      <li><strong>契税</strong>：2025-12 起，首套 ≤140㎡=1%、&gt;140㎡=1.5%；二套 ≤140㎡=1%、&gt;140㎡=2%（北上广深历史 3% 上限统一为 2%）</li>
+      <li><strong>增值税及附加</strong>：二手房持有不满 2 年按 5.3%（含附加）全额征；满 2 年免征（非北上广深；北上广深 90㎡ 以上差额征 5.3%，本计算按多数城市口径=免征）</li>
+      <li><strong>个税</strong>：满五唯一免征；其他情况按差额 20% 或核定 1%（多数城市做法）</li>
+      <li><strong>未计入</strong>：评估费、按揭手续费、登记费、中介费等</li>
+      <li>本结果仅供参考，最终以税务机关核定为准</li>
+    </ul>
+  </details>
 
-  <div class="card">
-    <h3 style="margin-top:0;">明细说明</h3>
-    <div id="r-breakdown" style="font-size:14px;"></div>
-  </div>
-
-  <h2>计算口径</h2>
-  <ul style="font-size:13px;color:var(--c-text-soft);">
-    <li><strong>契税</strong>：2025 年 12 月起，首套≤140㎡=1%、>140㎡=1.5%；二套≤140㎡=1%、>140㎡=2%（北上广深历史 3% 上限统一为 2%）</li>
-    <li><strong>增值税及附加</strong>：二手房持有不满 2 年，按 5.3%（含附加）全额征；满 2 年免征（非北上广深；北上广深 90㎡ 以上需差额征 5.3%，本计算按多数城市口径=免征）</li>
-    <li><strong>个税</strong>：满 5 年且家庭唯一免征；其他情况按差额 20% 或核定 1%（多数城市做法）</li>
-    <li><strong>未计入</strong>：评估费、按揭手续费、登记费、中介费等非税费用，因各地差异较大请单独询问</li>
-    <li>本结果仅供参考，最终税额以税务机关核定为准</li>
-  </ul>
-
-  <p style="font-size:13px;color:var(--c-text-soft);">
-    继续看：<a href="/mortgage">房贷计算器</a> | <a href="/guides/mortgage-basics">房贷入门</a> | <a href="/guides/prepayment">提前还款指南</a>
+  <p style="font-size:13px;margin-top:12px;">
+    继续看：<a href="/mortgage">房贷计算器</a> · <a href="/guides/mortgage-basics">房贷入门</a> · <a href="/guides/prepayment">提前还款指南</a>
   </p>
 
   <script>
@@ -103,8 +112,8 @@ import Base from "~/layouts/Base.astro";
 
       const r = calcTransactionTax({ totalPrice, area, order, type, sellerHoldYears, sellerOnlyHouse, originalPrice });
       $("r-contract").textContent = cny(r.contractTax);
-      $("r-vat").textContent = type === "new" ? "（一手不涉及）" : cny(r.valueAddedTax);
-      $("r-income").textContent = type === "new" ? "（一手不涉及）" : cny(r.incomeTax);
+      $("r-vat").textContent = type === "new" ? "（不涉及）" : cny(r.valueAddedTax);
+      $("r-income").textContent = type === "new" ? "（不涉及）" : cny(r.incomeTax);
       $("r-total").textContent = cny(r.total);
 
       const bk = $("r-breakdown");
@@ -115,8 +124,8 @@ import Base from "~/layouts/Base.astro";
       }
       for (const item of r.breakdown) {
         const div = document.createElement("div");
-        div.style.cssText = "padding:8px 0;border-bottom:1px solid var(--c-border);";
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;"><span>${item.name}</span><span><strong>${cny(item.amount)}</strong>（${item.rate}）</span></div>${item.note ? `<div style="font-size:13px;color:var(--c-text-soft);margin-top:2px;">${item.note}</div>` : ""}`;
+        div.style.cssText = "padding:6px 0;border-bottom:1px solid var(--c-border);";
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;"><span>${item.name}</span><span><strong>${cny(item.amount)}</strong>（${item.rate}）</span></div>${item.note ? `<div style="font-size:12px;color:var(--c-text-soft);margin-top:2px;">${item.note}</div>` : ""}`;
         bk.appendChild(div);
       }
     }
