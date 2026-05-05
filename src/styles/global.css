@@ -43,6 +43,16 @@ body {
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
 }
+/* grid 子元素显式水平居中：避免 grid 默认 stretch 导致 margin:0 auto 在某些浏览器不可靠 */
+body > header,
+body > footer {
+  width: 100%;
+}
+body > main {
+  justify-self: center;
+  width: 100%;
+  max-width: var(--maxw-tool);
+}
 
 a {
   color: var(--c-accent);
