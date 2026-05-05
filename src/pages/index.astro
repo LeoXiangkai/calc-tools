@@ -2,57 +2,86 @@
 import Base from "~/layouts/Base.astro";
 ---
 <Base
+  wide
   title="在线计算器工具集"
   description="免费在线房贷计算器、个税计算器、买房税费计算器，覆盖工资月度预扣、年度汇算、年终奖单独/并入对比、劳务报酬、经营所得、等额本息/本金、组合贷、提前还款等全场景。所有计算在浏览器本地完成。"
 >
-  <h1>在线计算器工具集</h1>
-  <p>
+  <h1 style="margin-bottom:4px;">在线计算器工具集</h1>
+  <p style="font-size:14px;margin:0 0 16px;">
     一组用得顺手的小工具，全部在浏览器本地计算，<strong>不收集、不上传任何输入数据</strong>。
-    页面尽量做到轻、快、能用。
   </p>
 
   <h2>个人税务</h2>
-  <div class="card">
-    <h3 style="margin-top:0;"><a href="/tax">个税计算器</a></h3>
-    <p style="margin:4px 0;">5 个 Tab 覆盖工薪族 / 自由职业 / 个体户全场景：</p>
-    <ul style="font-size:14px;color:var(--c-text-soft);margin:4px 0;">
-      <li><strong>月度预扣</strong>：累计预扣预缴法（2019 起），含 7 项专项附加扣除完整输入</li>
-      <li><strong>年度汇算</strong>：综合所得（工资+劳务+稿酬+特许权）应退应补</li>
-      <li><strong>年终奖对比</strong>：单独计税 vs 并入综合所得，自动推荐更省方案</li>
-      <li><strong>劳务/稿酬</strong>：单次预扣 + 年度并入计算</li>
-      <li><strong>经营所得</strong>：个体户 / 个独 / 合伙</li>
-    </ul>
-  </div>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/tax">个税计算器</a></h3>
+      <p style="margin:4px 0;font-size:13px;">5 个 Tab 覆盖工薪族 / 自由职业 / 个体户全场景：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li><strong>月度预扣</strong>：累计预扣预缴法（2019 起）</li>
+        <li><strong>年度汇算</strong>：综合所得应退应补</li>
+        <li><strong>年终奖对比</strong>：单独计税 vs 并入</li>
+        <li><strong>劳务/稿酬</strong>：单次预扣 + 年度并入</li>
+        <li><strong>经营所得</strong>：个体户 / 个独 / 合伙</li>
+      </ul>
+    </div>
 
-  <div class="card">
-    <h3 style="margin-top:0;"><a href="/tax-rate-tables">税率表速查</a></h3>
-    <p style="margin:4px 0;">综合所得 / 累计预扣 / 年终奖月度 / 经营所得 / 劳务报酬 5 张完整税率表 + 7 项专项附加扣除标准。</p>
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/tax-rate-tables">税率表速查</a></h3>
+      <p style="margin:4px 0;font-size:13px;">5 张完整税率表 + 7 项专项附加扣除标准。</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>综合所得年度税率（3% - 45%）</li>
+        <li>累计预扣预缴税率</li>
+        <li>年终奖月度税率</li>
+        <li>个体经营所得（5% - 35%）</li>
+        <li>劳务报酬预扣率</li>
+      </ul>
+    </div>
   </div>
 
   <h2>房产相关</h2>
-  <div class="card">
-    <h3 style="margin-top:0;"><a href="/mortgage">房贷计算器</a></h3>
-    <p style="margin:4px 0;">5 Tab 覆盖买房到还款全周期：</p>
-    <ul style="font-size:14px;color:var(--c-text-soft);margin:4px 0;">
-      <li><strong>基础对比</strong>：等额本息 + 等额本金同屏对比，含按月明细</li>
-      <li><strong>组合贷</strong>：商业贷款 + 公积金贷款合并月供</li>
-      <li><strong>提前还款</strong>：缩短年限 vs 减少月供节省利息对比</li>
-      <li><strong>购房力</strong>：按月供承受能力反推可贷额、可买总价</li>
-      <li><strong>利率重定价</strong>：LPR 调整后月供与剩余利息变化</li>
-    </ul>
-  </div>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/mortgage">房贷计算器</a></h3>
+      <p style="margin:4px 0;font-size:13px;">5 Tab 覆盖买房到还款全周期：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li><strong>基础对比</strong>：等额本息 + 等额本金同屏</li>
+        <li><strong>组合贷</strong>：商贷 + 公积金合并月供</li>
+        <li><strong>提前还款</strong>：缩短年限 vs 减少月供</li>
+        <li><strong>购房力</strong>：反推可贷、可买总价</li>
+        <li><strong>利率重定价</strong>：LPR 调整后月供变化</li>
+      </ul>
+    </div>
 
-  <div class="card">
-    <h3 style="margin-top:0;"><a href="/transaction-tax">买房税费计算器</a></h3>
-    <p style="margin:4px 0;">一手房 / 二手房交易税费：契税（按 2025-12 起新政分档）、增值税及附加、个人所得税。</p>
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/transaction-tax">买房税费计算器</a></h3>
+      <p style="margin:4px 0;font-size:13px;">一手房 / 二手房交易税费：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>契税（按 2025-12 新政分档）</li>
+        <li>增值税及附加（卖方）</li>
+        <li>个人所得税（卖方）</li>
+        <li>满五唯一 / 持有年限规则</li>
+        <li>首套 / 二套 × 140㎡ 分档</li>
+      </ul>
+    </div>
   </div>
 
   <h2>了解更多</h2>
-  <ul>
-    <li><a href="/guides/tax-deductions">专项附加扣除完整指南</a></li>
-    <li><a href="/guides/mortgage-basics">房贷入门：等额本息 vs 等额本金</a></li>
-    <li><a href="/guides/prepayment">提前还款指南：缩短年限 vs 减少月供</a></li>
-    <li><a href="/faq">常见问题</a></li>
-    <li><a href="/about">关于本站</a></li>
-  </ul>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/tax-deductions">专项附加扣除完整指南</a></h3>
+      <p style="margin:0;font-size:13px;">7 项专项附加扣除：金额、条件、申报方式、夫妻分摊、踩坑点。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/mortgage-basics">房贷入门：等额本息 vs 等额本金</a></h3>
+      <p style="margin:0;font-size:13px;">两种还款方式的差异、决策清单、典型场景对比。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/prepayment">提前还款指南</a></h3>
+      <p style="margin:0;font-size:13px;">最佳时机、缩短年限 vs 减少月供怎么选、违约金陷阱。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/faq">常见问题</a></h3>
+      <p style="margin:0;font-size:13px;">所有计算器和税务工具的常见疑问解答。</p>
+    </div>
+  </div>
 </Base>

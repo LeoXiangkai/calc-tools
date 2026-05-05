@@ -48,9 +48,25 @@ main {
 .tool-main {
   max-width: var(--maxw-tool) !important;
 }
-/* 阅读型内容容器：限宽 720 但左对齐到 nav 边缘 */
+/* 阅读型内容容器：限宽 720 居中显示 */
 .reading-inner {
   max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+/* 双列卡片网格（用于首页等卡片列表） */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .card-grid > .card {
+    margin: 0;
+  }
 }
 
 /* 站点统一头部 / 尾部 — 容器宽度全站一致，避免页面间跳动 */
