@@ -1,0 +1,358 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  wide
+  title="复利计算器"
+  description="免费复利计算器：单笔本金、定投终值、目标反推、通胀购买力调整、投资 vs 不投资机会成本对比。所有计算在浏览器本地完成。"
+>
+  <h1 style="margin-bottom:4px;">复利计算器</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    覆盖单笔、定投、目标反推、通胀调整、机会成本 5 大场景。数据本地处理，不上传。
+    入门：<a href="/guides/compound-basics">复利入门 · 72 法则</a>
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button data-tab="lump" role="tab" aria-selected="true">单笔</button>
+    <button data-tab="dca" role="tab" aria-selected="false">定投</button>
+    <button data-tab="goal" role="tab" aria-selected="false">目标反推</button>
+    <button data-tab="inflation" role="tab" aria-selected="false">通胀调整</button>
+    <button data-tab="opp" role="tab" aria-selected="false">机会对比</button>
+  </div>
+
+  {/* ==================== Tab 1: 单笔 ==================== */}
+  <section class="tab-panel active" data-panel="lump">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>本金（元）<input id="l-principal" type="number" min="1" step="100" value="100000" /></label>
+            <label>年化收益率（%）<input id="l-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="l-years" type="number" min="1" max="60" step="1" value="30" /></label>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">复利频率</div>
+            <div class="btn-row">
+              <input type="radio" name="l-comp" id="l-cm" value="monthly" checked />
+              <label for="l-cm">按月</label>
+              <input type="radio" name="l-comp" id="l-ca" value="annually" />
+              <label for="l-ca">按年</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">到期终值</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="l-fv">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">总利息</div><div class="value" id="l-interest" style="color:var(--c-success);">—</div></div>
+            <div><div class="label">翻倍倍数</div><div class="value" id="l-multiple">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">72 法则估算（翻倍年数）</div><div class="value" id="l-rule72">—</div></div>
+          </div>
+        </div>
+        <details class="card compact">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px;">按年增长明细</summary>
+          <div style="overflow-x:auto;max-height:280px;overflow-y:auto;margin-top:8px;">
+            <table id="l-table">
+              <thead><tr><th>年</th><th>本金</th><th>累计利息</th><th>余额</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 2: 定投 ==================== */}
+  <section class="tab-panel" data-panel="dca">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>每月投入（元）<input id="d-monthly" type="number" min="0" step="100" value="3000" /></label>
+            <label>初始本金（元，可选）<input id="d-initial" type="number" min="0" step="100" value="0" /></label>
+            <label>年化收益率（%）<input id="d-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="d-years" type="number" min="1" max="60" step="1" value="30" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">月末投入起息（标准年金终值公式）。</p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">到期终值</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="d-fv">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">累计本金</div><div class="value" id="d-contribution">—</div></div>
+            <div><div class="label">总收益</div><div class="value" id="d-interest" style="color:var(--c-success);">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">收益占终值比例</div><div class="value" id="d-ratio">—</div></div>
+          </div>
+        </div>
+        <details class="card compact">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px;">按年增长明细</summary>
+          <div style="overflow-x:auto;max-height:280px;overflow-y:auto;margin-top:8px;">
+            <table id="d-table">
+              <thead><tr><th>年</th><th>累计本金</th><th>累计收益</th><th>余额</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 3: 目标反推 ==================== */}
+  <section class="tab-panel" data-panel="goal">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>目标金额（元）<input id="g-goal" type="number" min="1" step="10000" value="1000000" /></label>
+            <label>已有本金（元，可选）<input id="g-initial" type="number" min="0" step="1000" value="0" /></label>
+            <label>预期年化（%）<input id="g-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="g-years" type="number" min="1" max="60" step="1" value="20" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">回答问题：每月投入多少能在 N 年后达到目标金额？</p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">每月需投入</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="g-monthly">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">累计本金</div><div class="value" id="g-contribution">—</div></div>
+            <div><div class="label">收益部分</div><div class="value" id="g-interest" style="color:var(--c-success);">—</div></div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">如果"月需投入"为 0，说明已有本金到期已超过目标，无需再加投。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 4: 通胀调整 ==================== */}
+  <section class="tab-panel" data-panel="inflation">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>未来名义金额（元）<input id="i-nominal" type="number" min="1" step="10000" value="1000000" /></label>
+            <label>年通胀率（%）<input id="i-inflation" type="number" min="0" max="20" step="0.1" value="3" /></label>
+            <label>年数<input id="i-years" type="number" min="0" max="60" step="1" value="20" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">把未来 N 年后的金额换算成今天的实际购买力。</p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">实际购买力（今日价值）</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="i-real">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">被通胀侵蚀</div><div class="value" id="i-eroded" style="color:var(--c-danger);">—</div></div>
+            <div><div class="label">侵蚀比例</div><div class="value" id="i-pct" style="color:var(--c-danger);">—</div></div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">3% 通胀下：20 年后货币购买力大约减半；30 年后只剩 41%。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 5: 机会对比 ==================== */}
+  <section class="tab-panel" data-panel="opp">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>资金（元）<input id="o-amount" type="number" min="1" step="1000" value="100000" /></label>
+            <label>预期投资年化（%）<input id="o-invest" type="number" min="0" max="50" step="0.1" value="8" /></label>
+            <label>年通胀率（%）<input id="o-infl" type="number" min="0" max="20" step="0.1" value="3" /></label>
+            <label>年数<input id="o-years" type="number" min="1" max="60" step="1" value="10" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">"投资 vs 不投资"的真实差距，按今天的购买力衡量。</p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">机会成本（不投资 vs 投资 实际差额）</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="o-cost">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">投资名义</div><div class="value" id="o-inv">—</div></div>
+            <div><div class="label">投资实际</div><div class="value" id="o-inv-real" style="color:var(--c-success);">—</div></div>
+            <div><div class="label">不投名义</div><div class="value" id="o-noi">—</div></div>
+            <div><div class="label">不投实际</div><div class="value" id="o-noi-real" style="color:var(--c-danger);">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">计算口径与免责</summary>
+    <ul style="font-size:13px;color:var(--c-text-soft);margin:8px 0 0;">
+      <li><strong>单笔复利</strong>：FV = P × (1 + r)^n，r 为期收益率，n 为期数（按月或按年由复利频率决定）</li>
+      <li><strong>定投终值</strong>：标准年金终值公式 FV = M × [(1+r)^n − 1] / r，月末投入起息</li>
+      <li><strong>目标反推</strong>：M = 剩余目标 × r / [(1+r)^n − 1]，已有本金按月复利增长后扣除</li>
+      <li><strong>通胀调整</strong>：实际值 = 名义值 / (1 + 通胀率)^年数</li>
+      <li><strong>机会成本</strong>：投资终值与现金贬值后实际购买力的差额</li>
+      <li><strong>72 法则</strong>：翻倍年数 ≈ 72 / 年化收益率%（适用于年化 5-15% 的中等区间，仅快速估算）</li>
+      <li>实际投资有波动、税费、汇率等额外因素，本计算为理想模型，仅供决策参考，不构成投资建议</li>
+    </ul>
+  </details>
+
+  <script>
+    import {
+      calcLumpSum,
+      calcDca,
+      calcGoal,
+      calcInflation,
+      calcOpportunity,
+      rule72,
+      type Compounding,
+    } from "~/lib/compound";
+    import { fmtCny } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny(n)}`;
+    const num = (id: string) => Number($<HTMLInputElement>(id).value) || 0;
+
+    // Tab switch
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
+      }),
+    );
+
+    // ---------- Tab 1: 单笔 ----------
+    function renderLump(): void {
+      const principal = num("l-principal");
+      const annualRatePct = num("l-rate");
+      const years = num("l-years");
+      const compounding = (document.querySelector<HTMLInputElement>("input[name='l-comp']:checked")?.value ?? "monthly") as Compounding;
+
+      if (principal <= 0 || years <= 0) {
+        ["l-fv","l-interest","l-multiple","l-rule72"].forEach((id) => ($(id).textContent = "—"));
+        document.querySelector<HTMLTableSectionElement>("#l-table tbody")!.replaceChildren();
+        return;
+      }
+      const r = calcLumpSum({ principal, annualRatePct, years, compounding });
+      $("l-fv").textContent = cny(r.futureValue);
+      $("l-interest").textContent = cny(r.totalInterest);
+      $("l-multiple").textContent = `${r.multiple.toFixed(2)}×`;
+      $("l-rule72").textContent = annualRatePct > 0 ? `${rule72(annualRatePct).toFixed(1)} 年` : "—";
+
+      const tbody = document.querySelector<HTMLTableSectionElement>("#l-table tbody")!;
+      const frag = document.createDocumentFragment();
+      for (const row of r.yearly) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.year}</td><td>${fmtCny(row.cumulativePrincipal)}</td><td>${fmtCny(row.cumulativeInterest)}</td><td>${fmtCny(row.endingBalance)}</td>`;
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='l-']").forEach((el) => el.addEventListener("input", renderLump));
+    document.querySelectorAll<HTMLInputElement>("input[name='l-comp']").forEach((el) => el.addEventListener("change", renderLump));
+    renderLump();
+
+    // ---------- Tab 2: 定投 ----------
+    function renderDca(): void {
+      const r = calcDca({
+        monthlyContribution: num("d-monthly"),
+        initialPrincipal: num("d-initial"),
+        annualRatePct: num("d-rate"),
+        years: num("d-years"),
+      });
+      $("d-fv").textContent = cny(r.futureValue);
+      $("d-contribution").textContent = cny(r.totalContribution);
+      $("d-interest").textContent = cny(r.totalInterest);
+      $("d-ratio").textContent = r.futureValue > 0 ? `${((r.totalInterest / r.futureValue) * 100).toFixed(1)}%` : "—";
+
+      const tbody = document.querySelector<HTMLTableSectionElement>("#d-table tbody")!;
+      const frag = document.createDocumentFragment();
+      for (const row of r.yearly) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.year}</td><td>${fmtCny(row.cumulativePrincipal)}</td><td>${fmtCny(row.cumulativeInterest)}</td><td>${fmtCny(row.endingBalance)}</td>`;
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='d-']").forEach((el) => el.addEventListener("input", renderDca));
+    renderDca();
+
+    // ---------- Tab 3: 目标反推 ----------
+    function renderGoal(): void {
+      const r = calcGoal({
+        goalAmount: num("g-goal"),
+        initialPrincipal: num("g-initial"),
+        annualRatePct: num("g-rate"),
+        years: num("g-years"),
+      });
+      $("g-monthly").textContent = cny(r.monthlyRequired);
+      $("g-contribution").textContent = cny(r.totalContribution);
+      $("g-interest").textContent = cny(r.totalInterest);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='g-']").forEach((el) => el.addEventListener("input", renderGoal));
+    renderGoal();
+
+    // ---------- Tab 4: 通胀调整 ----------
+    function renderInflation(): void {
+      const r = calcInflation({
+        nominalValue: num("i-nominal"),
+        inflationRatePct: num("i-inflation"),
+        years: num("i-years"),
+      });
+      $("i-real").textContent = cny(r.realValue);
+      $("i-eroded").textContent = cny(r.erodedAmount);
+      $("i-pct").textContent = `${r.erodedPct.toFixed(1)}%`;
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='i-']").forEach((el) => el.addEventListener("input", renderInflation));
+    renderInflation();
+
+    // ---------- Tab 5: 机会对比 ----------
+    function renderOpp(): void {
+      const r = calcOpportunity({
+        amount: num("o-amount"),
+        investRatePct: num("o-invest"),
+        inflationRatePct: num("o-infl"),
+        years: num("o-years"),
+      });
+      $("o-cost").textContent = cny(r.opportunityCost);
+      $("o-inv").textContent = cny(r.invested);
+      $("o-inv-real").textContent = cny(r.investedReal);
+      $("o-noi").textContent = cny(r.uninvested);
+      $("o-noi-real").textContent = cny(r.uninvestedReal);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='o-']").forEach((el) => el.addEventListener("input", renderOpp));
+    renderOpp();
+  </script>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅为复利公式的演示与教学，所有"年化收益率"参数为用户自行设定的假设，
+    <strong>不代表任何金融产品的实际收益、不构成投资或理财建议</strong>。
+    投资有风险，决策需谨慎；具体产品请咨询持牌金融机构或证券投资顾问。
+  </p>
+</Base>

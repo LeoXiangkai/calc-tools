@@ -402,4 +402,9 @@ import Base from "~/layouts/Base.astro";
     document.querySelectorAll<HTMLInputElement>("[id^='o-']").forEach((el) => el.addEventListener("input", renderBusiness));
     renderBusiness();
   </script>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅为个税法规公式的演示与教学，不提供税务咨询、税务代理、纳税筹划服务。
+    实际纳税情况以税务机关核定为准。具体涉税事项请咨询税务机关或注册税务师。
+  </p>
 </Base>

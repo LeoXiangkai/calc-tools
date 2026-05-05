@@ -18,6 +18,14 @@ import {
   applyBracket,
   COMPREHENSIVE_BRACKETS,
 } from "./src/lib/income-tax.ts";
+import {
+  calcLumpSum,
+  calcDca,
+  calcGoal,
+  calcInflation,
+  calcOpportunity,
+  rule72,
+} from "./src/lib/compound.ts";
 
 let passed = 0;
 let failed = 0;
@@ -335,6 +343,81 @@ const biz6 = calcBusinessIncome({
 // 应纳 100000-30000-30000=40000；10% 档 - 1500；40000×10%-1500=2500
 approx("经营 6个月 应纳 40000", biz6.taxable, 40000, 0.01);
 approx("经营 6个月 税 2500", biz6.tax, 2500, 0.01);
+
+// ===== 复利：单笔 =====
+console.log("\n=== calcLumpSum ===");
+// 10万 × 8% × 30年（月度复利）：FV = 100000 × (1+0.08/12)^360 ≈ 1,093,573
+const lump = calcLumpSum({ principal: 100000, annualRatePct: 8, years: 30, compounding: "monthly" });
+approx("10万8%30年月复利 FV ≈ 109.36万", lump.futureValue, 1093573, 1);
+approx("总利息 ≈ 99.36万", lump.totalInterest, 993573, 1);
+approx("翻倍倍数 ≈ 10.94", lump.multiple, 10.94, 0.01);
+approx("yearly 长度 = 30", lump.yearly.length, 30, 0);
+
+// 0% 利率退化为本金不变
+const lump0 = calcLumpSum({ principal: 100000, annualRatePct: 0, years: 10 });
+approx("0% 利率 FV = 本金", lump0.futureValue, 100000, 0.01);
+approx("0% 利率 总利息 = 0", lump0.totalInterest, 0, 0.01);
+
+// 非法输入
+const lumpBad = calcLumpSum({ principal: -100, annualRatePct: 5, years: 10 });
+approx("负本金 → 全 0", lumpBad.futureValue, 0, 0);
+
+// ===== 复利：定投 =====
+console.log("\n=== calcDca ===");
+// 月投 3000、年化 8%、30年（月末投入起息）：FV ≈ 4,471,078
+const dca = calcDca({ monthlyContribution: 3000, annualRatePct: 8, years: 30 });
+approx("月投3000 8% 30年 FV ≈ 447万", dca.futureValue, 4471078, 1);
+approx("累计本金 = 3000×360 = 108万", dca.totalContribution, 1080000, 1);
+approx("总收益 ≈ 447-108 ≈ 339万", dca.totalInterest, 3391078, 1);
+
+// 含初始本金 5万 + 月投 3000 + 30 年 8%：FV ≈ 5,017,864
+const dcaInit = calcDca({ monthlyContribution: 3000, annualRatePct: 8, years: 30, initialPrincipal: 50000 });
+approx("初始5万+月投3000 30年 FV ≈ 501.8万", dcaInit.futureValue, 5017864, 5);
+approx("累计本金 = 50000+108万 = 113万", dcaInit.totalContribution, 1130000, 1);
+
+// ===== 复利：目标反推 =====
+console.log("\n=== calcGoal ===");
+// 目标 100万、年化 8%、20年（月复利）
+// M = 1000000 × 0.00667 / ((1.00667)^240 - 1) ≈ 1697.73
+const goal = calcGoal({ goalAmount: 1_000_000, annualRatePct: 8, years: 20 });
+approx("目标100万 8% 20年 月需投 ≈ 1698", goal.monthlyRequired, 1697.73, 1);
+approx("累计投入 = 1697.73×240 ≈ 40.74万", goal.totalContribution, 407455, 200);
+
+// 已有 30万 + 8% + 20年，剩余靠定投
+// 30万×(1.00667)^240 ≈ 1481038（已超过 100万）→ 月需投 0
+const goalRich = calcGoal({ goalAmount: 1_000_000, annualRatePct: 8, years: 20, initialPrincipal: 300000 });
+approx("已有30万足够 → 月需 0", goalRich.monthlyRequired, 0, 0);
+
+// ===== 复利：通胀调整 =====
+console.log("\n=== calcInflation ===");
+// 100万、3%通胀、20年 → 实际 100万 / 1.03^20 ≈ 553676
+const inf = calcInflation({ nominalValue: 1_000_000, inflationRatePct: 3, years: 20 });
+approx("100万 3%通胀 20年 实际 ≈ 55.4万", inf.realValue, 553676, 100);
+approx("被侵蚀 ≈ 44.6万", inf.erodedAmount, 446324, 100);
+approx("侵蚀比例 ≈ 44.6%", inf.erodedPct, 44.63, 0.1);
+
+// 0% 通胀 → 不变
+const inf0 = calcInflation({ nominalValue: 1_000_000, inflationRatePct: 0, years: 20 });
+approx("0% 通胀 实际 = 名义", inf0.realValue, 1_000_000, 0.01);
+
+// ===== 复利：机会对比 =====
+console.log("\n=== calcOpportunity ===");
+// 10万、投资 8%、通胀 3%、10年
+// invested = 100000 × (1+0.08/12)^120 ≈ 221964
+// investedReal = 221964 / 1.03^10 ≈ 165152
+// uninvested = 100000；uninvestedReal = 100000 / 1.03^10 ≈ 74409
+// 机会成本 = investedReal - uninvestedReal ≈ 90743
+const opp = calcOpportunity({ amount: 100000, investRatePct: 8, inflationRatePct: 3, years: 10 });
+approx("投资名义 ≈ 22.2万", opp.invested, 221964, 100);
+approx("投资实际 ≈ 16.5万", opp.investedReal, 165162, 100);
+approx("不投实际 ≈ 7.4万", opp.uninvestedReal, 74409, 50);
+approx("机会成本 ≈ 9.07万", opp.opportunityCost, 90753, 100);
+
+// ===== 72 法则 =====
+console.log("\n=== rule72 ===");
+approx("8% → 72/8 = 9 年", rule72(8), 9, 0);
+approx("12% → 6 年", rule72(12), 6, 0);
+approx("6% → 12 年", rule72(6), 12, 0);
 
 // ===== 汇总 =====
 console.log(`\n${passed}/${passed + failed} passed${failed ? ", " + failed + " FAILED" : ""}`);

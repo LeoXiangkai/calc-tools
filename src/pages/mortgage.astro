@@ -481,4 +481,9 @@ import Base from "~/layouts/Base.astro";
     document.querySelectorAll<HTMLInputElement>("input[name='r-method']").forEach((el) => el.addEventListener("change", renderReprice));
     renderReprice();
   </script>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅为公开公式的演示与教学，不构成金融、投资、贷款或理财建议。
+    实际放款金额、月供与利息以银行账单为准。重大决策请咨询持牌金融机构或专业顾问。
+  </p>
 </Base>
