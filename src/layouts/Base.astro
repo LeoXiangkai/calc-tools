@@ -61,8 +61,8 @@ const isActive = (href: string) =>
       </nav>
     </header>
 
-    <main class={wide ? "tool-main" : ""}>
-      <slot />
+    <main>
+      {wide ? <slot /> : <div class="reading-inner"><slot /></div>}
     </main>
 
     <footer class="site-footer">

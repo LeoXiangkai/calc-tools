@@ -41,12 +41,16 @@ a:hover {
 }
 
 main {
-  max-width: var(--maxw);
+  max-width: var(--maxw-tool);
   margin: 0 auto;
   padding: 20px 16px 40px;
 }
 .tool-main {
   max-width: var(--maxw-tool) !important;
+}
+/* 阅读型内容容器：限宽 720 但左对齐到 nav 边缘 */
+.reading-inner {
+  max-width: var(--maxw);
 }
 
 /* 站点统一头部 / 尾部 — 容器宽度全站一致，避免页面间跳动 */
