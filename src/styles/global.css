@@ -33,12 +33,9 @@ body {
   line-height: 1.55;
 }
 body {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
-}
-body > main {
-  flex: 1;
 }
 
 a {
@@ -140,7 +137,6 @@ main {
   border-top: 1px solid var(--c-border);
   background: #fff;
   margin-top: 48px;
-  flex-shrink: 0;
 }
 .site-footer-inner {
   max-width: var(--maxw-tool);
