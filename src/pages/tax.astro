@@ -22,47 +22,52 @@ import Base from "~/layouts/Base.astro";
 
   {/* ==================== Tab 1: 月度预扣 ==================== */}
   <section class="tab-panel active" data-panel="monthly">
-    <h2>工资月度预扣（累计预扣预缴法）</h2>
-    <p style="font-size:13px;color:var(--c-text-soft);">
-      默认假设全年 12 个月工资、社保、专项附加扣除完全相同（多数工薪族场景）。给出每月预扣明细 + 全年合计。
-    </p>
-
-    <div class="card">
-      <h3 style="margin-top:0;">收入与五险一金</h3>
-      <label>月税前工资（元）<input id="m-gross" type="number" min="0" step="100" value="20000" /></label>
-      <label>月个人五险一金（元）<input id="m-social" type="number" min="0" step="100" value="3000" /></label>
-      <label>月其他扣除（年金/商业养老险等，可选）<input id="m-other" type="number" min="0" step="100" value="0" /></label>
-
-      <h3>专项附加扣除（每月）</h3>
-      <label>子女教育（孩数 × 2000）<input id="m-children" type="number" min="0" step="2000" value="0" /></label>
-      <label>婴幼儿照护（3岁以下孩数 × 2000）<input id="m-infant" type="number" min="0" step="2000" value="0" /></label>
-      <label>继续教育（学历 400/月，技能 0）<input id="m-edu" type="number" min="0" step="100" value="0" /></label>
-      <label>住房贷款利息（首套 1000）<input id="m-loan" type="number" min="0" step="500" value="0" /></label>
-      <label>住房租金（北上广深 1500 / 省会 1100 / 其他 800）<input id="m-rent" type="number" min="0" step="100" value="0" /></label>
-      <label>赡养老人（独生 3000 / 非独 ≤1500）<input id="m-elder" type="number" min="0" step="500" value="0" /></label>
-    </div>
-
-    <div class="card kv-grid">
-      <div><div class="label">每月专项附加合计</div><div class="value" id="m-special-sum">—</div></div>
-      <div><div class="label">每月减除合计</div><div class="value" id="m-deduct-sum">—</div></div>
-    </div>
-
-    <div class="card kv-grid">
-      <div><div class="label">全年税前工资</div><div class="value" id="m-total-gross">—</div></div>
-      <div><div class="label">全年应缴税</div><div class="value" id="m-total-tax" style="color:var(--c-danger);">—</div></div>
-      <div><div class="label">全年税后到手</div><div class="value" id="m-total-net" style="color:var(--c-success);">—</div></div>
-      <div><div class="label">全年综合税率</div><div class="value" id="m-eff-rate">—</div></div>
-    </div>
-
-    <details class="card">
-      <summary style="cursor:pointer;font-weight:600;">12 个月预扣明细</summary>
-      <div style="overflow-x:auto;margin-top:12px;">
-        <table id="m-table">
-          <thead><tr><th>月</th><th>累计应纳所得</th><th>累计税</th><th>本月预扣</th><th>本月到手</th></tr></thead>
-          <tbody></tbody>
-        </table>
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>收入与五险一金</h3>
+          <div class="form-grid">
+            <label>月税前工资（元）<input id="m-gross" type="number" min="0" step="100" value="20000" /></label>
+            <label>月个人五险一金<input id="m-social" type="number" min="0" step="100" value="3000" /></label>
+            <label>月其他扣除（年金等）<input id="m-other" type="number" min="0" step="100" value="0" /></label>
+          </div>
+          <h3 style="margin-top:12px;">专项附加扣除（每月）</h3>
+          <div class="form-grid">
+            <label>子女教育（孩数×2000）<input id="m-children" type="number" min="0" step="2000" value="0" /></label>
+            <label>婴幼儿照护（&lt;3岁孩数×2000）<input id="m-infant" type="number" min="0" step="2000" value="0" /></label>
+            <label>继续教育（学历 400）<input id="m-edu" type="number" min="0" step="100" value="0" /></label>
+            <label>住房贷款利息（首套 1000）<input id="m-loan" type="number" min="0" step="500" value="0" /></label>
+            <label>住房租金（1500/1100/800）<input id="m-rent" type="number" min="0" step="100" value="0" /></label>
+            <label>赡养老人（独生 3000 / 非独 ≤1500）<input id="m-elder" type="number" min="0" step="500" value="0" /></label>
+          </div>
+        </div>
       </div>
-    </details>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">全年税后到手</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-success);" id="m-total-net">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">每月专项附加</div><div class="value" id="m-special-sum">—</div></div>
+            <div><div class="label">每月减除合计</div><div class="value" id="m-deduct-sum">—</div></div>
+            <div><div class="label">全年税前</div><div class="value" id="m-total-gross">—</div></div>
+            <div><div class="label">全年应缴税</div><div class="value" id="m-total-tax" style="color:var(--c-danger);">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">全年综合税率</div><div class="value" id="m-eff-rate">—</div></div>
+          </div>
+        </div>
+        <details class="card compact">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px;">12 个月预扣明细</summary>
+          <div style="overflow-x:auto;max-height:280px;overflow-y:auto;margin-top:8px;">
+            <table id="m-table">
+              <thead><tr><th>月</th><th>累计应纳</th><th>累计税</th><th>本月预扣</th><th>本月到手</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
   </section>
 
   {/* ==================== Tab 2: 年度汇算 ==================== */}

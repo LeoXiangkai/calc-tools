@@ -45,8 +45,11 @@ main {
   margin: 0 auto;
   padding: 20px 16px 40px;
 }
-main.tool-main {
-  max-width: var(--maxw-tool);
+.tool-main {
+  max-width: var(--maxw-tool) !important;
+}
+.site-nav {
+  max-width: var(--maxw);
 }
 
 h1 {
@@ -191,6 +194,13 @@ td:first-child {
 .form-grid label > input,
 .form-grid label > select {
   margin-top: 3px;
+  max-width: 280px;
+}
+@media (max-width: 480px) {
+  .form-grid label > input,
+  .form-grid label > select {
+    max-width: 100%;
+  }
 }
 
 .kv-grid {
