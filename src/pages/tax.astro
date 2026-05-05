@@ -1,0 +1,364 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="个税计算器"
+  description="覆盖工资月度预扣（累计预扣预缴法）、年度汇算、年终奖（单独/并入对比）、劳务报酬/稿酬/特许权使用费、个体经营所得的全场景个税计算。基于 2026 年现行税率表。"
+>
+  <h1>个税计算器</h1>
+  <p>
+    覆盖中国个人所得税几乎所有常见计算场景：每月预扣、年度汇算、年终奖最优计税、劳务/稿酬/特许权、经营所得。
+    所有计算在浏览器本地完成，<strong>不会上传</strong>。
+    搞不清专项附加扣除？看 <a href="/guides/tax-deductions">专项附加扣除完整指南</a>；
+    要查税率档，去 <a href="/tax-rate-tables">税率表速查</a>。
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button data-tab="monthly" role="tab" aria-selected="true">月度预扣</button>
+    <button data-tab="annual" role="tab" aria-selected="false">年度汇算</button>
+    <button data-tab="bonus" role="tab" aria-selected="false">年终奖对比</button>
+    <button data-tab="incidental" role="tab" aria-selected="false">劳务/稿酬</button>
+    <button data-tab="business" role="tab" aria-selected="false">经营所得</button>
+  </div>
+
+  {/* ==================== Tab 1: 月度预扣 ==================== */}
+  <section class="tab-panel active" data-panel="monthly">
+    <h2>工资月度预扣（累计预扣预缴法）</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      默认假设全年 12 个月工资、社保、专项附加扣除完全相同（多数工薪族场景）。给出每月预扣明细 + 全年合计。
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top:0;">收入与五险一金</h3>
+      <label>月税前工资（元）<input id="m-gross" type="number" min="0" step="100" value="20000" /></label>
+      <label>月个人五险一金（元）<input id="m-social" type="number" min="0" step="100" value="3000" /></label>
+      <label>月其他扣除（年金/商业养老险等，可选）<input id="m-other" type="number" min="0" step="100" value="0" /></label>
+
+      <h3>专项附加扣除（每月）</h3>
+      <label>子女教育（孩数 × 2000）<input id="m-children" type="number" min="0" step="2000" value="0" /></label>
+      <label>婴幼儿照护（3岁以下孩数 × 2000）<input id="m-infant" type="number" min="0" step="2000" value="0" /></label>
+      <label>继续教育（学历 400/月，技能 0）<input id="m-edu" type="number" min="0" step="100" value="0" /></label>
+      <label>住房贷款利息（首套 1000）<input id="m-loan" type="number" min="0" step="500" value="0" /></label>
+      <label>住房租金（北上广深 1500 / 省会 1100 / 其他 800）<input id="m-rent" type="number" min="0" step="100" value="0" /></label>
+      <label>赡养老人（独生 3000 / 非独 ≤1500）<input id="m-elder" type="number" min="0" step="500" value="0" /></label>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">每月专项附加合计</div><div class="value" id="m-special-sum">—</div></div>
+      <div><div class="label">每月减除合计</div><div class="value" id="m-deduct-sum">—</div></div>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">全年税前工资</div><div class="value" id="m-total-gross">—</div></div>
+      <div><div class="label">全年应缴税</div><div class="value" id="m-total-tax" style="color:var(--c-danger);">—</div></div>
+      <div><div class="label">全年税后到手</div><div class="value" id="m-total-net" style="color:var(--c-success);">—</div></div>
+      <div><div class="label">全年综合税率</div><div class="value" id="m-eff-rate">—</div></div>
+    </div>
+
+    <details class="card">
+      <summary style="cursor:pointer;font-weight:600;">12 个月预扣明细</summary>
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table id="m-table">
+          <thead><tr><th>月</th><th>累计应纳所得</th><th>累计税</th><th>本月预扣</th><th>本月到手</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  {/* ==================== Tab 2: 年度汇算 ==================== */}
+  <section class="tab-panel" data-panel="annual">
+    <h2>年度综合所得汇算</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      次年 3-6 月汇算清缴：把全年工资、劳务、稿酬、特许权一起算应纳税额，与已预扣对比，应退应补。
+      <strong>所有金额按年度填写。</strong>
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top:0;">综合所得收入（税前）</h3>
+      <label>工资薪金年度合计（元）<input id="y-salary" type="number" min="0" step="1000" value="240000" /></label>
+      <label>劳务报酬年度合计（按 80% 计入）<input id="y-labor" type="number" min="0" step="1000" value="0" /></label>
+      <label>稿酬年度合计（按 56% 计入）<input id="y-author" type="number" min="0" step="1000" value="0" /></label>
+      <label>特许权使用费年度合计（按 80% 计入）<input id="y-royalty" type="number" min="0" step="1000" value="0" /></label>
+
+      <h3>扣除</h3>
+      <label>全年五险一金（个人部分）<input id="y-social" type="number" min="0" step="1000" value="36000" /></label>
+      <label>全年专项附加扣除合计<input id="y-special" type="number" min="0" step="1000" value="14400" /></label>
+      <label>全年其他扣除（年金等）<input id="y-other" type="number" min="0" step="1000" value="0" /></label>
+      <label>全年公益慈善捐赠<input id="y-charity" type="number" min="0" step="1000" value="0" /></label>
+
+      <h3>已预缴</h3>
+      <label>全年已预扣预缴税额<input id="y-withheld" type="number" min="0" step="100" value="0" /></label>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">综合所得收入额</div><div class="value" id="y-income">—</div></div>
+      <div><div class="label">总扣除（含 60000 起征）</div><div class="value" id="y-deduct">—</div></div>
+      <div><div class="label">应纳税所得额</div><div class="value" id="y-taxable">—</div></div>
+      <div><div class="label">适用税率</div><div class="value" id="y-rate">—</div></div>
+      <div><div class="label">全年应纳税额</div><div class="value" id="y-due" style="color:var(--c-danger);">—</div></div>
+      <div>
+        <div class="label">应退（-）/ 应补（+）</div>
+        <div class="value" id="y-refund" style="color:var(--c-accent);">—</div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 3: 年终奖对比 ==================== */}
+  <section class="tab-panel" data-panel="bonus">
+    <h2>年终奖：单独计税 vs 并入综合所得</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      自 2024 年起，年终奖可选两种计税方式：单独按月度税率表 / 并入年度综合所得。本工具同屏对比哪种更省。
+      <strong>需要先填本年度综合所得应纳税所得额（不含年终奖）。</strong>
+    </p>
+
+    <div class="card">
+      <label>年终奖金额（元）<input id="b-bonus" type="number" min="0" step="1000" value="50000" /></label>
+      <label>本年度综合应纳税所得额（不含年终奖，元）<input id="b-base" type="number" min="0" step="1000" value="138000" /></label>
+      <p style="font-size:13px;color:var(--c-text-soft);margin-top:8px;">
+        如何算"综合应纳税所得额"？= 全年工资 - 60000 - 全年社保 - 全年专项附加扣除 - 其他扣除。
+        可在"年度汇算" Tab 算出。
+      </p>
+    </div>
+
+    <div class="card kv-grid">
+      <div style="grid-column:1/-1;"><strong>方案 A：单独计税（按月度税率表）</strong></div>
+      <div><div class="label">应纳税额</div><div class="value" id="b-sep-tax">—</div></div>
+      <div><div class="label">适用税率</div><div class="value" id="b-sep-rate">—</div></div>
+    </div>
+
+    <div class="card kv-grid">
+      <div style="grid-column:1/-1;"><strong>方案 B：并入综合所得</strong></div>
+      <div><div class="label">合计应纳税</div><div class="value" id="b-com-tax">—</div></div>
+      <div><div class="label">奖金带来的税额增量</div><div class="value" id="b-com-inc">—</div></div>
+      <div><div class="label">适用税率</div><div class="value" id="b-com-rate">—</div></div>
+    </div>
+
+    <div class="card" style="background:var(--c-accent-soft);border-color:var(--c-accent);">
+      <div style="font-size:13px;color:var(--c-text-soft);">推荐方案</div>
+      <div style="font-size:22px;font-weight:600;color:var(--c-accent);" id="b-recommend">—</div>
+      <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px;" id="b-saving"></div>
+    </div>
+
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      <strong>年终奖陷阱</strong>：奖金从 36000→36001 元，单独计税额从 1080→3390，多 1 元税多 2310。
+      税率档跳跃区间附近一定要试算两种方式。
+    </p>
+  </section>
+
+  {/* ==================== Tab 4: 劳务/稿酬/特许权 ==================== */}
+  <section class="tab-panel" data-panel="incidental">
+    <h2>劳务报酬 / 稿酬 / 特许权使用费</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      支付时由扣缴义务人按"次"或"月"预扣。年度汇算时按 80%（劳务/特许权）或 56%（稿酬）并入综合所得。
+      预扣不等于最终税额，年底可能多退少补。
+    </p>
+
+    <div class="card">
+      <label>本次税前收入（元）<input id="i-amount" type="number" min="0" step="100" value="10000" /></label>
+      <h3>所得类型</h3>
+      <div class="btn-row">
+        <input type="radio" name="i-type" id="i-labor" value="labor" checked />
+        <label for="i-labor">劳务报酬</label>
+        <input type="radio" name="i-type" id="i-author" value="author" />
+        <label for="i-author">稿酬</label>
+        <input type="radio" name="i-type" id="i-royalty" value="royalty" />
+        <label for="i-royalty">特许权</label>
+      </div>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">单次预扣应纳税所得</div><div class="value" id="i-taxable">—</div></div>
+      <div><div class="label">单次预扣税额</div><div class="value" id="i-tax" style="color:var(--c-danger);">—</div></div>
+      <div><div class="label">预扣率</div><div class="value" id="i-rate">—</div></div>
+      <div><div class="label">本次到手</div><div class="value" id="i-net" style="color:var(--c-success);">—</div></div>
+      <div><div class="label">年度并入综合所得（按比例）</div><div class="value" id="i-annual">—</div></div>
+    </div>
+
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      <strong>劳务报酬预扣率档位</strong>：≤2万 20% / 2-5万 30%（速扣 2000）/ &gt;5万 40%（速扣 7000）。
+      <strong>稿酬</strong>：减除费用后再 ×70% 后按 20% 预扣。
+      <strong>特许权</strong>：减除费用后按 20% 预扣。
+      减除费用：单次≤4000 减 800；&gt;4000 减 20%。
+    </p>
+  </section>
+
+  {/* ==================== Tab 5: 经营所得 ==================== */}
+  <section class="tab-panel" data-panel="business">
+    <h2>个体经营所得（个体户 / 个独 / 合伙）</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      经营所得不并入综合所得，单独按 5%-35% 五级超额累进。业主本人可享受 5000/月起征点（按经营月数折算）。
+    </p>
+
+    <div class="card">
+      <label>年总收入（元）<input id="o-revenue" type="number" min="0" step="10000" value="500000" /></label>
+      <label>年总成本费用（元）<input id="o-costs" type="number" min="0" step="10000" value="200000" /></label>
+      <label>其他可扣除（公益等，可选）<input id="o-other" type="number" min="0" step="1000" value="0" /></label>
+      <label>本年实际经营月数（1-12）<input id="o-months" type="number" min="1" max="12" step="1" value="12" /></label>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">应纳税所得额</div><div class="value" id="o-taxable">—</div></div>
+      <div><div class="label">适用税率</div><div class="value" id="o-rate">—</div></div>
+      <div><div class="label">速算扣除数</div><div class="value" id="o-quick">—</div></div>
+      <div><div class="label">应纳税额</div><div class="value" id="o-tax" style="color:var(--c-danger);">—</div></div>
+    </div>
+  </section>
+
+  <h2>计算口径说明</h2>
+  <ul style="font-size:13px;color:var(--c-text-soft);">
+    <li>累计预扣预缴法（2019 年起）：每月按"截至当月累计应纳税所得额"查表算累计税，减去前期已预扣，得到本月预扣</li>
+    <li>专项附加扣除标准：以 2023-08 调整后金额为准（子女教育/婴幼儿照护各 2000、独生赡养老人 3000）</li>
+    <li>年终奖单独计税政策延续至 2027 年底，之后或并入综合所得</li>
+    <li>劳务报酬等并入年度汇算后，可能补退；高收入劳务收入往往年度税额低于已预扣</li>
+    <li>本计算器不处理：股权激励、解除劳动关系一次性补偿、退休金等特殊场景，请咨询专业税务顾问</li>
+    <li>结果仅供参考，最终以税务机关核定为准</li>
+  </ul>
+
+  <script>
+    import {
+      calcUniformYear,
+      calcAnnualSettlement,
+      calcAnnualBonus,
+      calcIncidentalPrewith,
+      calcBusinessIncome,
+      fmtCny2,
+      type IncidentalIncomeType,
+    } from "~/lib/income-tax";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny2(n)}`;
+    const num = (id: string) => Number($<HTMLInputElement>(id).value) || 0;
+
+    // Tab switch
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
+      }),
+    );
+
+    // ---------- Tab 1: 月度预扣 ----------
+    function renderMonthly(): void {
+      const monthlyGross = num("m-gross");
+      const monthlySocial = num("m-social");
+      const monthlyOther = num("m-other");
+      const monthlySpecial = {
+        childrenEducation: num("m-children"),
+        infantCare: num("m-infant"),
+        continuingEducation: num("m-edu"),
+        housingLoanInterest: num("m-loan"),
+        housingRent: num("m-rent"),
+        elderlyCare: num("m-elder"),
+      };
+      const specialSum =
+        monthlySpecial.childrenEducation +
+        monthlySpecial.infantCare +
+        monthlySpecial.continuingEducation +
+        monthlySpecial.housingLoanInterest +
+        monthlySpecial.housingRent +
+        monthlySpecial.elderlyCare;
+      $("m-special-sum").textContent = cny(specialSum);
+      $("m-deduct-sum").textContent = cny(5000 + monthlySocial + specialSum + monthlyOther);
+
+      if (monthlyGross <= 0) {
+        ["m-total-gross","m-total-tax","m-total-net","m-eff-rate"].forEach((id) => ($(id).textContent = "—"));
+        document.querySelector<HTMLTableSectionElement>("#m-table tbody")!.replaceChildren();
+        return;
+      }
+      const r = calcUniformYear({ monthlyGross, monthlySocial, monthlySpecial, monthlyOther });
+      $("m-total-gross").textContent = cny(r.totalGross);
+      $("m-total-tax").textContent = cny(r.totalTax);
+      $("m-total-net").textContent = cny(r.totalNet);
+      $("m-eff-rate").textContent = `${((r.totalTax / Math.max(1, r.totalGross)) * 100).toFixed(2)}%`;
+
+      const tbody = document.querySelector<HTMLTableSectionElement>("#m-table tbody")!;
+      const frag = document.createDocumentFragment();
+      for (const row of r.schedule) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.month}</td><td>${fmtCny2(row.cumulativeTaxable)}</td><td>${fmtCny2(row.cumulativeTax)}</td><td>${fmtCny2(row.thisMonthWithhold)}</td><td>${fmtCny2(row.netSalary)}</td>`;
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='m-']").forEach((el) => el.addEventListener("input", renderMonthly));
+    renderMonthly();
+
+    // ---------- Tab 2: 年度汇算 ----------
+    function renderAnnual(): void {
+      const r = calcAnnualSettlement({
+        salaryAnnual: num("y-salary"),
+        laborAnnual: num("y-labor"),
+        authorAnnual: num("y-author"),
+        royaltyAnnual: num("y-royalty"),
+        socialAnnual: num("y-social"),
+        specialAnnual: num("y-special"),
+        otherAnnual: num("y-other"),
+        charityAnnual: num("y-charity"),
+        withheldTotal: num("y-withheld"),
+      });
+      $("y-income").textContent = cny(r.totalIncome);
+      $("y-deduct").textContent = cny(r.totalDeduction);
+      $("y-taxable").textContent = cny(r.taxable);
+      $("y-rate").textContent = `${(r.rate * 100).toFixed(0)}%（速扣 ${r.quickDeduct}）`;
+      $("y-due").textContent = cny(r.taxDue);
+      const refundLabel =
+        r.refundOrPay > 0 ? `应补 ${cny(r.refundOrPay)}` :
+        r.refundOrPay < 0 ? `应退 ${cny(-r.refundOrPay)}` :
+        `刚好 ¥0`;
+      $("y-refund").textContent = refundLabel;
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='y-']").forEach((el) => el.addEventListener("input", renderAnnual));
+    renderAnnual();
+
+    // ---------- Tab 3: 年终奖对比 ----------
+    function renderBonus(): void {
+      const r = calcAnnualBonus({ bonus: num("b-bonus"), baseTaxableNoBonus: num("b-base") });
+      $("b-sep-tax").textContent = cny(r.separate.tax);
+      $("b-sep-rate").textContent = `${(r.separate.rate * 100).toFixed(0)}%（速扣 ${r.separate.quickDeduct}）`;
+      $("b-com-tax").textContent = cny(r.combined.tax);
+      $("b-com-inc").textContent = cny(r.combined.taxIncrement);
+      $("b-com-rate").textContent = `${(r.combined.rate * 100).toFixed(0)}%（速扣 ${r.combined.quickDeduct}）`;
+      $("b-recommend").textContent = r.recommend === "separate" ? "✅ 单独计税" : "✅ 并入综合所得";
+      $("b-saving").textContent = r.saving > 0.01 ? `比另一种方案节省 ${cny(r.saving)}` : "两种方案税额相同";
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='b-']").forEach((el) => el.addEventListener("input", renderBonus));
+    renderBonus();
+
+    // ---------- Tab 4: 劳务/稿酬 ----------
+    function renderIncidental(): void {
+      const amount = num("i-amount");
+      const type = (document.querySelector<HTMLInputElement>("input[name='i-type']:checked")?.value ?? "labor") as IncidentalIncomeType;
+      const r = calcIncidentalPrewith({ amount, type });
+      $("i-taxable").textContent = cny(r.taxableForWithhold);
+      $("i-tax").textContent = cny(r.withholdTax);
+      $("i-rate").textContent = `${(r.rate * 100).toFixed(0)}%${r.quickDeduct ? `（速扣 ${r.quickDeduct}）` : ""}`;
+      $("i-net").textContent = cny(amount - r.withholdTax);
+      $("i-annual").textContent = cny(r.annualizedIncomeAmount);
+    }
+    $<HTMLInputElement>("i-amount").addEventListener("input", renderIncidental);
+    document.querySelectorAll<HTMLInputElement>("input[name='i-type']").forEach((el) => el.addEventListener("change", renderIncidental));
+    renderIncidental();
+
+    // ---------- Tab 5: 经营所得 ----------
+    function renderBusiness(): void {
+      const r = calcBusinessIncome({
+        annualRevenue: num("o-revenue"),
+        annualCosts: num("o-costs"),
+        annualOtherDeductions: num("o-other"),
+        monthsActive: num("o-months"),
+      });
+      $("o-taxable").textContent = cny(r.taxable);
+      $("o-rate").textContent = `${(r.rate * 100).toFixed(0)}%`;
+      $("o-quick").textContent = cny(r.quickDeduct);
+      $("o-tax").textContent = cny(r.tax);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='o-']").forEach((el) => el.addEventListener("input", renderBusiness));
+    renderBusiness();
+  </script>
+</Base>

@@ -1,0 +1,60 @@
+---
+import "~/styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+}
+
+const { title, description, canonical } = Astro.props;
+const pageUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
+const fullTitle = title === "在线计算器工具集"
+  ? title
+  : `${title} - 在线计算器工具集`;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={pageUrl} />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-adsense-account" content="ca-pub-4449948043133958" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4449948043133958" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <header style="border-bottom: 1px solid var(--c-border); background: #fff;">
+      <nav style="max-width: var(--maxw); margin: 0 auto; padding: 12px 16px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px;">
+        <a href="/" style="font-weight: 600; color: var(--c-text);">计算器工具集</a>
+        <a href="/mortgage">房贷</a>
+        <a href="/tax">个税</a>
+        <a href="/transaction-tax">买房税费</a>
+        <a href="/tax-rate-tables">税率表</a>
+        <a href="/faq">FAQ</a>
+        <a href="/about">关于</a>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer style="border-top: 1px solid var(--c-border); background: #fff; margin-top: 48px;">
+      <div style="max-width: var(--maxw); margin: 0 auto; padding: 16px; font-size: 13px; color: var(--c-text-soft);">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+          <a href="/privacy">隐私政策</a>
+          <a href="/terms">服务条款</a>
+          <a href="/contact">联系方式</a>
+        </div>
+        <div>计算结果仅供参考，请以银行实际放款为准。</div>
+      </div>
+    </footer>
+  </body>
+</html>

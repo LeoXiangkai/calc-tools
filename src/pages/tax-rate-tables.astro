@@ -1,0 +1,133 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="个税税率表速查（2026 年现行）"
+  description="个人所得税完整税率表速查：综合所得年度 / 月度累计预扣、全年一次性奖金月度、经营所得、劳务报酬预扣率、利息股息红利、财产转让等。"
+>
+  <h1>个税税率表速查（2026 年现行）</h1>
+  <p>
+    覆盖中国个人所得税 5 大税率表 + 2 项比例税率。所有数据基于 2019 年税改后现行规定，年终奖单独计税政策延续至 2027-12。
+    需要计算请用 <a href="/tax">个税计算器</a>。
+  </p>
+
+  <h2>一、综合所得年度税率表（年度汇算）</h2>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    适用于：工资薪金、劳务报酬、稿酬、特许权使用费的<strong>年度汇算</strong>。
+    年度应纳税所得额 = 年总收入 - 60000 - 五险一金 - 专项附加 - 其他扣除 - 公益捐赠
+  </p>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>级数</th><th>全年应纳税所得额（元）</th><th>税率</th><th>速算扣除数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>≤ 36,000</td><td>3%</td><td>0</td></tr>
+        <tr><td>2</td><td>(36,000, 144,000]</td><td>10%</td><td>2,520</td></tr>
+        <tr><td>3</td><td>(144,000, 300,000]</td><td>20%</td><td>16,920</td></tr>
+        <tr><td>4</td><td>(300,000, 420,000]</td><td>25%</td><td>31,920</td></tr>
+        <tr><td>5</td><td>(420,000, 660,000]</td><td>30%</td><td>52,920</td></tr>
+        <tr><td>6</td><td>(660,000, 960,000]</td><td>35%</td><td>85,920</td></tr>
+        <tr><td>7</td><td>&gt; 960,000</td><td>45%</td><td>181,920</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>二、月度累计预扣预缴税率表</h2>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    工资薪金每月由单位预扣预缴，<strong>查表时用"截至当月累计应纳税所得额"</strong>，与年度表数字相同（每年累计上限相同），月度本身无独立档位。
+  </p>
+
+  <h2>三、全年一次性奖金（年终奖）月度税率表</h2>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    年终奖<strong>单独计税</strong>时使用：用 <code>奖金 ÷ 12</code> 找税率档，再用 <code>奖金 × 税率 - 速扣</code>。
+    政策延续至 2027-12-31。
+  </p>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>级数</th><th>奖金 ÷ 12（元）</th><th>税率</th><th>速算扣除数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>≤ 3,000</td><td>3%</td><td>0</td></tr>
+        <tr><td>2</td><td>(3,000, 12,000]</td><td>10%</td><td>210</td></tr>
+        <tr><td>3</td><td>(12,000, 25,000]</td><td>20%</td><td>1,410</td></tr>
+        <tr><td>4</td><td>(25,000, 35,000]</td><td>25%</td><td>2,660</td></tr>
+        <tr><td>5</td><td>(35,000, 55,000]</td><td>30%</td><td>4,410</td></tr>
+        <tr><td>6</td><td>(55,000, 80,000]</td><td>35%</td><td>7,160</td></tr>
+        <tr><td>7</td><td>&gt; 80,000</td><td>45%</td><td>15,160</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13px;color:var(--c-danger);">
+    <strong>陷阱区间</strong>：奖金 36,000→36,001 元，税额从 1,080→3,390，多 1 元税多 2,310；
+    144,000→144,001、300,000→300,001 等档位临界点都有类似跳跃，发奖金前一定要避开。
+  </p>
+
+  <h2>四、经营所得税率表（个体户/个独/合伙）</h2>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    经营所得不并入综合所得，单独按 5%-35% 五级累进。业主可享 5000/月起征点（按经营月数折算）。
+  </p>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>级数</th><th>全年应纳税所得额（元）</th><th>税率</th><th>速算扣除数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>≤ 30,000</td><td>5%</td><td>0</td></tr>
+        <tr><td>2</td><td>(30,000, 90,000]</td><td>10%</td><td>1,500</td></tr>
+        <tr><td>3</td><td>(90,000, 300,000]</td><td>20%</td><td>10,500</td></tr>
+        <tr><td>4</td><td>(300,000, 500,000]</td><td>30%</td><td>40,500</td></tr>
+        <tr><td>5</td><td>&gt; 500,000</td><td>35%</td><td>65,500</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>五、劳务报酬预扣率表</h2>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    单位/平台支付劳务报酬时，先减 800 或 20% 得"预扣应纳税所得额"，再查下表。
+    年度汇算时按 80% 计入综合所得，可能多退少补。
+  </p>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>级数</th><th>预扣应纳税所得额（元）</th><th>税率</th><th>速算扣除数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>≤ 20,000</td><td>20%</td><td>0</td></tr>
+        <tr><td>2</td><td>(20,000, 50,000]</td><td>30%</td><td>2,000</td></tr>
+        <tr><td>3</td><td>&gt; 50,000</td><td>40%</td><td>7,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>六、稿酬 / 特许权使用费</h2>
+  <ul style="font-size:14px;">
+    <li><strong>稿酬</strong>：单次收入 ×（1 - 减除费用）×70% 后按 20% 预扣；年度按 56%（=80%×70%）计入综合所得</li>
+    <li><strong>特许权使用费</strong>：单次收入 ×（1 - 减除费用）后按 20% 预扣；年度按 80% 计入综合所得</li>
+    <li><strong>减除费用</strong>：单次收入 ≤ 4000 元减 800 元；&gt; 4000 元减 20%</li>
+  </ul>
+
+  <h2>七、其他比例税率（不并入综合所得）</h2>
+  <ul style="font-size:14px;">
+    <li><strong>利息、股息、红利</strong>：20%（上市公司股息按持股期限差别征收：≥1 年免；1 月-1 年 10%；&lt;1 月 20%）</li>
+    <li><strong>财产租赁所得</strong>：20%（住房出租 10%）</li>
+    <li><strong>财产转让所得</strong>：20%；二手房交易另有满五唯一等优惠</li>
+    <li><strong>偶然所得</strong>：20%（中奖、彩票等）</li>
+  </ul>
+
+  <h2>八、专项附加扣除标准（2023-08 调整后）</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>项目</th><th>标准（每月，除注明）</th><th>关键条件</th></tr></thead>
+      <tbody>
+        <tr><td>子女教育</td><td>2,000/孩</td><td>3 岁起到博士；可父母分摊或一方扣</td></tr>
+        <tr><td>婴幼儿照护</td><td>2,000/孩</td><td>3 岁以下</td></tr>
+        <tr><td>继续教育</td><td>学历 400/月（最长 48 月）；技能 3,600/年（取证当年一次性）</td><td>—</td></tr>
+        <tr><td>住房贷款利息</td><td>1,000</td><td>仅首套住房，最长 240 月</td></tr>
+        <tr><td>住房租金</td><td>1,500（北上广深）/ 1,100（省会）/ 800（其他）</td><td>主要工作城市无自有住房；与房贷利息二选一</td></tr>
+        <tr><td>赡养老人</td><td>独生 3,000；非独生分摊 ≤1,500/人</td><td>父母年满 60 岁</td></tr>
+        <tr><td>大病医疗</td><td>年度个人负担 15,000-80,000 部分据实扣除</td><td>仅在汇算清缴时扣除</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13px;color:var(--c-text-soft);">
+    详细条件、申报方式、夫妻分摊、踩坑点见 <a href="/guides/tax-deductions">专项附加扣除完整指南</a>。
+  </p>
+
+  <p style="font-size:13px;color:var(--c-text-soft);margin-top:32px;">
+    本表为 calc-tools 整理。税率与起征点以国务院、税务总局最新公告为准。
+  </p>
+</Base>

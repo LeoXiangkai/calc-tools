@@ -1,0 +1,55 @@
+---
+import Base from "~/layouts/Base.astro";
+const lastUpdate = "2026-05-05";
+---
+<Base
+  title="隐私政策"
+  description="本站隐私政策：不收集用户输入的计算数据，使用 Cloudflare 基础访问日志和 Google AdSense 广告 cookie 的说明。"
+>
+  <h1>隐私政策</h1>
+  <p style="color: var(--c-text-soft); font-size: 13px;">最后更新：{lastUpdate}</p>
+
+  <h2>一、我们不收集什么</h2>
+  <p>
+    本站所有计算器（房贷、个税等）的输入数据——包括但不限于贷款金额、年限、利率、工资、社保——
+    完全在你本地浏览器内计算，<strong>不会上传到任何服务器</strong>。
+    我们没有数据库保存这些信息，离开页面后数据即从内存释放。
+  </p>
+
+  <h2>二、我们会接触到的有限信息</h2>
+  <ol>
+    <li>
+      <strong>访问日志</strong>：托管平台 Cloudflare Pages 会按其默认策略记录基础访问日志（IP、访问时间、UA、来源页），
+      用于安全和性能分析。我们本身不主动记录或导出这些日志。
+    </li>
+    <li>
+      <strong>广告 cookie</strong>：本站使用 Google AdSense 投放广告，AdSense 可能在你的浏览器中
+      设置 cookie 以提供个性化或非个性化广告。具体规则参见
+      <a href="https://policies.google.com/technologies/ads" rel="nofollow noopener">Google 广告政策</a>。
+      你可以通过浏览器设置或
+      <a href="https://www.google.com/settings/ads" rel="nofollow noopener">Google 广告设置</a>
+      关闭个性化广告。
+    </li>
+  </ol>
+
+  <h2>三、Cookie 使用</h2>
+  <p>
+    本站自身不使用第一方 cookie 跟踪用户。你看到的 cookie 主要来自 Google AdSense 等第三方服务。
+    你可以通过浏览器隐私设置随时清除或阻止这些 cookie，这不会影响本站工具的核心功能。
+  </p>
+
+  <h2>四、儿童隐私</h2>
+  <p>
+    本站不针对 13 岁以下儿童，也不刻意收集儿童信息。
+  </p>
+
+  <h2>五、政策变更</h2>
+  <p>
+    若本政策更新，我们会修改本页顶部的「最后更新」日期。重大变更会在首页提示。
+  </p>
+
+  <h2>六、联系</h2>
+  <p>
+    对隐私政策有疑问，请通过 <a href="/contact">联系方式</a> 与我们沟通。
+  </p>
+</Base>

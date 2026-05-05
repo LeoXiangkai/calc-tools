@@ -1,0 +1,447 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="房贷计算器"
+  description="免费房贷计算器：等额本息/等额本金对比、商贷+公积金组合贷、提前还款、利率重定价（LPR）、购房力反推。所有计算在浏览器本地完成，不上传服务器。"
+>
+  <h1>房贷计算器</h1>
+  <p>
+    覆盖买房到还款全周期的常见计算。所有数据在你浏览器本地处理，<strong>不会上传</strong>。
+    不熟悉概念可以先看 <a href="/guides/mortgage-basics">房贷入门</a> 与
+    <a href="/guides/prepayment">提前还款指南</a>。
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button data-tab="basic" role="tab" aria-selected="true">基础对比</button>
+    <button data-tab="combined" role="tab" aria-selected="false">组合贷</button>
+    <button data-tab="prepay" role="tab" aria-selected="false">提前还款</button>
+    <button data-tab="afford" role="tab" aria-selected="false">购房力</button>
+    <button data-tab="reprice" role="tab" aria-selected="false">利率重定价</button>
+  </div>
+
+  {/* ==================== Tab 1: 基础对比 ==================== */}
+  <section class="tab-panel active" data-panel="basic">
+    <h2>基础月供 + 双方式同屏对比</h2>
+
+    <div class="card">
+      <div style="display: grid; gap: 12px;">
+        <label>
+          <div style="font-size:14px;margin-bottom:4px;">总价（万元，可选）</div>
+          <input id="b-totalPrice" type="number" inputmode="numeric" min="0" step="1" value="" placeholder="留空则直接输入贷款额" />
+        </label>
+        <label>
+          <div style="font-size:14px;margin-bottom:4px;">首付比例（%，配总价用）</div>
+          <input id="b-downRatio" type="number" inputmode="numeric" min="0" max="100" step="1" value="30" />
+        </label>
+        <label>
+          <div style="font-size:14px;margin-bottom:4px;">贷款金额（元）</div>
+          <input id="b-principal" type="number" inputmode="numeric" min="1" step="1" value="1000000" />
+        </label>
+        <label>
+          <div style="font-size:14px;margin-bottom:4px;">贷款年限（年）</div>
+          <input id="b-years" type="number" inputmode="numeric" min="1" max="30" step="1" value="30" />
+        </label>
+        <label>
+          <div style="font-size:14px;margin-bottom:4px;">年利率（%）</div>
+          <input id="b-rate" type="number" inputmode="decimal" min="0.01" max="20" step="0.01" value="3.95" />
+        </label>
+      </div>
+      <p id="b-error" style="color:var(--c-danger);margin:12px 0 0;min-height:22px;"></p>
+    </div>
+
+    <h3 style="margin-top:24px;">等额本息</h3>
+    <div class="card kv-grid">
+      <div><div class="label">月供（恒定）</div><div class="value" id="b-ei-monthly">—</div></div>
+      <div><div class="label">总利息</div><div class="value" id="b-ei-interest">—</div></div>
+      <div><div class="label">总还款</div><div class="value" id="b-ei-total">—</div></div>
+      <div><div class="label">利息占比</div><div class="value" id="b-ei-ratio">—</div></div>
+    </div>
+
+    <h3>等额本金</h3>
+    <div class="card kv-grid">
+      <div><div class="label">首月月供</div><div class="value" id="b-ep-first">—</div></div>
+      <div><div class="label">末月月供</div><div class="value" id="b-ep-last">—</div></div>
+      <div><div class="label">总利息</div><div class="value" id="b-ep-interest">—</div></div>
+      <div><div class="label">总还款</div><div class="value" id="b-ep-total">—</div></div>
+    </div>
+
+    <div class="card" style="background: var(--c-accent-soft); border-color: var(--c-accent);">
+      <div style="font-size:13px;color:var(--c-text-soft);">两种方式总利息差额</div>
+      <div style="font-size:22px;font-weight:600;color:var(--c-accent);" id="b-diff">—</div>
+      <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px;" id="b-diff-note"></div>
+    </div>
+
+    <details class="card">
+      <summary style="cursor:pointer;font-weight:600;">等额本息 按月明细</summary>
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table id="b-ei-table">
+          <thead><tr><th>期</th><th>月供</th><th>本金</th><th>利息</th><th>剩余</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary style="cursor:pointer;font-weight:600;">等额本金 按月明细</summary>
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table id="b-ep-table">
+          <thead><tr><th>期</th><th>月供</th><th>本金</th><th>利息</th><th>剩余</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  {/* ==================== Tab 2: 组合贷 ==================== */}
+  <section class="tab-panel" data-panel="combined">
+    <h2>组合贷：商业贷款 + 公积金贷款</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      组合贷由两笔独立贷款组成，各自计算月供后相加。公积金利率通常远低于商贷（当前 5 年以上 2.85%，5 年以下 2.35%），优先用足公积金额度更划算。
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top:0;">商业贷款</h3>
+      <div style="display:grid;gap:8px;">
+        <input id="c-cPrincipal" type="number" inputmode="numeric" min="0" step="1" value="700000" placeholder="商贷本金（元）" />
+        <input id="c-cYears" type="number" inputmode="numeric" min="1" max="30" step="1" value="30" placeholder="商贷年限" />
+        <input id="c-cRate" type="number" inputmode="decimal" min="0.01" max="20" step="0.01" value="3.95" placeholder="商贷年利率 %" />
+      </div>
+      <h3>公积金贷款</h3>
+      <div style="display:grid;gap:8px;">
+        <input id="c-hPrincipal" type="number" inputmode="numeric" min="0" step="1" value="600000" placeholder="公积金本金（元）" />
+        <input id="c-hYears" type="number" inputmode="numeric" min="1" max="30" step="1" value="30" placeholder="公积金年限" />
+        <input id="c-hRate" type="number" inputmode="decimal" min="0.01" max="20" step="0.01" value="2.85" placeholder="公积金年利率 %" />
+      </div>
+      <h3>还款方式</h3>
+      <div class="btn-row">
+        <input type="radio" name="c-method" id="c-m1" value="equal-installment" checked />
+        <label for="c-m1">等额本息</label>
+        <input type="radio" name="c-method" id="c-m2" value="equal-principal" />
+        <label for="c-m2">等额本金</label>
+      </div>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">商贷首月月供</div><div class="value" id="c-cMonthly">—</div></div>
+      <div><div class="label">公积金首月月供</div><div class="value" id="c-hMonthly">—</div></div>
+      <div><div class="label">合计首月月供</div><div class="value" id="c-totalMonthly" style="color:var(--c-accent);">—</div></div>
+      <div><div class="label">合计总利息</div><div class="value" id="c-totalInterest">—</div></div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 3: 提前还款 ==================== */}
+  <section class="tab-panel" data-panel="prepay">
+    <h2>提前还款</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      在某月还款后一次性额外还掉一笔本金，对比两种处理方式：缩短年限（月供不变）或减少月供（年限不变）。
+      详细策略说明见 <a href="/guides/prepayment">提前还款指南</a>。
+    </p>
+
+    <div class="card">
+      <div style="display:grid;gap:8px;">
+        <label>原始贷款本金（元）<input id="p-principal" type="number" min="1" step="1" value="1000000" /></label>
+        <label>原始贷款年限（年）<input id="p-years" type="number" min="1" max="30" step="1" value="30" /></label>
+        <label>原始年利率（%）<input id="p-rate" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
+      </div>
+      <h3>原还款方式</h3>
+      <div class="btn-row">
+        <input type="radio" name="p-method" id="p-m1" value="equal-installment" checked />
+        <label for="p-m1">等额本息</label>
+        <input type="radio" name="p-method" id="p-m2" value="equal-principal" />
+        <label for="p-m2">等额本金</label>
+      </div>
+      <div style="display:grid;gap:8px;margin-top:12px;">
+        <label>第几个月后提前还（1-360）<input id="p-month" type="number" min="1" max="360" step="1" value="60" /></label>
+        <label>提前还款金额（元）<input id="p-amount" type="number" min="1" step="1" value="300000" /></label>
+      </div>
+    </div>
+
+    <div class="card kv-grid" id="p-result-shorten">
+      <div style="grid-column:1/-1;"><strong style="color:var(--c-accent);">方案 A：缩短年限（月供不变）</strong></div>
+      <div><div class="label">节省利息</div><div class="value" id="p-s-saved" style="color:var(--c-success);">—</div></div>
+      <div><div class="label">提前结清月数</div><div class="value" id="p-s-months">—</div></div>
+      <div><div class="label">还清剩余月数</div><div class="value" id="p-s-remain">—</div></div>
+      <div><div class="label">原总利息</div><div class="value" id="p-s-base">—</div></div>
+    </div>
+
+    <div class="card kv-grid">
+      <div style="grid-column:1/-1;"><strong style="color:var(--c-accent);">方案 B：减少月供（年限不变）</strong></div>
+      <div><div class="label">节省利息</div><div class="value" id="p-r-saved" style="color:var(--c-success);">—</div></div>
+      <div><div class="label">原月供</div><div class="value" id="p-r-old">—</div></div>
+      <div><div class="label">新月供</div><div class="value" id="p-r-new">—</div></div>
+      <div><div class="label">月供减少</div><div class="value" id="p-r-delta">—</div></div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 4: 购房力 ==================== */}
+  <section class="tab-panel" data-panel="afford">
+    <h2>购房力反推</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      给定家庭月收入和月供占比上限，反推最大可贷额、可买总价、所需首付。
+      银行常见月供占比红线：30% 保守、40% 一般、50% 紧绷。
+    </p>
+
+    <div class="card">
+      <div style="display:grid;gap:8px;">
+        <label>家庭税后月收入（元）<input id="a-income" type="number" min="1" step="100" value="20000" /></label>
+        <label>月供占收入上限（%）
+          <select id="a-ratio">
+            <option value="30">30% — 保守</option>
+            <option value="40">40% — 一般</option>
+            <option value="50" selected>50% — 紧绷</option>
+          </select>
+        </label>
+        <label>贷款年限（年）<input id="a-years" type="number" min="1" max="30" step="1" value="30" /></label>
+        <label>年利率（%）<input id="a-rate" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
+        <label>首付比例（%）<input id="a-down" type="number" min="0" max="100" step="5" value="30" /></label>
+      </div>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">最大可承受月供</div><div class="value" id="a-monthly">—</div></div>
+      <div><div class="label">最大可贷本金</div><div class="value" id="a-loan" style="color:var(--c-accent);">—</div></div>
+      <div><div class="label">最大可买总价</div><div class="value" id="a-price" style="color:var(--c-accent);">—</div></div>
+      <div><div class="label">所需首付</div><div class="value" id="a-down-amt">—</div></div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 5: 利率重定价 ==================== */}
+  <section class="tab-panel" data-panel="reprice">
+    <h2>利率重定价（LPR 调整模拟）</h2>
+    <p style="font-size:13px;color:var(--c-text-soft);">
+      浮动利率房贷每年（或按合同约定）按当时 LPR 重新计算月供。模拟一次重定价后，月供与剩余利息变化。
+    </p>
+
+    <div class="card">
+      <div style="display:grid;gap:8px;">
+        <label>原始贷款本金（元）<input id="r-principal" type="number" min="1" step="1" value="1000000" /></label>
+        <label>原始贷款年限（年）<input id="r-years" type="number" min="1" max="30" step="1" value="30" /></label>
+        <label>原年利率（%）<input id="r-old" type="number" min="0.01" max="20" step="0.01" value="4.5" /></label>
+        <label>新年利率（%）<input id="r-new" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
+        <label>第几月开始按新利率（1-360）<input id="r-month" type="number" min="1" max="360" step="1" value="12" /></label>
+      </div>
+      <h3>还款方式</h3>
+      <div class="btn-row">
+        <input type="radio" name="r-method" id="r-m1" value="equal-installment" checked />
+        <label for="r-m1">等额本息</label>
+        <input type="radio" name="r-method" id="r-m2" value="equal-principal" />
+        <label for="r-m2">等额本金</label>
+      </div>
+    </div>
+
+    <div class="card kv-grid">
+      <div><div class="label">原月供</div><div class="value" id="r-oldM">—</div></div>
+      <div><div class="label">新月供</div><div class="value" id="r-newM" style="color:var(--c-accent);">—</div></div>
+      <div><div class="label">月供变化</div><div class="value" id="r-delta">—</div></div>
+      <div><div class="label">剩余利息变化</div><div class="value" id="r-iDelta">—</div></div>
+    </div>
+  </section>
+
+  <h2>计算口径与免责</h2>
+  <ul style="font-size:13px;color:var(--c-text-soft);">
+    <li><strong>等额本息</strong>：<code>月供 = P × r × (1+r)^n / ((1+r)^n − 1)</code></li>
+    <li><strong>等额本金</strong>：<code>首月月供 = P/n + P × r</code>，每月递减 <code>(P/n) × r</code></li>
+    <li><strong>组合贷</strong>：商贷与公积金两笔独立计算后按月相加</li>
+    <li><strong>提前还款</strong>：缩短年限保持原月供，减少月供保持原年限</li>
+    <li><strong>购房力反推</strong>：用等额本息口径，按月供上限反推最大本金</li>
+    <li>实际放款时银行可能对小数位、首月日息、最后一期尾差做调整，本计算与银行账单可能差几角到几元，重大决策请以银行为准</li>
+  </ul>
+
+  <script>
+    import {
+      calcMortgage,
+      calcCombined,
+      calcPrepay,
+      calcRepricing,
+      calcAffordability,
+      fmtCny,
+      fmtWan,
+      type RepaymentMethod,
+    } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) =>
+      document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny(n)}`;
+    const wan = (n: number) => `${fmtWan(n)} 万`;
+
+    // ---------- Tab switch ----------
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
+      }),
+    );
+
+    // ---------- Tab 1: 基础对比 ----------
+    const bTotalPrice = $<HTMLInputElement>("b-totalPrice");
+    const bDownRatio = $<HTMLInputElement>("b-downRatio");
+    const bPrincipal = $<HTMLInputElement>("b-principal");
+    const bYears = $<HTMLInputElement>("b-years");
+    const bRate = $<HTMLInputElement>("b-rate");
+    const bError = $<HTMLParagraphElement>("b-error");
+
+    function syncBasicPrincipal(): void {
+      const tp = Number(bTotalPrice.value);
+      const dr = Number(bDownRatio.value);
+      if (Number.isFinite(tp) && tp > 0 && Number.isFinite(dr) && dr >= 0 && dr < 100) {
+        bPrincipal.value = String(Math.round(tp * 10000 * (1 - dr / 100)));
+      }
+    }
+
+    function renderBasic(): void {
+      const principal = Number(bPrincipal.value);
+      const years = Number(bYears.value);
+      const annualRatePct = Number(bRate.value);
+      const errs: string[] = [];
+      if (!Number.isFinite(principal) || principal <= 0) errs.push("贷款金额需为正数");
+      if (!Number.isFinite(years) || years < 1 || years > 30) errs.push("年限 1-30");
+      if (!Number.isFinite(annualRatePct) || annualRatePct <= 0 || annualRatePct > 20) errs.push("利率 0.01-20");
+      bError.textContent = errs.join("；");
+      if (errs.length) {
+        ["b-ei-monthly","b-ei-interest","b-ei-total","b-ei-ratio","b-ep-first","b-ep-last","b-ep-interest","b-ep-total","b-diff"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      const ei = calcMortgage({ principal, years, annualRatePct, method: "equal-installment" });
+      const ep = calcMortgage({ principal, years, annualRatePct, method: "equal-principal" });
+      $("b-ei-monthly").textContent = cny(ei.firstMonthPayment);
+      $("b-ei-interest").textContent = cny(ei.totalInterest);
+      $("b-ei-total").textContent = cny(ei.totalPayment);
+      $("b-ei-ratio").textContent = `${((ei.totalInterest / ei.totalPayment) * 100).toFixed(1)}%`;
+      $("b-ep-first").textContent = cny(ep.firstMonthPayment);
+      $("b-ep-last").textContent = cny(ep.lastMonthPayment);
+      $("b-ep-interest").textContent = cny(ep.totalInterest);
+      $("b-ep-total").textContent = cny(ep.totalPayment);
+      const diff = ei.totalInterest - ep.totalInterest;
+      $("b-diff").textContent = cny(Math.abs(diff));
+      $("b-diff-note").textContent =
+        diff > 0
+          ? `等额本金少付 ¥${fmtCny(diff)} 利息（≈${(diff / ei.totalInterest * 100).toFixed(1)}%），但前期月供更高`
+          : "两种方式总利息几乎相同";
+
+      const fillTable = (id: string, rows: typeof ei.schedule) => {
+        const tbody = document.querySelector<HTMLTableSectionElement>(`#${id} tbody`)!;
+        const frag = document.createDocumentFragment();
+        for (const row of rows) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${row.month}</td><td>${fmtCny(row.payment)}</td><td>${fmtCny(row.principal)}</td><td>${fmtCny(row.interest)}</td><td>${fmtCny(row.remaining)}</td>`;
+          frag.appendChild(tr);
+        }
+        tbody.replaceChildren(frag);
+      };
+      fillTable("b-ei-table", ei.schedule);
+      fillTable("b-ep-table", ep.schedule);
+    }
+
+    [bTotalPrice, bDownRatio].forEach((el) => el.addEventListener("input", () => { syncBasicPrincipal(); renderBasic(); }));
+    [bPrincipal, bYears, bRate].forEach((el) => el.addEventListener("input", renderBasic));
+    renderBasic();
+
+    // ---------- Tab 2: 组合贷 ----------
+    function renderCombined(): void {
+      const cP = Number($<HTMLInputElement>("c-cPrincipal").value);
+      const cY = Number($<HTMLInputElement>("c-cYears").value);
+      const cR = Number($<HTMLInputElement>("c-cRate").value);
+      const hP = Number($<HTMLInputElement>("c-hPrincipal").value);
+      const hY = Number($<HTMLInputElement>("c-hYears").value);
+      const hR = Number($<HTMLInputElement>("c-hRate").value);
+      const method = (document.querySelector<HTMLInputElement>("input[name='c-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
+      if ([cP, cY, cR, hP, hY, hR].some((x) => !Number.isFinite(x) || x < 0)) return;
+
+      const r = calcCombined({
+        commercial: { principal: cP, years: cY, annualRatePct: cR },
+        housingFund: { principal: hP, years: hY, annualRatePct: hR },
+        method,
+      });
+      $("c-cMonthly").textContent = cny(r.commercial.firstMonthPayment);
+      $("c-hMonthly").textContent = cny(r.housingFund.firstMonthPayment);
+      $("c-totalMonthly").textContent = cny(r.firstMonthPayment);
+      $("c-totalInterest").textContent = cny(r.totalInterest);
+    }
+    document.querySelectorAll<HTMLElement>("[id^='c-']").forEach((el) => el.addEventListener("input", renderCombined));
+    document.querySelectorAll<HTMLInputElement>("input[name='c-method']").forEach((el) => el.addEventListener("change", renderCombined));
+    renderCombined();
+
+    // ---------- Tab 3: 提前还款 ----------
+    function renderPrepay(): void {
+      const principal = Number($<HTMLInputElement>("p-principal").value);
+      const years = Number($<HTMLInputElement>("p-years").value);
+      const annualRatePct = Number($<HTMLInputElement>("p-rate").value);
+      const prepayAtMonth = Number($<HTMLInputElement>("p-month").value);
+      const prepayAmount = Number($<HTMLInputElement>("p-amount").value);
+      const method = (document.querySelector<HTMLInputElement>("input[name='p-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
+
+      const ids = ["p-s-saved","p-s-months","p-s-remain","p-s-base","p-r-saved","p-r-old","p-r-new","p-r-delta"];
+      if ([principal,years,annualRatePct,prepayAtMonth,prepayAmount].some((x) => !Number.isFinite(x) || x <= 0)) {
+        ids.forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+
+      const sh = calcPrepay({ principal, years, annualRatePct, method, prepayAtMonth, prepayAmount, strategy: "shorten-term" });
+      const rd = calcPrepay({ principal, years, annualRatePct, method, prepayAtMonth, prepayAmount, strategy: "reduce-payment" });
+
+      if (sh) {
+        $("p-s-saved").textContent = cny(sh.interestSaved);
+        $("p-s-months").textContent = `${sh.monthsSaved ?? 0} 月（${((sh.monthsSaved ?? 0) / 12).toFixed(1)} 年）`;
+        $("p-s-remain").textContent = `${sh.newRemainingMonths ?? 0} 月`;
+        $("p-s-base").textContent = cny(sh.baseTotalInterest);
+      }
+      if (rd) {
+        $("p-r-saved").textContent = cny(rd.interestSaved);
+        $("p-r-old").textContent = cny(rd.oldMonthlyPayment ?? 0);
+        $("p-r-new").textContent = cny(rd.newMonthlyPayment ?? 0);
+        const delta = (rd.oldMonthlyPayment ?? 0) - (rd.newMonthlyPayment ?? 0);
+        $("p-r-delta").textContent = cny(delta);
+      }
+    }
+    document.querySelectorAll<HTMLElement>("[id^='p-']").forEach((el) => el.addEventListener("input", renderPrepay));
+    document.querySelectorAll<HTMLInputElement>("input[name='p-method']").forEach((el) => el.addEventListener("change", renderPrepay));
+    renderPrepay();
+
+    // ---------- Tab 4: 购房力 ----------
+    function renderAfford(): void {
+      const monthlyIncome = Number($<HTMLInputElement>("a-income").value);
+      const paymentRatioPct = Number($<HTMLSelectElement>("a-ratio").value);
+      const years = Number($<HTMLInputElement>("a-years").value);
+      const annualRatePct = Number($<HTMLInputElement>("a-rate").value);
+      const downPaymentRatioPct = Number($<HTMLInputElement>("a-down").value);
+      const r = calcAffordability({ monthlyIncome, paymentRatioPct, years, annualRatePct, downPaymentRatioPct });
+      $("a-monthly").textContent = cny(r.maxMonthlyPayment);
+      $("a-loan").textContent = wan(r.maxLoanPrincipal);
+      $("a-price").textContent = wan(r.maxTotalPrice);
+      $("a-down-amt").textContent = wan(r.maxDownPayment);
+    }
+    document.querySelectorAll<HTMLElement>("[id^='a-']").forEach((el) => el.addEventListener("input", renderAfford));
+    $<HTMLSelectElement>("a-ratio").addEventListener("change", renderAfford);
+    renderAfford();
+
+    // ---------- Tab 5: 利率重定价 ----------
+    function renderReprice(): void {
+      const principal = Number($<HTMLInputElement>("r-principal").value);
+      const years = Number($<HTMLInputElement>("r-years").value);
+      const oldR = Number($<HTMLInputElement>("r-old").value);
+      const newR = Number($<HTMLInputElement>("r-new").value);
+      const month = Number($<HTMLInputElement>("r-month").value);
+      const method = (document.querySelector<HTMLInputElement>("input[name='r-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
+      const r = calcRepricing({
+        principal, years, oldAnnualRatePct: oldR, newAnnualRatePct: newR, repriceAtMonth: month, method,
+      });
+      if (!r) {
+        ["r-oldM","r-newM","r-delta","r-iDelta"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      $("r-oldM").textContent = cny(r.oldMonthlyPayment);
+      $("r-newM").textContent = cny(r.newMonthlyPayment);
+      $("r-delta").textContent = (r.monthlyDelta >= 0 ? "+" : "") + cny(r.monthlyDelta);
+      $("r-iDelta").textContent = (r.totalInterestDelta >= 0 ? "+" : "") + cny(r.totalInterestDelta);
+    }
+    document.querySelectorAll<HTMLElement>("[id^='r-']").forEach((el) => el.addEventListener("input", renderReprice));
+    document.querySelectorAll<HTMLInputElement>("input[name='r-method']").forEach((el) => el.addEventListener("change", renderReprice));
+    renderReprice();
+  </script>
+</Base>
