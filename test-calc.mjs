@@ -26,6 +26,11 @@ import {
   calcOpportunity,
   rule72,
 } from "./src/lib/compound.ts";
+import { calcPension, calcPersonalPension, PAYOUT_MONTHS } from "./src/lib/pension.ts";
+import { calcDeposit, compareDeposits } from "./src/lib/deposit.ts";
+import { calcInstallmentIrr, calcEarlyPayoff } from "./src/lib/credit-card-irr.ts";
+import { calcFireTarget, calcFireYears, calcFireFromSavingsRate } from "./src/lib/fire.ts";
+import { calcRentVsBuy } from "./src/lib/rent-vs-buy.ts";
 
 let passed = 0;
 let failed = 0;
@@ -418,6 +423,160 @@ console.log("\n=== rule72 ===");
 approx("8% → 72/8 = 9 年", rule72(8), 9, 0);
 approx("12% → 6 年", rule72(12), 6, 0);
 approx("6% → 12 年", rule72(6), 12, 0);
+
+// ===== 退休金 =====
+console.log("\n=== calcPension ===");
+const pen = calcPension({
+  currentAvgWage: 8000,
+  wageGrowthPct: 5,
+  yearsToRetire: 20,
+  contributionYears: 30,
+  contributionIndex: 1,
+  personalAccountBalance: 50000,
+  monthlyContributionToAccount: 800,
+  accountInterestPct: 5,
+  retireAge: 60,
+});
+approx("退休时社平 ≈ 21227", pen.retirementAvgWage, 21227, 5);
+approx("基础养老金 ≈ 6368", pen.basicPension, 6368, 5);
+approx("月退休金 ≈ 9709", pen.monthlyPension, 9709, 5);
+approx("替代率 ≈ 45.74%", pen.replacementPct, 45.74, 0.1);
+
+// 60 岁计发月数 139
+eq("60 岁计发月数 = 139", PAYOUT_MONTHS[60], 139);
+
+// 缴费年限越短退休金越少（30 → 15 年砍半）
+const penShort = calcPension({ ...{ currentAvgWage: 8000, wageGrowthPct: 5, yearsToRetire: 20, contributionIndex: 1, personalAccountBalance: 50000, monthlyContributionToAccount: 800, accountInterestPct: 5, retireAge: 60 }, contributionYears: 15 });
+approx("缴 15 年比 30 年的基础养老金少一半左右", penShort.basicPension * 2 - pen.basicPension, 0, 100);
+
+// 个人养老金账户：12000/年 × 20年 × 边际20% × 5%回报，3% 退休税
+console.log("\n=== calcPersonalPension ===");
+const pp = calcPersonalPension({
+  yearlyContribution: 12000,
+  marginalTaxRatePct: 20,
+  yearsToRetire: 20,
+  expectedAnnualReturnPct: 5,
+});
+approx("累计本金 240000", pp.totalContribution, 240000, 1);
+approx("累计抵税 48000", pp.taxSaved, 48000, 1);
+approx("退休时账户 ≈ 396791", pp.finalBalance, 396791, 5);
+approx("领取时税 ≈ 11904", pp.withdrawTax, 11903.74, 1);
+
+// 边际税率 3% 时，节税近乎为零（缴存 3% 抵 - 退休 3% 缴 = 0）
+const ppLow = calcPersonalPension({ yearlyContribution: 12000, marginalTaxRatePct: 3, yearsToRetire: 20, expectedAnnualReturnPct: 5 });
+const lowEffective = ppLow.taxSaved - ppLow.withdrawTax;
+approx("3% 边际税率几乎不节税（应小于 0）", lowEffective < 0 ? 1 : 0, 1, 0);
+
+// ===== 存款 =====
+console.log("\n=== calcDeposit ===");
+const d1 = calcDeposit({ principal: 200000, annualRatePct: 1.5, years: 1 });
+approx("20万 1.5% 1年 → 利息 3000", d1.totalInterest, 3000, 0.5);
+approx("simple 1 年 实际年化 = 名义", d1.effectiveAnnualPct, 1.5, 0.01);
+
+const d3y = calcDeposit({ principal: 200000, annualRatePct: 2.5, years: 3, compounding: "annual" });
+approx("20万 2.5% 3年按年复利 → FV ≈ 215378", d3y.futureValue, 215378.13, 1);
+approx("按年复利 3 年实际年化 = 2.5%", d3y.effectiveAnnualPct, 2.5, 0.01);
+
+const cmp = compareDeposits(100000, [
+  { name: "1y 定存", annualRatePct: 1.5, years: 1 },
+  { name: "1y 大额", annualRatePct: 1.9, years: 1, threshold: 200000 },
+]);
+eq("不达起存 大额存单标记 eligible=false", cmp[1].eligible, false);
+approx("达起存 1y 定存 利息 1500", cmp[0].totalInterest, 1500, 0.5);
+
+// ===== 信用卡分期 IRR =====
+console.log("\n=== calcInstallmentIrr ===");
+// 12 期月费率 0.6%：名义 7.2%，IRR 约 13.2%
+const ir = calcInstallmentIrr({ principal: 10000, monthlyFeePct: 0.6, months: 12 });
+approx("12期 0.6% 月供 = 10000/12 + 60 = 893.33", ir.monthlyPayment, 893.33, 0.5);
+approx("名义年化 = 7.2%", ir.nominalAprPct, 7.2, 0.01);
+approx("IRR 约 13.2-13.9%", ir.irrAnnualPct, 13.5, 0.5);
+approx("IRR 是名义的 1.85x 左右", ir.irrMultiple, 1.9, 0.1);
+
+// 24 期 0.45% 月费率 → 真实 IRR 约 10%
+const ir24 = calcInstallmentIrr({ principal: 10000, monthlyFeePct: 0.45, months: 24 });
+approx("24期 0.45% 名义 5.4%", ir24.nominalAprPct, 5.4, 0.01);
+approx("24期 0.45% 真实 IRR 约 10.4%", ir24.irrAnnualPct, 10.4, 0.6);
+
+// 提前结清：剩余手续费 vs 违约金
+console.log("\n=== calcEarlyPayoff ===");
+const ep = calcEarlyPayoff({ principal: 10000, monthlyFeePct: 0.6, totalMonths: 12, paidMonths: 6, earlyPayoffPenaltyPct: 1 });
+approx("剩余本金 5000", ep.remainingPrincipal, 5000, 0.5);
+approx("剩余手续费 6×60 = 360", ep.remainingFee, 360, 0.5);
+approx("违约金 1% × 5000 = 50", ep.payoffPenalty, 50, 0.5);
+approx("净节省 360-50 = 310", ep.netSaving, 310, 0.5);
+eq("推荐提前结清", ep.recommendation, "early-payoff");
+
+// 违约金高过剩余手续费时反向
+const epHigh = calcEarlyPayoff({ principal: 10000, monthlyFeePct: 0.3, totalMonths: 12, paidMonths: 11, earlyPayoffPenaltyPct: 5 });
+eq("最后一期违约金高 → 不建议提前", epHigh.recommendation, "continue");
+
+// ===== FIRE =====
+console.log("\n=== calcFireTarget ===");
+const ft = calcFireTarget({ annualExpense: 120000 });
+approx("年支出 12万 4% 法则 → 300 万", ft.fireNumber, 3_000_000, 1);
+approx("倍数 = 25", ft.multiple, 25, 0);
+
+const ft3 = calcFireTarget({ annualExpense: 120000, withdrawalRatePct: 3 });
+approx("3% 提取率 → 倍数 33.33", ft3.multiple, 33.33, 0.01);
+approx("3% 提取率目标 = 400 万", ft3.fireNumber, 4_000_000, 1);
+
+console.log("\n=== calcFireYears ===");
+// 起点 50万 + 年储 30万 + 7% 回报 → 几年达 300 万
+const fy = calcFireYears({ currentAssets: 500_000, annualSavings: 300_000, expectedReturnPct: 7, fireNumber: 3_000_000 });
+approx("达 FIRE 年数 ≈ 7", fy.yearsToFire, 7, 0);
+approx("终值 ≈ 339万", fy.finalAssets, 3_399_097, 1000);
+
+// 已超目标 → 0 年
+const fyDone = calcFireYears({ currentAssets: 5_000_000, annualSavings: 0, expectedReturnPct: 7, fireNumber: 3_000_000 });
+eq("已达目标 → 0 年", fyDone.yearsToFire, 0);
+
+console.log("\n=== calcFireFromSavingsRate ===");
+// 50% 储蓄率 → ~17 年（MMM 经典数）
+const sf50 = calcFireFromSavingsRate({ savingsRatePct: 50 });
+approx("50% 储蓄率 ≈ 17 年", sf50.yearsToFire, 17, 1);
+
+// 75% 储蓄率 → ~7 年
+const sf75 = calcFireFromSavingsRate({ savingsRatePct: 75 });
+approx("75% 储蓄率 ≈ 7 年", sf75.yearsToFire, 7, 1);
+
+// ===== 租 vs 买 =====
+console.log("\n=== calcRentVsBuy ===");
+const rb = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 8000,
+  rentGrowthPct: 3,
+  homeAppreciationPct: 2,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 5,
+  yearsToHold: 10,
+});
+approx("首付 150 万", rb.downPayment, 1_500_000, 1);
+approx("10 年累计月供 ≈ 199.3 万", rb.totalMortgageCost, 1993056, 1000);
+approx("期末房价 ≈ 609.5 万", rb.homeValueAtEnd, 6_094_972, 1000);
+// 默认参数下房价涨 2% < 投资回报 5%，应推荐 rent
+eq("房价涨幅低于投资回报 → 推荐 rent", rb.recommendation, "rent");
+approx("租房比买房省（buyAdvantage < 0）", rb.buyAdvantage < 0 ? 1 : 0, 1, 0);
+
+// 房价涨 6%（大于投资 5%）→ 转向 buy
+const rbBoom = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 8000,
+  rentGrowthPct: 3,
+  homeAppreciationPct: 6,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 5,
+  yearsToHold: 10,
+});
+eq("房价涨 6% → 推荐 buy", rbBoom.recommendation, "buy");
 
 // ===== 汇总 =====
 console.log(`\n${passed}/${passed + failed} passed${failed ? ", " + failed + " FAILED" : ""}`);
