@@ -16,16 +16,27 @@ import Base from "~/layouts/Base.astro";
       <div class="card compact">
         <h3>本金与利率（年化 %）</h3>
         <div class="form-grid">
-          <label>本金（元）<input id="d-principal" type="number" min="1" step="1000" value="200000" /></label>
-          <label>活期（%）<input id="d-current" type="number" min="0" max="10" step="0.05" value="0.20" /></label>
-          <label>1 年定存（%）<input id="d-1y" type="number" min="0" max="10" step="0.05" value="1.50" /></label>
-          <label>2 年定存（%）<input id="d-2y" type="number" min="0" max="10" step="0.05" value="1.55" /></label>
-          <label>3 年定存（%）<input id="d-3y" type="number" min="0" max="10" step="0.05" value="1.95" /></label>
-          <label>5 年定存（%）<input id="d-5y" type="number" min="0" max="10" step="0.05" value="2.00" /></label>
-          <label>3 年大额存单（≥20 万，%）<input id="d-3y-big" type="number" min="0" max="10" step="0.05" value="2.10" /></label>
-          <label>3 年储蓄国债（%，按年复利）<input id="d-3y-bond" type="number" min="0" max="10" step="0.05" value="2.50" /></label>
-          <label>5 年储蓄国债（%，按年复利）<input id="d-5y-bond" type="number" min="0" max="10" step="0.05" value="2.65" /></label>
+          <label>本金（元）<input id="d-principal" type="number" min="0" max="100000000" step="1000" value="200000" /></label>
+          <label>活期（%）<input id="d-current" type="number" min="0" max="30" step="0.05" value="0.20" /></label>
+          <label>1 年定存（%）<input id="d-1y" type="number" min="0" max="30" step="0.05" value="1.50" /></label>
+          <label>2 年定存（%）<input id="d-2y" type="number" min="0" max="30" step="0.05" value="1.55" /></label>
+          <label>3 年定存（%）<input id="d-3y" type="number" min="0" max="30" step="0.05" value="1.95" /></label>
+          <label>5 年定存（%）<input id="d-5y" type="number" min="0" max="30" step="0.05" value="2.00" /></label>
+          <label>3 年大额存单（≥20 万，%）<input id="d-3y-big" type="number" min="0" max="30" step="0.05" value="2.10" /></label>
+          <label>3 年储蓄国债（%，按年复利）<input id="d-3y-bond" type="number" min="0" max="30" step="0.05" value="2.50" /></label>
+          <label>5 年储蓄国债（%，按年复利）<input id="d-5y-bond" type="number" min="0" max="30" step="0.05" value="2.65" /></label>
         </div>
+        <p class="error-msg" id="d-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
+      </div>
+      <div class="card compact" style="margin-top:10px;">
+        <h3>自定义产品</h3>
+        <div class="form-grid">
+          <label>名称<input id="d-custom-name" type="text" placeholder="如 货币基金 / 7 天通知存款" /></label>
+          <label>年利率（%）<input id="d-custom-rate" type="number" min="0" max="20" step="0.05" value="0" /></label>
+          <label>期限（年，0 表示活期 / 短期）<input id="d-custom-years" type="number" min="0" max="10" step="0.5" value="1" /></label>
+          <label style="display:flex;align-items:center;gap:6px;"><input id="d-custom-compound" type="checkbox" /> 按年复利（如国债）</label>
+        </div>
+        <p style="font-size:12px;margin:8px 0 0;color:var(--c-text-soft);">填入名称且利率 &gt; 0 时加入对比表。期限填 0 时按 1 年计。</p>
       </div>
     </div>
 
@@ -69,6 +80,14 @@ import Base from "~/layouts/Base.astro";
 
     function render(): void {
       const principal = num("d-principal");
+      const errEl = $("d-error");
+      const tbody = document.querySelector<HTMLTableSectionElement>("#d-table tbody")!;
+      if (principal <= 0) {
+        errEl.textContent = "请输入大于 0 的本金";
+        tbody.replaceChildren();
+        return;
+      }
+      errEl.textContent = "";
       const items: DepositCompareItem[] = [
         { name: "活期", annualRatePct: num("d-current"), years: 1 },
         { name: "1 年定存", annualRatePct: num("d-1y"), years: 1 },
@@ -79,8 +98,23 @@ import Base from "~/layouts/Base.astro";
         { name: "3 年储蓄国债", annualRatePct: num("d-3y-bond"), years: 3, compounding: "annual" },
         { name: "5 年储蓄国债", annualRatePct: num("d-5y-bond"), years: 5, compounding: "annual" },
       ];
+
+      // 自定义产品
+      const customName = ($<HTMLInputElement>("d-custom-name").value || "").trim();
+      const customRate = num("d-custom-rate");
+      const customYearsRaw = num("d-custom-years");
+      const customYears = customYearsRaw > 0 ? customYearsRaw : 1;
+      const customCompound = $<HTMLInputElement>("d-custom-compound").checked;
+      if (customName && customRate > 0) {
+        items.push({
+          name: `${customName}（自定义）`,
+          annualRatePct: customRate,
+          years: customYears,
+          compounding: customCompound ? "annual" : "simple",
+        });
+      }
+
       const results = compareDeposits(principal, items);
-      const tbody = document.querySelector<HTMLTableSectionElement>("#d-table tbody")!;
       const frag = document.createDocumentFragment();
       // 按到期总额排序
       results.sort((a, b) => b.futureValue - a.futureValue);
@@ -89,7 +123,7 @@ import Base from "~/layouts/Base.astro";
         const period = items.find((x) => x.name === r.name)?.years ?? 1;
         tr.innerHTML = `<td style="text-align:left;">${r.name}</td><td>${period} 年</td>` +
           (r.eligible
-            ? `<td>${cny(r.futureValue)}</td><td>${cny(r.totalInterest)}</td><td>${r.effectiveAnnualPct}%</td>`
+            ? `<td>${cny(r.futureValue)}</td><td style="color:var(--c-success);">${cny(r.totalInterest)}</td><td>${r.effectiveAnnualPct}%</td>`
             : `<td colspan="3" style="color:var(--c-text-soft);text-align:center;">不达起存（≥¥${r.threshold?.toLocaleString()}）</td>`);
         frag.appendChild(tr);
       }
@@ -97,6 +131,9 @@ import Base from "~/layouts/Base.astro";
     }
     document.querySelectorAll<HTMLInputElement>("[id^='d-']").forEach((el) =>
       el.addEventListener("input", render),
+    );
+    document.querySelectorAll<HTMLInputElement>("[id^='d-custom-']").forEach((el) =>
+      el.addEventListener("change", render),
     );
     render();
   </script>

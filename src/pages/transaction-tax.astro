@@ -16,8 +16,6 @@ import Base from "~/layouts/Base.astro";
     <button data-tab="used" role="tab" aria-selected="false">二手房</button>
   </div>
 
-  <input type="hidden" name="t-type" id="t-type-hidden" value="new" />
-
   <div class="split" style="margin-top:8px;">
     <div class="col-input">
       <div class="card compact">
@@ -30,8 +28,8 @@ import Base from "~/layouts/Base.astro";
         </div>
 
         <div class="form-grid" style="margin-top:12px;">
-          <label>网签总价（万元）<input id="t-price" type="number" min="1" step="1" value="500" /></label>
-          <label>建筑面积（㎡）<input id="t-area" type="number" min="1" step="1" value="100" /></label>
+          <label>网签总价（万元）<input id="t-price" type="number" min="1" max="100000" step="1" value="500" /></label>
+          <label>建筑面积（㎡）<input id="t-area" type="number" min="1" max="10000" step="1" value="100" /></label>
         </div>
 
         <div id="t-used-fields" style="display:none;">
@@ -50,9 +48,10 @@ import Base from "~/layouts/Base.astro";
                 <option value="no">否</option>
               </select>
             </label>
-            <label>原值（万元，可选）<input id="t-orig" type="number" min="0" step="1" value="" placeholder="留空按 1% 核定" /></label>
+            <label>原值（万元，可选）<input id="t-orig" type="number" min="0" max="100000" step="1" value="" placeholder="留空按 1% 核定" /></label>
           </div>
         </div>
+        <p class="error-msg" id="t-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
       </div>
     </div>
 
@@ -97,30 +96,45 @@ import Base from "~/layouts/Base.astro";
     const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
     const cny = (n: number) => `¥${fmtCny(n)}`;
 
-    // Tab switch (一手 / 二手)
+    // Tab switch (一手 / 二手) — 通过 aria-selected 决定当前 type
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
-    const typeHidden = $<HTMLInputElement>("t-type-hidden");
+    function getCurrentType(): TransactionType {
+      return (document.querySelector<HTMLButtonElement>(".tabs button[aria-selected='true']")?.dataset.tab ?? "new") as TransactionType;
+    }
     tabs.forEach((t) =>
       t.addEventListener("click", () => {
         tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
         t.setAttribute("aria-selected", "true");
-        typeHidden.value = t.dataset.tab ?? "new";
         render();
       }),
     );
 
     function render(): void {
-      const type = (typeHidden.value ?? "new") as TransactionType;
+      const type = getCurrentType();
       const order = (document.querySelector<HTMLInputElement>("input[name='t-order']:checked")?.value ?? "first") as HouseOrder;
-      const totalPrice = Number($<HTMLInputElement>("t-price").value) * 10000;
+      const priceWan = Number($<HTMLInputElement>("t-price").value);
       const area = Number($<HTMLInputElement>("t-area").value);
       const sellerHoldYears = $<HTMLSelectElement>("t-hold").value as SellerHoldYears;
       const sellerOnlyHouse = $<HTMLSelectElement>("t-only").value as SellerOnlyHouse;
       const origVal = Number($<HTMLInputElement>("t-orig").value);
       const originalPrice = Number.isFinite(origVal) && origVal > 0 ? origVal * 10000 : undefined;
+      const errorEl = $<HTMLParagraphElement>("t-error");
 
       $<HTMLDivElement>("t-used-fields").style.display = type === "used" ? "block" : "none";
 
+      const errs: string[] = [];
+      if (!Number.isFinite(priceWan) || priceWan <= 0) errs.push("总价需为正数（万元）");
+      if (!Number.isFinite(area) || area <= 0) errs.push("面积需为正数");
+      errorEl.textContent = errs.join("；");
+      if (errs.length) {
+        ["r-contract", "r-vat", "r-income", "r-total"].forEach((id) => ($(id).textContent = "—"));
+        const bk = $("r-breakdown");
+        bk.innerHTML = "";
+        bk.textContent = "请填写有效的总价和面积";
+        return;
+      }
+
+      const totalPrice = priceWan * 10000;
       const r = calcTransactionTax({ totalPrice, area, order, type, sellerHoldYears, sellerOnlyHouse, originalPrice });
       $("r-contract").textContent = cny(r.contractTax);
       $("r-vat").textContent = type === "new" ? "（不涉及）" : cny(r.valueAddedTax);

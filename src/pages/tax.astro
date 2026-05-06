@@ -27,19 +27,20 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>收入与五险一金</h3>
           <div class="form-grid">
-            <label>月税前工资（元）<input id="m-gross" type="number" min="0" step="100" value="20000" /></label>
-            <label>月个人五险一金<input id="m-social" type="number" min="0" step="100" value="3000" /></label>
-            <label>月其他扣除（年金等）<input id="m-other" type="number" min="0" step="100" value="0" /></label>
+            <label>月税前工资（元）<input id="m-gross" type="number" min="0" max="100000000" step="100" value="20000" /></label>
+            <label>月个人五险一金<input id="m-social" type="number" min="0" max="100000000" step="100" value="3000" /></label>
+            <label>月其他扣除（年金等）<input id="m-other" type="number" min="0" max="100000000" step="100" value="0" /></label>
           </div>
           <h3 style="margin-top:12px;">专项附加扣除（每月）</h3>
           <div class="form-grid">
-            <label>子女教育（孩数×2000）<input id="m-children" type="number" min="0" step="2000" value="0" /></label>
-            <label>婴幼儿照护（&lt;3岁孩数×2000）<input id="m-infant" type="number" min="0" step="2000" value="0" /></label>
-            <label>继续教育（学历 400）<input id="m-edu" type="number" min="0" step="100" value="0" /></label>
-            <label>住房贷款利息（首套 1000）<input id="m-loan" type="number" min="0" step="500" value="0" /></label>
-            <label>住房租金（1500/1100/800）<input id="m-rent" type="number" min="0" step="100" value="0" /></label>
-            <label>赡养老人（独生 3000 / 非独 ≤1500）<input id="m-elder" type="number" min="0" step="500" value="0" /></label>
+            <label>子女教育（元/月）<input id="m-children" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">每孩 2000 元/月，N 个孩填 N×2000</small></label>
+            <label>婴幼儿照护（元/月）<input id="m-infant" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">3 岁以下每孩 2000，N 个孩填 N×2000</small></label>
+            <label>继续教育（元/月）<input id="m-edu" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">学历教育 400，职业技能不在此处填写</small></label>
+            <label>住房贷款利息（元/月）<input id="m-loan" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">首套住房 1000，二套不享受</small></label>
+            <label>住房租金（元/月）<input id="m-rent" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">北上广深 1500 / 省会城市 1100 / 其他 800</small></label>
+            <label>赡养老人（元/月）<input id="m-elder" type="number" min="0" max="20000" step="100" value="0" /><small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">独生子女 3000，非独生分摊每人 ≤1500</small></label>
           </div>
+          <p class="error-msg" id="m-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -77,22 +78,23 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>综合所得收入（年度，税前）</h3>
           <div class="form-grid">
-            <label>工资薪金合计<input id="y-salary" type="number" min="0" step="1000" value="240000" /></label>
-            <label>劳务报酬合计（80% 计入）<input id="y-labor" type="number" min="0" step="1000" value="0" /></label>
-            <label>稿酬合计（56% 计入）<input id="y-author" type="number" min="0" step="1000" value="0" /></label>
-            <label>特许权使用费合计（80%）<input id="y-royalty" type="number" min="0" step="1000" value="0" /></label>
+            <label>工资薪金合计<input id="y-salary" type="number" min="0" max="100000000" step="1000" value="240000" /></label>
+            <label>劳务报酬合计（80% 计入）<input id="y-labor" type="number" min="0" max="100000000" step="1000" value="0" /></label>
+            <label>稿酬合计（56% 计入）<input id="y-author" type="number" min="0" max="100000000" step="1000" value="0" /></label>
+            <label>特许权使用费合计（80%）<input id="y-royalty" type="number" min="0" max="100000000" step="1000" value="0" /></label>
           </div>
           <h3 style="margin-top:12px;">扣除（年度）</h3>
           <div class="form-grid">
-            <label>五险一金（个人部分）<input id="y-social" type="number" min="0" step="1000" value="36000" /></label>
-            <label>专项附加扣除合计<input id="y-special" type="number" min="0" step="1000" value="14400" /></label>
-            <label>其他扣除（年金等）<input id="y-other" type="number" min="0" step="1000" value="0" /></label>
-            <label>公益慈善捐赠<input id="y-charity" type="number" min="0" step="1000" value="0" /></label>
+            <label>五险一金（个人部分）<input id="y-social" type="number" min="0" max="100000000" step="1000" value="36000" /></label>
+            <label>专项附加扣除合计<input id="y-special" type="number" min="0" max="100000000" step="1000" value="14400" /></label>
+            <label>其他扣除（年金等）<input id="y-other" type="number" min="0" max="100000000" step="1000" value="0" /></label>
+            <label>公益慈善捐赠<input id="y-charity" type="number" min="0" max="100000000" step="1000" value="0" /></label>
           </div>
           <h3 style="margin-top:12px;">已预缴</h3>
           <div class="form-grid">
-            <label>全年已预扣预缴税额<input id="y-withheld" type="number" min="0" step="100" value="0" /></label>
+            <label>全年已预扣预缴税额<input id="y-withheld" type="number" min="0" max="100000000" step="100" value="0" /></label>
           </div>
+          <p class="error-msg" id="y-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -122,12 +124,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>年终奖金额（元）<input id="b-bonus" type="number" min="0" step="1000" value="50000" /></label>
-            <label>本年度综合应纳税所得额<br/>（不含年终奖）<input id="b-base" type="number" min="0" step="1000" value="138000" /></label>
+            <label>年终奖金额（元）<input id="b-bonus" type="number" min="0" max="100000000" step="1000" value="50000" /></label>
+            <label>本年度综合应纳税所得额<br/>（不含年终奖）<input id="b-base" type="number" min="0" max="100000000" step="1000" value="138000" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">
             综合应纳税所得额 = 全年工资 − 60000 − 全年社保 − 专项附加扣除 − 其他。可在"年度汇算"算出。
           </p>
+          <p class="error-msg" id="b-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -166,8 +169,9 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>本次税前收入（元）<input id="i-amount" type="number" min="0" step="100" value="10000" /></label>
+            <label>本次税前收入（元）<input id="i-amount" type="number" min="0" max="10000000" step="100" value="10000" /></label>
           </div>
+          <p class="error-msg" id="i-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
           <div style="margin-top:10px;">
             <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">所得类型</div>
             <div class="btn-row">
@@ -218,12 +222,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>年总收入（元）<input id="o-revenue" type="number" min="0" step="10000" value="500000" /></label>
-            <label>年总成本费用<input id="o-costs" type="number" min="0" step="10000" value="200000" /></label>
-            <label>其他可扣除（公益等）<input id="o-other" type="number" min="0" step="1000" value="0" /></label>
+            <label>年总收入（元）<input id="o-revenue" type="number" min="0" max="100000000" step="1000" value="500000" /></label>
+            <label>年总成本费用<input id="o-costs" type="number" min="0" max="100000000" step="1000" value="200000" /></label>
+            <label>其他可扣除（公益等）<input id="o-other" type="number" min="0" max="100000000" step="1000" value="0" /></label>
             <label>本年实际经营月数<input id="o-months" type="number" min="1" max="12" step="1" value="12" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">业主本人享受 5000/月起征点，按经营月数折算。</p>
+          <p class="error-msg" id="o-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -304,6 +309,22 @@ import Base from "~/layouts/Base.astro";
         monthlySpecial.housingLoanInterest +
         monthlySpecial.housingRent +
         monthlySpecial.elderlyCare;
+      const errEl = $("m-error");
+      const clearAll = () => {
+        ["m-total-gross","m-total-tax","m-total-net","m-eff-rate","m-special-sum","m-deduct-sum"].forEach((id) => ($(id).textContent = "—"));
+        document.querySelector<HTMLTableSectionElement>("#m-table tbody")!.replaceChildren();
+      };
+      // 校验
+      if (monthlyGross < 0 || monthlySocial < 0 || monthlyOther < 0 || specialSum < 0) {
+        errEl.textContent = "输入金额不能为负数";
+        clearAll();
+        return;
+      }
+      if (monthlySocial + specialSum + monthlyOther > monthlyGross + 1e-9 && monthlyGross > 0) {
+        errEl.textContent = "扣除项合计大于工资，请检查输入";
+      } else {
+        errEl.textContent = "";
+      }
       $("m-special-sum").textContent = cny(specialSum);
       $("m-deduct-sum").textContent = cny(5000 + monthlySocial + specialSum + monthlyOther);
 
@@ -332,6 +353,15 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 2: 年度汇算 ----------
     function renderAnnual(): void {
+      const errEl = $("y-error");
+      const inputIds = ["y-salary","y-labor","y-author","y-royalty","y-social","y-special","y-other","y-charity","y-withheld"];
+      const anyNeg = inputIds.some((id) => num(id) < 0);
+      if (anyNeg) {
+        errEl.textContent = "输入金额不能为负数";
+        ["y-income","y-deduct","y-taxable","y-rate","y-due","y-refund"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      errEl.textContent = "";
       const r = calcAnnualSettlement({
         salaryAnnual: num("y-salary"),
         laborAnnual: num("y-labor"),
@@ -348,32 +378,59 @@ import Base from "~/layouts/Base.astro";
       $("y-taxable").textContent = cny(r.taxable);
       $("y-rate").textContent = `${(r.rate * 100).toFixed(0)}%（速扣 ${r.quickDeduct}）`;
       $("y-due").textContent = cny(r.taxDue);
-      const refundLabel =
-        r.refundOrPay > 0 ? `应补 ${cny(r.refundOrPay)}` :
-        r.refundOrPay < 0 ? `应退 ${cny(-r.refundOrPay)}` :
-        `刚好 ¥0`;
-      $("y-refund").textContent = refundLabel;
+      const refundEl = $<HTMLElement>("y-refund");
+      if (r.refundOrPay > 0.01) {
+        refundEl.textContent = `应补 ${cny(r.refundOrPay)}`;
+        refundEl.style.color = "var(--c-danger)";
+      } else if (r.refundOrPay < -0.01) {
+        refundEl.textContent = `应退 ${cny(-r.refundOrPay)}`;
+        refundEl.style.color = "var(--c-success)";
+      } else {
+        refundEl.textContent = `刚好 ¥0`;
+        refundEl.style.color = "var(--c-accent)";
+      }
     }
     document.querySelectorAll<HTMLInputElement>("[id^='y-']").forEach((el) => el.addEventListener("input", renderAnnual));
     renderAnnual();
 
     // ---------- Tab 3: 年终奖对比 ----------
     function renderBonus(): void {
-      const r = calcAnnualBonus({ bonus: num("b-bonus"), baseTaxableNoBonus: num("b-base") });
+      const errEl = $("b-error");
+      const bonus = num("b-bonus");
+      const base = num("b-base");
+      if (bonus < 0 || base < 0) {
+        errEl.textContent = "输入金额不能为负数";
+        ["b-sep-tax","b-sep-rate","b-com-tax","b-com-inc","b-com-rate","b-recommend","b-saving"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      errEl.textContent = "";
+      const r = calcAnnualBonus({ bonus, baseTaxableNoBonus: base });
       $("b-sep-tax").textContent = cny(r.separate.tax);
       $("b-sep-rate").textContent = `${(r.separate.rate * 100).toFixed(0)}%（速扣 ${r.separate.quickDeduct}）`;
       $("b-com-tax").textContent = cny(r.combined.tax);
       $("b-com-inc").textContent = cny(r.combined.taxIncrement);
       $("b-com-rate").textContent = `${(r.combined.rate * 100).toFixed(0)}%（速扣 ${r.combined.quickDeduct}）`;
-      $("b-recommend").textContent = r.recommend === "separate" ? "✅ 单独计税" : "✅ 并入综合所得";
-      $("b-saving").textContent = r.saving > 0.01 ? `比另一种方案节省 ${cny(r.saving)}` : "两种方案税额相同";
+      if (r.saving > 0.01) {
+        $("b-recommend").textContent = r.recommend === "separate" ? "✅ 单独计税" : "✅ 并入综合所得";
+        $("b-saving").textContent = `比另一种方案节省 ${cny(r.saving)}`;
+      } else {
+        $("b-recommend").textContent = r.recommend === "separate" ? "单独计税" : "并入综合所得";
+        $("b-saving").textContent = "两种方案差异极小，按习惯任选";
+      }
     }
     document.querySelectorAll<HTMLInputElement>("[id^='b-']").forEach((el) => el.addEventListener("input", renderBonus));
     renderBonus();
 
     // ---------- Tab 4: 劳务/稿酬 ----------
     function renderIncidental(): void {
+      const errEl = $("i-error");
       const amount = num("i-amount");
+      if (amount < 0) {
+        errEl.textContent = "输入金额不能为负数";
+        ["i-taxable","i-tax","i-rate","i-net","i-annual"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      errEl.textContent = "";
       const type = (document.querySelector<HTMLInputElement>("input[name='i-type']:checked")?.value ?? "labor") as IncidentalIncomeType;
       const r = calcIncidentalPrewith({ amount, type });
       $("i-taxable").textContent = cny(r.taxableForWithhold);
@@ -388,11 +445,27 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 5: 经营所得 ----------
     function renderBusiness(): void {
+      const errEl = $("o-error");
+      const revenue = num("o-revenue");
+      const costs = num("o-costs");
+      const other = num("o-other");
+      const months = num("o-months");
+      if (revenue < 0 || costs < 0 || other < 0) {
+        errEl.textContent = "输入金额不能为负数";
+        ["o-taxable","o-rate","o-quick","o-tax"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      if (months < 1 || months > 12) {
+        errEl.textContent = "经营月数需在 1-12 之间";
+        ["o-taxable","o-rate","o-quick","o-tax"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      errEl.textContent = "";
       const r = calcBusinessIncome({
-        annualRevenue: num("o-revenue"),
-        annualCosts: num("o-costs"),
-        annualOtherDeductions: num("o-other"),
-        monthsActive: num("o-months"),
+        annualRevenue: revenue,
+        annualCosts: costs,
+        annualOtherDeductions: other,
+        monthsActive: months,
       });
       $("o-taxable").textContent = cny(r.taxable);
       $("o-rate").textContent = `${(r.rate * 100).toFixed(0)}%`;

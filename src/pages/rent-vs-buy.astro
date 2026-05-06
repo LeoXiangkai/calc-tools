@@ -16,34 +16,34 @@ import Base from "~/layouts/Base.astro";
       <div class="card compact">
         <h3>房产</h3>
         <div class="form-grid">
-          <label>总价（万元）<input id="rb-price" type="number" min="1" step="1" value="500" /></label>
+          <label>总价（万元）<input id="rb-price" type="number" min="0" max="100000" step="1" value="500" /></label>
           <label>首付比例（%）<input id="rb-down" type="number" min="0" max="100" step="1" value="30" /></label>
-          <label>贷款年限<input id="rb-loan-years" type="number" min="1" max="30" step="1" value="30" /></label>
-          <label>贷款利率（%）<input id="rb-rate" type="number" min="0" step="0.01" value="3.95" /></label>
+          <label>贷款年限<input id="rb-loan-years" type="number" min="1" max="50" step="1" value="30" /></label>
+          <label>贷款利率（%）<input id="rb-rate" type="number" min="0" max="30" step="0.01" value="3.95" /></label>
         </div>
       </div>
 
       <div class="card compact">
         <h3>租房</h3>
         <div class="form-grid">
-          <label>当前月租（元）<input id="rb-rent" type="number" min="0" step="100" value="6000" /></label>
-          <label>年化租金涨幅（%）<input id="rb-rent-growth" type="number" min="0" step="0.1" value="3" /></label>
+          <label>当前月租（元）<input id="rb-rent" type="number" min="0" max="100000000" step="100" value="6000" /></label>
+          <label>年化租金涨幅（%）<input id="rb-rent-growth" type="number" min="-10" max="30" step="0.1" value="3" /></label>
         </div>
       </div>
 
       <div class="card compact">
         <h3>持有</h3>
         <div class="form-grid">
-          <label>年化房价涨幅（%）<input id="rb-appr" type="number" step="0.1" value="3" /></label>
-          <label>房产税年化（%）<input id="rb-tax" type="number" min="0" step="0.1" value="0.5" /></label>
-          <label>维护费年化（%）<input id="rb-maint" type="number" min="0" step="0.1" value="0.5" /></label>
+          <label>年化房价涨幅（%）<input id="rb-appr" type="number" min="-10" max="30" step="0.1" value="3" /></label>
+          <label>房产税年化（%）<input id="rb-tax" type="number" min="0" max="30" step="0.1" value="0.5" /></label>
+          <label>维护费年化（%）<input id="rb-maint" type="number" min="0" max="30" step="0.1" value="0.5" /></label>
         </div>
       </div>
 
       <div class="card compact">
         <h3>投资</h3>
         <div class="form-grid">
-          <label>首付投资年化回报（%）<input id="rb-inv" type="number" step="0.1" value="5" /></label>
+          <label>首付投资年化回报（%）<input id="rb-inv" type="number" min="-10" max="30" step="0.1" value="5" /></label>
         </div>
       </div>
 
@@ -61,6 +61,10 @@ import Base from "~/layouts/Base.astro";
           <input type="radio" name="rb-years" id="rb-y30" value="30" />
           <label for="rb-y30">30 年</label>
         </div>
+        <div class="form-grid" style="margin-top:10px;">
+          <label>自定义年数<input id="rb-custom-years" type="number" min="1" max="50" step="1" placeholder="留空则用上方选项" /></label>
+        </div>
+        <p class="error-msg" id="rb-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
       </div>
     </div>
 
@@ -135,9 +139,26 @@ import Base from "~/layouts/Base.astro";
       const propertyTaxYearlyPct = Number($<HTMLInputElement>("rb-tax").value);
       const maintenanceYearlyPct = Number($<HTMLInputElement>("rb-maint").value);
       const investmentReturnPct = Number($<HTMLInputElement>("rb-inv").value);
-      const yearsToHold = Number(
-        document.querySelector<HTMLInputElement>("input[name='rb-years']:checked")?.value ?? "10",
-      );
+      const errEl = $("rb-error");
+      const customRaw = ($<HTMLInputElement>("rb-custom-years").value || "").trim();
+      const customNum = Number(customRaw);
+      let yearsToHold: number;
+      if (customRaw !== "" && Number.isFinite(customNum) && customNum >= 1) {
+        yearsToHold = customNum;
+      } else {
+        yearsToHold = Number(
+          document.querySelector<HTMLInputElement>("input[name='rb-years']:checked")?.value ?? "10",
+        );
+      }
+      const resetOutputs = () => {
+        ["rb-rec","rb-advantage","rb-r-down","rb-r-mortgage","rb-r-holding","rb-r-home-value","rb-r-remaining","rb-r-equity","rb-r-buy-net","rb-r-rent","rb-r-invested","rb-r-rent-net"]
+          .forEach((id) => ($(id).textContent = "—"));
+      };
+      if (totalPrice <= 0) { errEl.textContent = "请输入大于 0 的总价（万元）"; resetOutputs(); return; }
+      if (downPaymentPct < 0 || downPaymentPct > 100) { errEl.textContent = "首付比例应在 0-100% 之间"; resetOutputs(); return; }
+      if (loanYears < 1) { errEl.textContent = "贷款年限至少为 1 年"; resetOutputs(); return; }
+      if (yearsToHold < 1) { errEl.textContent = "持有年限至少为 1 年"; resetOutputs(); return; }
+      errEl.textContent = "";
 
       const r = calcRentVsBuy({
         totalPrice,
@@ -186,7 +207,7 @@ import Base from "~/layouts/Base.astro";
 
     document
       .querySelectorAll<HTMLElement>(
-        "#rb-price,#rb-down,#rb-loan-years,#rb-rate,#rb-rent,#rb-rent-growth,#rb-appr,#rb-tax,#rb-maint,#rb-inv,input[name='rb-years']",
+        "#rb-price,#rb-down,#rb-loan-years,#rb-rate,#rb-rent,#rb-rent-growth,#rb-appr,#rb-tax,#rb-maint,#rb-inv,#rb-custom-years,input[name='rb-years']",
       )
       .forEach((el) => {
         el.addEventListener("input", render);

@@ -27,9 +27,9 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>总价（万元，可选）<input id="b-totalPrice" type="number" inputmode="numeric" min="0" step="1" value="" placeholder="留空直接输入贷款额" /></label>
+            <label>总价（万元，可选）<input id="b-totalPrice" type="number" inputmode="numeric" min="0" max="100000" step="1" value="" placeholder="留空直接输入贷款额" /></label>
             <label>首付比例（%）<input id="b-downRatio" type="number" inputmode="numeric" min="0" max="100" step="1" value="30" /></label>
-            <label>贷款金额（元）<input id="b-principal" type="number" inputmode="numeric" min="1" step="1" value="1000000" /></label>
+            <label>贷款金额（元）<input id="b-principal" type="number" inputmode="numeric" min="0" max="100000000" step="1" value="1000000" /></label>
             <label>贷款年限（年）<input id="b-years" type="number" inputmode="numeric" min="1" max="30" step="1" value="30" /></label>
             <label>年利率（%）<input id="b-rate" type="number" inputmode="decimal" min="0.01" max="20" step="0.01" value="3.95" /></label>
           </div>
@@ -98,13 +98,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>商业贷款</h3>
           <div class="form-grid">
-            <label>本金（元）<input id="c-cPrincipal" type="number" min="0" step="1" value="700000" /></label>
+            <label>本金（元）<input id="c-cPrincipal" type="number" min="0" max="100000000" step="1" value="700000" /></label>
             <label>年限（年）<input id="c-cYears" type="number" min="1" max="30" step="1" value="30" /></label>
             <label>年利率（%）<input id="c-cRate" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
           </div>
           <h3 style="margin-top:12px;">公积金贷款</h3>
           <div class="form-grid">
-            <label>本金（元）<input id="c-hPrincipal" type="number" min="0" step="1" value="600000" /></label>
+            <label>本金（元）<input id="c-hPrincipal" type="number" min="0" max="100000000" step="1" value="600000" /></label>
             <label>年限（年）<input id="c-hYears" type="number" min="1" max="30" step="1" value="30" /></label>
             <label>年利率（%）<input id="c-hRate" type="number" min="0.01" max="20" step="0.01" value="2.85" /></label>
           </div>
@@ -117,6 +117,7 @@ import Base from "~/layouts/Base.astro";
               <label for="c-m2">等额本金</label>
             </div>
           </div>
+          <p class="error-msg" id="c-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -144,7 +145,7 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>原贷款</h3>
           <div class="form-grid">
-            <label>本金（元）<input id="p-principal" type="number" min="1" step="1" value="1000000" /></label>
+            <label>本金（元）<input id="p-principal" type="number" min="0" max="100000000" step="1" value="1000000" /></label>
             <label>年限（年）<input id="p-years" type="number" min="1" max="30" step="1" value="30" /></label>
             <label>年利率（%）<input id="p-rate" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
           </div>
@@ -160,8 +161,9 @@ import Base from "~/layouts/Base.astro";
           <h3 style="margin-top:12px;">提前还款</h3>
           <div class="form-grid">
             <label>第几个月后还（1-360）<input id="p-month" type="number" min="1" max="360" step="1" value="60" /></label>
-            <label>提前还款金额（元）<input id="p-amount" type="number" min="1" step="1" value="300000" /></label>
+            <label>提前还款金额（元）<input id="p-amount" type="number" min="0" max="100000000" step="1" value="300000" /></label>
           </div>
+          <p class="error-msg" id="p-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -196,7 +198,7 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>家庭税后月收入（元）<input id="a-income" type="number" min="1" step="100" value="20000" /></label>
+            <label>家庭税后月收入（元）<input id="a-income" type="number" min="0" max="100000000" step="100" value="20000" /></label>
             <label>月供占比上限
               <select id="a-ratio">
                 <option value="30">30% — 保守</option>
@@ -208,6 +210,7 @@ import Base from "~/layouts/Base.astro";
             <label>年利率（%）<input id="a-rate" type="number" min="0.01" max="20" step="0.01" value="3.95" /></label>
             <label>首付比例（%）<input id="a-down" type="number" min="0" max="100" step="5" value="30" /></label>
           </div>
+          <p class="error-msg" id="a-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -235,7 +238,7 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>原贷款</h3>
           <div class="form-grid">
-            <label>本金（元）<input id="r-principal" type="number" min="1" step="1" value="1000000" /></label>
+            <label>本金（元）<input id="r-principal" type="number" min="0" max="100000000" step="1" value="1000000" /></label>
             <label>年限（年）<input id="r-years" type="number" min="1" max="30" step="1" value="30" /></label>
             <label>原年利率（%）<input id="r-old" type="number" min="0.01" max="20" step="0.01" value="4.5" /></label>
           </div>
@@ -253,6 +256,7 @@ import Base from "~/layouts/Base.astro";
               <label for="r-m2">等额本金</label>
             </div>
           </div>
+          <p class="error-msg" id="r-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -380,6 +384,7 @@ import Base from "~/layouts/Base.astro";
     renderBasic();
 
     // ---------- Tab 2: 组合贷 ----------
+    const cError = $<HTMLParagraphElement>("c-error");
     function renderCombined(): void {
       const cP = Number($<HTMLInputElement>("c-cPrincipal").value);
       const cY = Number($<HTMLInputElement>("c-cYears").value);
@@ -388,7 +393,16 @@ import Base from "~/layouts/Base.astro";
       const hY = Number($<HTMLInputElement>("c-hYears").value);
       const hR = Number($<HTMLInputElement>("c-hRate").value);
       const method = (document.querySelector<HTMLInputElement>("input[name='c-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
-      if ([cP, cY, cR, hP, hY, hR].some((x) => !Number.isFinite(x) || x < 0)) return;
+      const errs: string[] = [];
+      if (![cP, hP].every((x) => Number.isFinite(x) && x >= 0)) errs.push("本金需为非负数");
+      if (cP + hP <= 0) errs.push("商贷与公积金本金至少有一笔为正");
+      if (![cY, hY].every((x) => Number.isFinite(x) && x >= 1 && x <= 30)) errs.push("年限 1-30");
+      if (![cR, hR].every((x) => Number.isFinite(x) && x > 0 && x <= 20)) errs.push("利率 0.01-20");
+      cError.textContent = errs.join("；");
+      if (errs.length) {
+        ["c-cMonthly","c-hMonthly","c-totalMonthly","c-totalInterest"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
 
       const r = calcCombined({
         commercial: { principal: cP, years: cY, annualRatePct: cR },
@@ -405,6 +419,7 @@ import Base from "~/layouts/Base.astro";
     renderCombined();
 
     // ---------- Tab 3: 提前还款 ----------
+    const pError = $<HTMLParagraphElement>("p-error");
     function renderPrepay(): void {
       const principal = Number($<HTMLInputElement>("p-principal").value);
       const years = Number($<HTMLInputElement>("p-years").value);
@@ -414,7 +429,20 @@ import Base from "~/layouts/Base.astro";
       const method = (document.querySelector<HTMLInputElement>("input[name='p-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
 
       const ids = ["p-s-saved","p-s-months","p-s-remain","p-s-base","p-r-saved","p-r-old","p-r-new","p-r-delta"];
-      if ([principal,years,annualRatePct,prepayAtMonth,prepayAmount].some((x) => !Number.isFinite(x) || x <= 0)) {
+      const errs: string[] = [];
+      if (!Number.isFinite(principal) || principal <= 0) errs.push("本金需为正数");
+      if (!Number.isFinite(years) || years < 1 || years > 30) errs.push("年限 1-30");
+      if (!Number.isFinite(annualRatePct) || annualRatePct <= 0 || annualRatePct > 20) errs.push("利率 0.01-20");
+      if (!Number.isFinite(prepayAtMonth) || prepayAtMonth < 1) errs.push("提前还款月份需 ≥ 1");
+      if (!Number.isFinite(prepayAmount) || prepayAmount <= 0) errs.push("提前还款金额需为正数");
+      if (Number.isFinite(prepayAtMonth) && Number.isFinite(years) && prepayAtMonth > years * 12) {
+        errs.push(`提前还款月份超出年限范围（最多 ${years * 12} 月）`);
+      }
+      if (Number.isFinite(prepayAmount) && Number.isFinite(principal) && prepayAmount >= principal) {
+        errs.push("提前还款金额应小于本金");
+      }
+      pError.textContent = errs.join("；");
+      if (errs.length) {
         ids.forEach((id) => ($(id).textContent = "—"));
         return;
       }
@@ -441,12 +469,23 @@ import Base from "~/layouts/Base.astro";
     renderPrepay();
 
     // ---------- Tab 4: 购房力 ----------
+    const aError = $<HTMLParagraphElement>("a-error");
     function renderAfford(): void {
       const monthlyIncome = Number($<HTMLInputElement>("a-income").value);
       const paymentRatioPct = Number($<HTMLSelectElement>("a-ratio").value);
       const years = Number($<HTMLInputElement>("a-years").value);
       const annualRatePct = Number($<HTMLInputElement>("a-rate").value);
       const downPaymentRatioPct = Number($<HTMLInputElement>("a-down").value);
+      const errs: string[] = [];
+      if (!Number.isFinite(monthlyIncome) || monthlyIncome <= 0) errs.push("月收入需为正数");
+      if (!Number.isFinite(years) || years < 1 || years > 30) errs.push("年限 1-30");
+      if (!Number.isFinite(annualRatePct) || annualRatePct <= 0 || annualRatePct > 20) errs.push("利率 0.01-20");
+      if (!Number.isFinite(downPaymentRatioPct) || downPaymentRatioPct < 0 || downPaymentRatioPct >= 100) errs.push("首付比例 0-99");
+      aError.textContent = errs.join("；");
+      if (errs.length) {
+        ["a-monthly","a-loan","a-price","a-down-amt"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
       const r = calcAffordability({ monthlyIncome, paymentRatioPct, years, annualRatePct, downPaymentRatioPct });
       $("a-monthly").textContent = cny(r.maxMonthlyPayment);
       $("a-loan").textContent = wan(r.maxLoanPrincipal);
@@ -458,6 +497,7 @@ import Base from "~/layouts/Base.astro";
     renderAfford();
 
     // ---------- Tab 5: 利率重定价 ----------
+    const rError = $<HTMLParagraphElement>("r-error");
     function renderReprice(): void {
       const principal = Number($<HTMLInputElement>("r-principal").value);
       const years = Number($<HTMLInputElement>("r-years").value);
@@ -465,6 +505,20 @@ import Base from "~/layouts/Base.astro";
       const newR = Number($<HTMLInputElement>("r-new").value);
       const month = Number($<HTMLInputElement>("r-month").value);
       const method = (document.querySelector<HTMLInputElement>("input[name='r-method']:checked")?.value ?? "equal-installment") as RepaymentMethod;
+      const errs: string[] = [];
+      if (!Number.isFinite(principal) || principal <= 0) errs.push("本金需为正数");
+      if (!Number.isFinite(years) || years < 1 || years > 30) errs.push("年限 1-30");
+      if (!Number.isFinite(oldR) || oldR <= 0 || oldR > 20) errs.push("原利率 0.01-20");
+      if (!Number.isFinite(newR) || newR <= 0 || newR > 20) errs.push("新利率 0.01-20");
+      if (!Number.isFinite(month) || month < 1) errs.push("重定价月份需 ≥ 1");
+      if (Number.isFinite(month) && Number.isFinite(years) && month > years * 12) {
+        errs.push(`重定价月份超出年限范围（最多 ${years * 12} 月）`);
+      }
+      rError.textContent = errs.join("；");
+      if (errs.length) {
+        ["r-oldM","r-newM","r-delta","r-iDelta"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
       const r = calcRepricing({
         principal, years, oldAnnualRatePct: oldR, newAnnualRatePct: newR, repriceAtMonth: month, method,
       });

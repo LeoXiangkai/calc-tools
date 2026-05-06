@@ -24,14 +24,24 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>当前情况</h3>
           <div class="form-grid">
-            <label>当前社平工资（元/月）<input id="b-wage" type="number" min="1" step="100" value="8000" /></label>
-            <label>社平工资年化增长（%）<input id="b-growth" type="number" min="0" max="20" step="0.1" value="5" /></label>
-            <label>距退休年数<input id="b-years" type="number" min="0" max="50" step="1" value="20" /></label>
+            <label>当前社平工资（元/月）<input id="b-wage" type="number" min="0" max="100000000" step="100" value="8000" /></label>
+            <label>社平工资年化增长（%）<input id="b-growth" type="number" min="-10" max="30" step="0.1" value="5" /></label>
+            <label>距退休年数<input id="b-years" type="number" min="1" max="50" step="1" value="20" /></label>
+          </div>
+        </div>
+        <div class="card compact">
+          <h3>缴费记录</h3>
+          <div class="form-grid">
             <label>总缴费年限（含到退休时）<input id="b-contrib-years" type="number" min="1" max="50" step="1" value="30" /></label>
             <label>平均缴费指数（0.6-3.0）<input id="b-index" type="number" min="0.6" max="3" step="0.1" value="1.0" /></label>
-            <label>当前个人账户余额（元）<input id="b-balance" type="number" min="0" step="1000" value="50000" /></label>
-            <label>每月划入个人账户（元）<input id="b-monthly" type="number" min="0" step="50" value="800" /></label>
-            <label>个人账户记账利率（%）<input id="b-account-rate" type="number" min="0" max="15" step="0.1" value="5" /></label>
+            <label>当前个人账户余额（元）<input id="b-balance" type="number" min="0" max="100000000" step="1000" value="50000" /></label>
+            <label>每月划入个人账户（元）<input id="b-monthly" type="number" min="0" max="100000000" step="100" value="800" /></label>
+            <label>个人账户记账利率（%）<input id="b-account-rate" type="number" min="0" max="30" step="0.1" value="5" /></label>
+          </div>
+        </div>
+        <div class="card compact">
+          <h3>退休设置</h3>
+          <div class="form-grid">
             <label>退休年龄
               <select id="b-retire-age">
                 <option value="50">50</option>
@@ -41,6 +51,7 @@ import Base from "~/layouts/Base.astro";
               </select>
             </label>
           </div>
+          <p class="error-msg" id="b-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -85,12 +96,13 @@ import Base from "~/layouts/Base.astro";
               </select>
             </label>
             <label>距退休年数<input id="p-years" type="number" min="1" max="50" step="1" value="20" /></label>
-            <label>账户内投资年化（%）<input id="p-return" type="number" min="0" max="15" step="0.1" value="5" /></label>
-            <label>领取时税率（%，2024 起 3%）<input id="p-withdraw-tax" type="number" min="0" max="20" step="0.5" value="3" /></label>
+            <label>账户内投资年化（%）<input id="p-return" type="number" min="0" max="30" step="0.1" value="5" /></label>
+            <label>领取时税率（%，2024 起 3%）<input id="p-withdraw-tax" type="number" min="0" max="30" step="0.1" value="3" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">
             缴存 12000/年抵税；退休领取时按 3% 综合税率单独计税。边际税率越高，节税效果越好。
           </p>
+          <p class="error-msg" id="p-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -138,12 +150,26 @@ import Base from "~/layouts/Base.astro";
     );
 
     function renderBasic(): void {
+      const wage = num("b-wage");
+      const years = num("b-years");
+      const contribYears = num("b-contrib-years");
+      const index = num("b-index");
+      const errEl = $("b-error");
+      const reset = () => {
+        ["b-monthly-pension","b-replacement","b-basic","b-account-pen","b-retire-wage","b-account-end"]
+          .forEach((id) => ($(id).textContent = "—"));
+      };
+      if (wage <= 0) { errEl.textContent = "请输入大于 0 的当前社平工资"; reset(); return; }
+      if (years < 1) { errEl.textContent = "距退休年数至少为 1"; reset(); return; }
+      if (contribYears < 1) { errEl.textContent = "总缴费年限至少为 1 年"; reset(); return; }
+      if (index < 0.6 || index > 3) { errEl.textContent = "缴费指数应在 0.6 - 3.0 之间"; reset(); return; }
+      errEl.textContent = "";
       const r = calcPension({
-        currentAvgWage: num("b-wage"),
+        currentAvgWage: wage,
         wageGrowthPct: num("b-growth"),
-        yearsToRetire: num("b-years"),
-        contributionYears: num("b-contrib-years"),
-        contributionIndex: num("b-index"),
+        yearsToRetire: years,
+        contributionYears: contribYears,
+        contributionIndex: index,
         personalAccountBalance: num("b-balance"),
         monthlyContributionToAccount: num("b-monthly"),
         accountInterestPct: num("b-account-rate"),
@@ -163,10 +189,21 @@ import Base from "~/layouts/Base.astro";
     renderBasic();
 
     function renderPersonal(): void {
+      const yearly = num("p-yearly");
+      const yrs = num("p-years");
+      const errEl = $("p-error");
+      const reset = () => {
+        ["p-net","p-eff-rate","p-contrib","p-saved","p-final","p-tax-pay"]
+          .forEach((id) => ($(id).textContent = "—"));
+      };
+      if (yearly <= 0) { errEl.textContent = "请输入大于 0 的年缴存额"; reset(); return; }
+      if (yearly > 12000) { errEl.textContent = "年缴存额不得超过 12000"; reset(); return; }
+      if (yrs < 1) { errEl.textContent = "距退休年数至少为 1"; reset(); return; }
+      errEl.textContent = "";
       const r = calcPersonalPension({
-        yearlyContribution: num("p-yearly"),
+        yearlyContribution: yearly,
         marginalTaxRatePct: num("p-tax"),
-        yearsToRetire: num("p-years"),
+        yearsToRetire: yrs,
         expectedAnnualReturnPct: num("p-return"),
         withdrawTaxRatePct: num("p-withdraw-tax"),
       });

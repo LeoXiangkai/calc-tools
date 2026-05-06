@@ -12,104 +12,108 @@ import Base from "~/layouts/Base.astro";
   </p>
 
   <div class="tabs" role="tablist">
-    <button data-tab="irr" role="tab" aria-selected="true">分期 IRR</button>
+    <button data-tab="installment" role="tab" aria-selected="true">分期 IRR</button>
     <button data-tab="payoff" role="tab" aria-selected="false">是否提前结清</button>
   </div>
 
-  <input type="hidden" name="cc-tab" id="cc-tab-hidden" value="irr" />
-
-  <!-- Tab 1: 分期 IRR -->
-  <div class="split" id="cc-irr-pane" style="margin-top:8px;">
-    <div class="col-input">
-      <div class="card compact">
-        <h3 style="margin-top:0;">分期参数</h3>
-        <div class="form-grid">
-          <label>分期本金（元）<input id="i-principal" type="number" min="100" step="100" value="100000" /></label>
-          <label>月费率（%）<input id="i-fee" type="number" min="0" step="0.01" value="0.6" /></label>
-          <label>分期数
-            <select id="i-months">
-              <option value="3">3 期</option>
-              <option value="6">6 期</option>
-              <option value="9">9 期</option>
-              <option value="12" selected>12 期</option>
-              <option value="18">18 期</option>
-              <option value="24">24 期</option>
-            </select>
-          </label>
-        </div>
-        <p style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;">
-          月费率指银行账单上写的“分期手续费”，常见 0.45% – 0.75%。
-        </p>
-      </div>
-    </div>
-
-    <div class="col-result">
-      <div class="card compact highlight">
-        <div style="font-size:12px;color:var(--c-text-soft);">真实年化（IRR）</div>
-        <div style="font-size:30px;font-weight:700;color:#c0392b;" id="i-irr">—</div>
-        <div style="font-size:12px;color:var(--c-text-soft);margin-top:4px;" id="i-irr-note">—</div>
-      </div>
-      <div class="card compact">
-        <div class="kv-grid">
-          <div><div class="label">每期还款</div><div class="value" id="i-monthly">—</div></div>
-          <div><div class="label">总手续费</div><div class="value" id="i-fee-total">—</div></div>
-          <div><div class="label">名义年化（月费率×12）</div><div class="value" id="i-nominal">—</div></div>
-          <div><div class="label">IRR / 名义</div><div class="value" id="i-multiple">—</div></div>
+  {/* ==================== Tab 1: 分期 IRR ==================== */}
+  <section class="tab-panel active" data-panel="installment">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3 style="margin-top:0;">分期参数</h3>
+          <div class="form-grid">
+            <label>分期本金（元）<input id="i-principal" type="number" min="0" max="10000000" step="100" value="100000" /></label>
+            <label>月费率（%）<input id="i-fee" type="number" min="0" max="5" step="0.01" value="0.6" /></label>
+            <label>分期数
+              <select id="i-months">
+                <option value="3">3 期</option>
+                <option value="6">6 期</option>
+                <option value="9">9 期</option>
+                <option value="12" selected>12 期</option>
+                <option value="18">18 期</option>
+                <option value="24">24 期</option>
+              </select>
+            </label>
+          </div>
+          <p style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;">
+            月费率指银行账单上写的“分期手续费”，常见 0.45% – 0.75%。
+          </p>
+          <p class="error-msg" id="i-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
-      <div class="card compact">
-        <h3 style="margin-top:0;">为什么 IRR 比名义年化高</h3>
-        <p style="font-size:13px;color:var(--c-text-soft);margin:0;">
-          每期都在还本金，但手续费始终按最初的全额本金算。后期实际占用的资金越来越少，
-          却仍按原始本金收手续费，真实成本因此被推高。详见
-          <a href="/guides/credit-card-irr-trap">月费率 0.6%≠ 年化 7.2%</a>。
-        </p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Tab 2: 提前结清 -->
-  <div class="split" id="cc-payoff-pane" style="margin-top:8px;display:none;">
-    <div class="col-input">
-      <div class="card compact">
-        <h3 style="margin-top:0;">分期与已还情况</h3>
-        <div class="form-grid">
-          <label>原本金（元）<input id="p-principal" type="number" min="100" step="100" value="100000" /></label>
-          <label>月费率（%）<input id="p-fee" type="number" min="0" step="0.01" value="0.6" /></label>
-          <label>总期数<input id="p-total" type="number" min="2" step="1" value="12" /></label>
-          <label>已还期数<input id="p-paid" type="number" min="0" step="1" value="4" /></label>
-          <label>提前结清违约金（%）<input id="p-penalty" type="number" min="0" max="5" step="0.1" value="1" /></label>
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">真实年化（IRR）</div>
+          <div style="font-size:30px;font-weight:700;color:var(--c-danger);" id="i-irr">—</div>
+          <div style="font-size:12px;color:var(--c-text-soft);margin-top:4px;" id="i-irr-note">—</div>
         </div>
-        <p style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;">
-          多数银行收剩余本金的 0% – 3%；部分卡 6 个月以内提前结清需付 1 个月手续费。
-        </p>
-      </div>
-    </div>
-
-    <div class="col-result">
-      <div class="card compact highlight">
-        <div style="font-size:12px;color:var(--c-text-soft);">建议</div>
-        <div style="font-size:24px;font-weight:700;" id="p-recommend">—</div>
-        <div style="font-size:12px;color:var(--c-text-soft);margin-top:4px;" id="p-recommend-note">—</div>
-      </div>
-      <div class="card compact">
-        <div class="kv-grid">
-          <div><div class="label">剩余本金</div><div class="value" id="p-remain">—</div></div>
-          <div><div class="label">剩余手续费（不还）</div><div class="value" id="p-fee-remain">—</div></div>
-          <div><div class="label">违约金</div><div class="value" id="p-penalty-amt">—</div></div>
-          <div><div class="label">净节省</div><div class="value" id="p-net">—</div></div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">每期还款</div><div class="value" id="i-monthly">—</div></div>
+            <div><div class="label">总手续费</div><div class="value" id="i-fee-total">—</div></div>
+            <div><div class="label">名义年化（月费率×12）</div><div class="value" id="i-nominal">—</div></div>
+            <div><div class="label">IRR / 名义</div><div class="value" id="i-multiple">—</div></div>
+          </div>
+        </div>
+        <div class="card compact">
+          <h3 style="margin-top:0;">为什么 IRR 比名义年化高</h3>
+          <p style="font-size:13px;color:var(--c-text-soft);margin:0;">
+            每期都在还本金，但手续费始终按最初的全额本金算。后期实际占用的资金越来越少，
+            却仍按原始本金收手续费，真实成本因此被推高。详见
+            <a href="/guides/credit-card-irr-trap">月费率 0.6%≠ 年化 7.2%</a>。
+          </p>
         </div>
       </div>
-      <div class="card compact">
-        <h3 style="margin-top:0;">说明</h3>
-        <ul style="font-size:13px;color:var(--c-text-soft);margin:0;padding-left:18px;">
-          <li>“净节省” = 剩余手续费 − 违约金。&gt; 0 倾向提前结清，&lt; 0 倾向继续还。</li>
-          <li>已收手续费不退；本计算只比较“后续要付的钱”。</li>
-          <li>若现金紧张，即便净节省为正也未必要立刻还，要看资金用途。</li>
-        </ul>
+    </div>
+  </section>
+
+  {/* ==================== Tab 2: 提前结清 ==================== */}
+  <section class="tab-panel" data-panel="payoff">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3 style="margin-top:0;">分期与已还情况</h3>
+          <div class="form-grid">
+            <label>原本金（元）<input id="p-principal" type="number" min="0" max="10000000" step="100" value="100000" /></label>
+            <label>月费率（%）<input id="p-fee" type="number" min="0" max="5" step="0.01" value="0.6" /></label>
+            <label>总期数<input id="p-total" type="number" min="2" step="1" value="12" /></label>
+            <label>已还期数<input id="p-paid" type="number" min="0" step="1" value="4" /></label>
+            <label>提前结清违约金（%）<input id="p-penalty" type="number" min="0" max="10" step="0.1" value="1" /></label>
+          </div>
+          <p style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;">
+            多数银行收剩余本金的 0% – 3%；部分卡 6 个月以内提前结清需付 1 个月手续费。
+          </p>
+          <p class="error-msg" id="p-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">建议</div>
+          <div style="font-size:24px;font-weight:700;" id="p-recommend">—</div>
+          <div style="font-size:12px;color:var(--c-text-soft);margin-top:4px;" id="p-recommend-note">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">剩余本金</div><div class="value" id="p-remain">—</div></div>
+            <div><div class="label">剩余手续费（不还）</div><div class="value" id="p-fee-remain">—</div></div>
+            <div><div class="label">违约金</div><div class="value" id="p-penalty-amt">—</div></div>
+            <div><div class="label">净节省</div><div class="value" id="p-net">—</div></div>
+          </div>
+        </div>
+        <div class="card compact">
+          <h3 style="margin-top:0;">说明</h3>
+          <ul style="font-size:13px;color:var(--c-text-soft);margin:0;padding-left:18px;">
+            <li>“净节省” = 剩余手续费 − 违约金。&gt; 0 倾向提前结清，&lt; 0 倾向继续还。</li>
+            <li>已收手续费不退；本计算只比较“后续要付的钱”。</li>
+            <li>若现金紧张，即便净节省为正也未必要立刻还，要看资金用途。</li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <p style="font-size:13px;margin-top:12px;">
     继续看：<a href="/guides/credit-card-irr-trap">月费率 0.6% ≠ 年化 7.2%</a> ·
@@ -125,20 +129,16 @@ import Base from "~/layouts/Base.astro";
     const cny = (n: number) => `¥${fmtCny(n)}`;
     const pct = (n: number) => `${n.toFixed(2)}%`;
 
-    // Tab switch
+    // Tab switch — .tab-panel.active 标准模式
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
-    const tabHidden = $<HTMLInputElement>("cc-tab-hidden");
-    const irrPane = $<HTMLDivElement>("cc-irr-pane");
-    const payoffPane = $<HTMLDivElement>("cc-payoff-pane");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
     tabs.forEach((t) =>
       t.addEventListener("click", () => {
         tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
         t.setAttribute("aria-selected", "true");
-        const which = t.dataset.tab ?? "irr";
-        tabHidden.value = which;
-        irrPane.style.display = which === "irr" ? "" : "none";
-        payoffPane.style.display = which === "payoff" ? "" : "none";
-        renderAll();
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
       }),
     );
 
@@ -146,6 +146,18 @@ import Base from "~/layouts/Base.astro";
       const principal = Number($<HTMLInputElement>("i-principal").value);
       const monthlyFeePct = Number($<HTMLInputElement>("i-fee").value);
       const months = Number($<HTMLSelectElement>("i-months").value);
+      const errorEl = $<HTMLParagraphElement>("i-error");
+
+      const errs: string[] = [];
+      if (!Number.isFinite(principal) || principal <= 0) errs.push("本金需为正数");
+      if (!Number.isFinite(monthlyFeePct) || monthlyFeePct < 0) errs.push("月费率需 ≥ 0");
+      if (!Number.isFinite(months) || months <= 0) errs.push("分期数需为正整数");
+      errorEl.textContent = errs.join("；");
+      if (errs.length) {
+        ["i-irr", "i-irr-note", "i-monthly", "i-fee-total", "i-nominal", "i-multiple"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+
       const r = calcInstallmentIrr({ principal, monthlyFeePct, months });
       if (r.monthlyPayment === 0) {
         $("i-irr").textContent = "—";
@@ -173,16 +185,20 @@ import Base from "~/layouts/Base.astro";
       const earlyPayoffPenaltyPct = Number($<HTMLInputElement>("p-penalty").value);
       const recEl = $<HTMLDivElement>("p-recommend");
       const recNote = $<HTMLDivElement>("p-recommend-note");
+      const errorEl = $<HTMLParagraphElement>("p-error");
 
-      if (
-        !Number.isFinite(principal) || principal <= 0 ||
-        !Number.isFinite(totalMonths) || totalMonths <= 0 ||
-        !Number.isFinite(paidMonths) || paidMonths < 0 ||
-        paidMonths >= totalMonths
-      ) {
+      const errs: string[] = [];
+      if (!Number.isFinite(principal) || principal <= 0) errs.push("本金需为正数");
+      if (!Number.isFinite(monthlyFeePct) || monthlyFeePct < 0) errs.push("月费率需 ≥ 0");
+      if (!Number.isFinite(totalMonths) || totalMonths <= 0) errs.push("总期数需为正整数");
+      if (!Number.isFinite(paidMonths) || paidMonths < 0) errs.push("已还期数需 ≥ 0");
+      if (Number.isFinite(paidMonths) && Number.isFinite(totalMonths) && paidMonths >= totalMonths) errs.push("已还期数需小于总期数");
+      if (!Number.isFinite(earlyPayoffPenaltyPct) || earlyPayoffPenaltyPct < 0) errs.push("违约金需 ≥ 0");
+      errorEl.textContent = errs.join("；");
+      if (errs.length) {
         recEl.textContent = "—";
         recEl.style.color = "";
-        recNote.textContent = "请填写有效参数（已还期数需小于总期数）";
+        recNote.textContent = "请填写有效参数";
         $("p-remain").textContent = "—";
         $("p-fee-remain").textContent = "—";
         $("p-penalty-amt").textContent = "—";
@@ -198,11 +214,11 @@ import Base from "~/layouts/Base.astro";
 
       if (r.recommendation === "early-payoff") {
         recEl.textContent = "建议提前结清";
-        recEl.style.color = "#27ae60";
+        recEl.style.color = "var(--c-success)";
         recNote.textContent = `相比继续还，净节省 ${cny(Math.max(0, r.netSaving))}`;
       } else {
         recEl.textContent = "建议继续还";
-        recEl.style.color = "#c0392b";
+        recEl.style.color = "var(--c-danger)";
         const diff = Math.max(0, -r.netSaving);
         recNote.textContent = diff > 0
           ? `提前结清反而多花 ${cny(diff)}（违约金高于剩余手续费）`

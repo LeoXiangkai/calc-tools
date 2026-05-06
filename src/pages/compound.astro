@@ -27,9 +27,9 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>本金（元）<input id="l-principal" type="number" min="1" step="100" value="100000" /></label>
-            <label>年化收益率（%）<input id="l-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
-            <label>年限（年）<input id="l-years" type="number" min="1" max="60" step="1" value="30" /></label>
+            <label>本金（元）<input id="l-principal" type="number" min="0" max="100000000" step="100" value="100000" /></label>
+            <label>年化收益率（%）<input id="l-rate" type="number" min="0" max="30" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="l-years" type="number" min="1" max="50" step="1" value="30" /></label>
           </div>
           <div style="margin-top:10px;">
             <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">复利频率</div>
@@ -40,6 +40,7 @@ import Base from "~/layouts/Base.astro";
               <label for="l-ca">按年</label>
             </div>
           </div>
+          <p class="error-msg" id="l-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -75,12 +76,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>每月投入（元）<input id="d-monthly" type="number" min="0" step="100" value="3000" /></label>
-            <label>初始本金（元，可选）<input id="d-initial" type="number" min="0" step="100" value="0" /></label>
-            <label>年化收益率（%）<input id="d-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
-            <label>年限（年）<input id="d-years" type="number" min="1" max="60" step="1" value="30" /></label>
+            <label>每月投入（元）<input id="d-monthly" type="number" min="0" max="100000000" step="100" value="3000" /></label>
+            <label>初始本金（元，可选）<input id="d-initial" type="number" min="0" max="100000000" step="100" value="0" /></label>
+            <label>年化收益率（%）<input id="d-rate" type="number" min="0" max="30" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="d-years" type="number" min="1" max="50" step="1" value="30" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">月末投入起息（标准年金终值公式）。</p>
+          <p class="error-msg" id="d-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -116,12 +118,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>目标金额（元）<input id="g-goal" type="number" min="1" step="10000" value="1000000" /></label>
-            <label>已有本金（元，可选）<input id="g-initial" type="number" min="0" step="1000" value="0" /></label>
-            <label>预期年化（%）<input id="g-rate" type="number" min="0" max="50" step="0.1" value="8" /></label>
-            <label>年限（年）<input id="g-years" type="number" min="1" max="60" step="1" value="20" /></label>
+            <label>目标金额（元）<input id="g-goal" type="number" min="0" max="100000000" step="1000" value="1000000" /></label>
+            <label>已有本金（元，可选）<input id="g-initial" type="number" min="0" max="100000000" step="1000" value="0" /></label>
+            <label>预期年化（%）<input id="g-rate" type="number" min="0" max="30" step="0.1" value="8" /></label>
+            <label>年限（年）<input id="g-years" type="number" min="1" max="50" step="1" value="20" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">回答问题：每月投入多少能在 N 年后达到目标金额？</p>
+          <p class="error-msg" id="g-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -148,11 +151,12 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>未来名义金额（元）<input id="i-nominal" type="number" min="1" step="10000" value="1000000" /></label>
-            <label>年通胀率（%）<input id="i-inflation" type="number" min="0" max="20" step="0.1" value="3" /></label>
-            <label>年数<input id="i-years" type="number" min="0" max="60" step="1" value="20" /></label>
+            <label>未来名义金额（元）<input id="i-nominal" type="number" min="0" max="100000000" step="1000" value="1000000" /></label>
+            <label>年通胀率（%）<input id="i-inflation" type="number" min="-10" max="30" step="0.1" value="3" /></label>
+            <label>年数<input id="i-years" type="number" min="1" max="50" step="1" value="20" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">把未来 N 年后的金额换算成今天的实际购买力。</p>
+          <p class="error-msg" id="i-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -179,12 +183,13 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>资金（元）<input id="o-amount" type="number" min="1" step="1000" value="100000" /></label>
-            <label>预期投资年化（%）<input id="o-invest" type="number" min="0" max="50" step="0.1" value="8" /></label>
-            <label>年通胀率（%）<input id="o-infl" type="number" min="0" max="20" step="0.1" value="3" /></label>
-            <label>年数<input id="o-years" type="number" min="1" max="60" step="1" value="10" /></label>
+            <label>资金（元）<input id="o-amount" type="number" min="0" max="100000000" step="1000" value="100000" /></label>
+            <label>预期投资年化（%）<input id="o-invest" type="number" min="0" max="30" step="0.1" value="8" /></label>
+            <label>年通胀率（%）<input id="o-infl" type="number" min="-10" max="30" step="0.1" value="3" /></label>
+            <label>年数<input id="o-years" type="number" min="1" max="50" step="1" value="10" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">"投资 vs 不投资"的真实差距，按今天的购买力衡量。</p>
+          <p class="error-msg" id="o-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -253,12 +258,15 @@ import Base from "~/layouts/Base.astro";
       const annualRatePct = num("l-rate");
       const years = num("l-years");
       const compounding = (document.querySelector<HTMLInputElement>("input[name='l-comp']:checked")?.value ?? "monthly") as Compounding;
+      const errEl = $("l-error");
 
-      if (principal <= 0 || years <= 0) {
+      const reset = () => {
         ["l-fv","l-interest","l-multiple","l-rule72"].forEach((id) => ($(id).textContent = "—"));
         document.querySelector<HTMLTableSectionElement>("#l-table tbody")!.replaceChildren();
-        return;
-      }
+      };
+      if (principal <= 0) { errEl.textContent = "请输入大于 0 的本金"; reset(); return; }
+      if (years < 1) { errEl.textContent = "年限至少为 1 年"; reset(); return; }
+      errEl.textContent = "";
       const r = calcLumpSum({ principal, annualRatePct, years, compounding });
       $("l-fv").textContent = cny(r.futureValue);
       $("l-interest").textContent = cny(r.totalInterest);
@@ -280,11 +288,22 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 2: 定投 ----------
     function renderDca(): void {
+      const monthly = num("d-monthly");
+      const initial = num("d-initial");
+      const yrs = num("d-years");
+      const errEl = $("d-error");
+      const reset = () => {
+        ["d-fv","d-contribution","d-interest","d-ratio"].forEach((id) => ($(id).textContent = "—"));
+        document.querySelector<HTMLTableSectionElement>("#d-table tbody")!.replaceChildren();
+      };
+      if (monthly <= 0 && initial <= 0) { errEl.textContent = "每月投入与初始本金不能都为 0"; reset(); return; }
+      if (yrs < 1) { errEl.textContent = "年限至少为 1 年"; reset(); return; }
+      errEl.textContent = "";
       const r = calcDca({
-        monthlyContribution: num("d-monthly"),
-        initialPrincipal: num("d-initial"),
+        monthlyContribution: monthly,
+        initialPrincipal: initial,
         annualRatePct: num("d-rate"),
-        years: num("d-years"),
+        years: yrs,
       });
       $("d-fv").textContent = cny(r.futureValue);
       $("d-contribution").textContent = cny(r.totalContribution);
@@ -305,11 +324,20 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 3: 目标反推 ----------
     function renderGoal(): void {
+      const goal = num("g-goal");
+      const yrs = num("g-years");
+      const errEl = $("g-error");
+      const reset = () => {
+        ["g-monthly","g-contribution","g-interest"].forEach((id) => ($(id).textContent = "—"));
+      };
+      if (goal <= 0) { errEl.textContent = "请输入大于 0 的目标金额"; reset(); return; }
+      if (yrs < 1) { errEl.textContent = "年限至少为 1 年"; reset(); return; }
+      errEl.textContent = "";
       const r = calcGoal({
-        goalAmount: num("g-goal"),
+        goalAmount: goal,
         initialPrincipal: num("g-initial"),
         annualRatePct: num("g-rate"),
-        years: num("g-years"),
+        years: yrs,
       });
       $("g-monthly").textContent = cny(r.monthlyRequired);
       $("g-contribution").textContent = cny(r.totalContribution);
@@ -320,10 +348,19 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 4: 通胀调整 ----------
     function renderInflation(): void {
+      const nominal = num("i-nominal");
+      const yrs = num("i-years");
+      const errEl = $("i-error");
+      const reset = () => {
+        ["i-real","i-eroded","i-pct"].forEach((id) => ($(id).textContent = "—"));
+      };
+      if (nominal <= 0) { errEl.textContent = "请输入大于 0 的名义金额"; reset(); return; }
+      if (yrs < 1) { errEl.textContent = "年数至少为 1 年"; reset(); return; }
+      errEl.textContent = "";
       const r = calcInflation({
-        nominalValue: num("i-nominal"),
+        nominalValue: nominal,
         inflationRatePct: num("i-inflation"),
-        years: num("i-years"),
+        years: yrs,
       });
       $("i-real").textContent = cny(r.realValue);
       $("i-eroded").textContent = cny(r.erodedAmount);
@@ -334,11 +371,20 @@ import Base from "~/layouts/Base.astro";
 
     // ---------- Tab 5: 机会对比 ----------
     function renderOpp(): void {
+      const amount = num("o-amount");
+      const yrs = num("o-years");
+      const errEl = $("o-error");
+      const reset = () => {
+        ["o-cost","o-inv","o-inv-real","o-noi","o-noi-real"].forEach((id) => ($(id).textContent = "—"));
+      };
+      if (amount <= 0) { errEl.textContent = "请输入大于 0 的资金"; reset(); return; }
+      if (yrs < 1) { errEl.textContent = "年数至少为 1 年"; reset(); return; }
+      errEl.textContent = "";
       const r = calcOpportunity({
-        amount: num("o-amount"),
+        amount,
         investRatePct: num("o-invest"),
         inflationRatePct: num("o-infl"),
-        years: num("o-years"),
+        years: yrs,
       });
       $("o-cost").textContent = cny(r.opportunityCost);
       $("o-inv").textContent = cny(r.invested);

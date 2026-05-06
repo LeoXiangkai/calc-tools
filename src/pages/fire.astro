@@ -25,24 +25,25 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>年支出（元）<input id="t-expense" type="number" min="1" step="1000" value="120000" /></label>
+            <label>年支出（元）<input id="t-expense" type="number" min="0" max="100000000" step="1000" value="120000" /></label>
           </div>
           <div style="margin-top:10px;">
             <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">安全提取率（SWR）</div>
             <div class="btn-row">
               <input type="radio" name="t-swr" id="t-swr-3" value="3" />
-              <label for="t-swr-3">3%（保守）</label>
+              <label for="t-swr-3">3% — 极保守（适合国内）</label>
               <input type="radio" name="t-swr" id="t-swr-35" value="3.5" />
-              <label for="t-swr-35">3.5%</label>
+              <label for="t-swr-35">3.5% — 保守</label>
               <input type="radio" name="t-swr" id="t-swr-4" value="4" checked />
-              <label for="t-swr-4">4%（经典）</label>
+              <label for="t-swr-4">4% — 经典 Trinity</label>
               <input type="radio" name="t-swr" id="t-swr-5" value="5" />
-              <label for="t-swr-5">5%（激进）</label>
+              <label for="t-swr-5">5% — 激进</label>
             </div>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">
             4% 来自 1998 年 Trinity Study：基于美股 1926-1995 数据，4% 提取率在 30 年滚动窗口里几乎从未让本金归零。
           </p>
+          <p class="error-msg" id="t-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -50,6 +51,9 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact highlight">
           <div style="font-size:12px;color:var(--c-text-soft);">FIRE 目标资产</div>
           <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="t-fire">—</div>
+          <button id="t-use-as-target" type="button" style="margin-top:8px;padding:6px 12px;border:1px solid var(--c-accent);background:var(--c-accent-soft);color:var(--c-accent);border-radius:6px;cursor:pointer;font-size:13px;">
+            用此目标到"现状达标"计算年限 →
+          </button>
         </div>
         <div class="card compact">
           <div class="kv-grid">
@@ -69,14 +73,15 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>当前资产（元）<input id="y-assets" type="number" min="0" step="10000" value="500000" /></label>
-            <label>每年净储蓄（元）<input id="y-savings" type="number" min="0" step="1000" value="120000" /></label>
+            <label>当前资产（元）<input id="y-assets" type="number" min="0" max="100000000" step="1000" value="500000" /></label>
+            <label>每年净储蓄（元）<input id="y-savings" type="number" min="0" max="100000000" step="1000" value="120000" /></label>
             <label>预期投资年化（%）<input id="y-rate" type="number" min="0" max="30" step="0.1" value="6" /></label>
-            <label>FIRE 目标资产（元）<input id="y-fire" type="number" min="1" step="10000" value="3000000" /></label>
+            <label>FIRE 目标资产（元）<input id="y-fire" type="number" min="0" max="100000000" step="1000" value="3000000" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">
-            年储蓄按"年末投入"计入复利。Tab 1 算出的目标资产可手动填进这里。
+            年储蓄按"年末投入"计入复利。Tab 1 算出的目标资产可一键带入。
           </p>
+          <p class="error-msg" id="y-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -103,13 +108,14 @@ import Base from "~/layouts/Base.astro";
         <div class="card compact">
           <h3>输入</h3>
           <div class="form-grid">
-            <label>储蓄率（%）<input id="r-rate" type="number" min="10" max="90" step="1" value="50" /></label>
+            <label>储蓄率（%）<input id="r-rate" type="number" min="1" max="99" step="1" value="50" /></label>
             <label>预期投资年化（%）<input id="r-return" type="number" min="0" max="30" step="0.1" value="5" /></label>
-            <label>安全提取率（%）<input id="r-swr" type="number" min="2" max="6" step="0.1" value="4" /></label>
+            <label>安全提取率（%）<input id="r-swr" type="number" min="0.5" max="10" step="0.1" value="4" /></label>
           </div>
           <p style="font-size:12px;margin:8px 0 0;">
             储蓄率 = 净储蓄 / 税后收入。该模型由 Mr. Money Mustache 推广，从 0 资产起步、储蓄率与回报率不变的理想假设。
           </p>
+          <p class="error-msg" id="r-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
         </div>
       </div>
 
@@ -168,13 +174,23 @@ import Base from "~/layouts/Base.astro";
     );
 
     // ---------- Tab 1: 4% 法则目标 ----------
+    function getSwr(): number {
+      return Number(document.querySelector<HTMLInputElement>("input[name='t-swr']:checked")?.value ?? "4");
+    }
     function renderTarget(): void {
       const annualExpense = num("t-expense");
-      const swr = Number(document.querySelector<HTMLInputElement>("input[name='t-swr']:checked")?.value ?? "4");
-      if (annualExpense <= 0 || swr <= 0) {
+      const swr = getSwr();
+      const errEl = $("t-error");
+      if (annualExpense <= 0) {
         ["t-fire","t-multiple","t-monthly","t-hint"].forEach((id) => ($(id).textContent = "—"));
+        errEl.textContent = annualExpense < 0 ? "年支出不能为负数" : "请输入年支出（> 0）";
         return;
       }
+      if (annualExpense > 100_000_000) {
+        errEl.textContent = "年支出已超出合理上限（1 亿）";
+        return;
+      }
+      errEl.textContent = "";
       const r = calcFireTarget({ annualExpense, withdrawalRatePct: swr });
       $("t-fire").textContent = cny(r.fireNumber);
       $("t-multiple").textContent = `${r.multiple.toFixed(1)} ×`;
@@ -190,25 +206,74 @@ import Base from "~/layouts/Base.astro";
     document.querySelectorAll<HTMLInputElement>("input[name='t-swr']").forEach((el) => el.addEventListener("change", renderTarget));
     renderTarget();
 
+    // 一键带入：Tab1 → Tab2
+    $<HTMLButtonElement>("t-use-as-target").addEventListener("click", () => {
+      const annualExpense = num("t-expense");
+      const swr = getSwr();
+      if (annualExpense <= 0 || swr <= 0) {
+        $("t-error").textContent = "请先填入有效的年支出再带入";
+        return;
+      }
+      const r = calcFireTarget({ annualExpense, withdrawalRatePct: swr });
+      $<HTMLInputElement>("y-fire").value = String(Math.round(r.fireNumber));
+      // 切到 Tab2
+      document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]").forEach((b) => b.setAttribute("aria-selected", "false"));
+      document.querySelector<HTMLButtonElement>('[data-tab="years"]')?.setAttribute("aria-selected", "true");
+      document.querySelectorAll<HTMLElement>(".tab-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === "years"));
+      renderYears();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
     // ---------- Tab 2: 现状 → 几年达 FIRE ----------
     function renderYears(): void {
       const currentAssets = num("y-assets");
       const annualSavings = num("y-savings");
       const expectedReturnPct = num("y-rate");
       const fireNumber = num("y-fire");
+      const errEl = $("y-error");
+      const yearsEl = $("y-years");
+
+      // 输入校验
+      if (fireNumber <= 0) {
+        errEl.textContent = "请输入 FIRE 目标资产（> 0）";
+        yearsEl.textContent = "—";
+        yearsEl.style.color = "var(--c-accent)";
+        ["y-final","y-contribution","y-return"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      if (currentAssets < 0 || annualSavings < 0) {
+        errEl.textContent = "资产和储蓄不能为负数";
+        yearsEl.textContent = "—";
+        yearsEl.style.color = "var(--c-accent)";
+        ["y-final","y-contribution","y-return"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      if (expectedReturnPct < 0 || expectedReturnPct > 30) {
+        errEl.textContent = "投资年化建议在 0-30% 区间";
+        yearsEl.textContent = "—";
+        yearsEl.style.color = "var(--c-accent)";
+        ["y-final","y-contribution","y-return"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      errEl.textContent = "";
+
       const r = calcFireYears({ currentAssets, annualSavings, expectedReturnPct, fireNumber });
 
       if (r.yearsToFire === -1) {
-        $("y-years").textContent = "100 年内无解";
+        yearsEl.textContent = "100 年内无解";
+        yearsEl.style.color = "var(--c-danger)";
+        errEl.textContent = "100 年内无法达成：请提高储蓄、提高回报率或降低目标";
         $("y-final").textContent = "—";
         $("y-contribution").textContent = "—";
         $("y-return").textContent = "—";
         return;
       }
       if (r.yearsToFire === 0) {
-        $("y-years").textContent = "已达 FIRE";
+        yearsEl.textContent = "已达 FIRE";
+        yearsEl.style.color = "var(--c-success)";
       } else {
-        $("y-years").textContent = `${r.yearsToFire} 年`;
+        yearsEl.textContent = `${r.yearsToFire} 年`;
+        yearsEl.style.color = "var(--c-accent)";
       }
       $("y-final").textContent = cny(r.finalAssets);
       $("y-contribution").textContent = cny(r.totalContribution);
@@ -223,12 +288,33 @@ import Base from "~/layouts/Base.astro";
       const savingsRatePct = num("r-rate");
       const expectedReturnPct = num("r-return");
       const withdrawalRatePct = num("r-swr");
+      const errEl = $("r-error");
+      const yearsEl = $("r-years");
+
+      if (savingsRatePct <= 0 || savingsRatePct >= 100) {
+        errEl.textContent = "储蓄率须在 1-99% 之间";
+        yearsEl.textContent = "—";
+        yearsEl.style.color = "var(--c-accent)";
+        $("r-desc").textContent = "—";
+        return;
+      }
+      if (withdrawalRatePct <= 0) {
+        errEl.textContent = "安全提取率须 > 0";
+        yearsEl.textContent = "—";
+        yearsEl.style.color = "var(--c-accent)";
+        $("r-desc").textContent = "—";
+        return;
+      }
+      errEl.textContent = "";
+
       const r = calcFireFromSavingsRate({ savingsRatePct, expectedReturnPct, withdrawalRatePct });
       if (r.yearsToFire === -1) {
-        $("r-years").textContent = "无解";
+        yearsEl.textContent = "无解";
+        yearsEl.style.color = "var(--c-danger)";
         $("r-desc").textContent = r.description;
       } else {
-        $("r-years").textContent = `${r.yearsToFire} 年`;
+        yearsEl.textContent = `${r.yearsToFire} 年`;
+        yearsEl.style.color = "var(--c-accent)";
         $("r-desc").textContent = `节奏：${r.description}`;
       }
 
@@ -251,7 +337,7 @@ import Base from "~/layouts/Base.astro";
     renderRate();
   </script>
 
-  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+  <p style="margin-top:24px;padding:12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅为 FIRE 公式的演示与教学，所有"投资年化""提取率"参数均为用户自行设定的假设，
     <strong>不代表任何金融产品的实际收益、不构成投资、退休或理财规划建议</strong>。
     4% 法则源自基于美股历史数据的 Trinity Study，不能直接套用于国内市场；A 股波动更大、债券实际收益率较低，
