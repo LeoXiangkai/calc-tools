@@ -1,0 +1,103 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  wide
+  title="存款收益对比"
+  description="活期、整存整取、大额存单、储蓄国债同屏对比，给出实际年化与到期收益。"
+>
+  <h1 style="margin-bottom:4px;">存款收益对比</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    活期、整存整取、大额存单、储蓄国债同屏对比。利率请以银行实时公布为准。
+  </p>
+
+  <div class="split">
+    <div class="col-input">
+      <div class="card compact">
+        <h3>本金与利率（年化 %）</h3>
+        <div class="form-grid">
+          <label>本金（元）<input id="d-principal" type="number" min="1" step="1000" value="200000" /></label>
+          <label>活期（%）<input id="d-current" type="number" min="0" max="10" step="0.05" value="0.20" /></label>
+          <label>1 年定存（%）<input id="d-1y" type="number" min="0" max="10" step="0.05" value="1.50" /></label>
+          <label>2 年定存（%）<input id="d-2y" type="number" min="0" max="10" step="0.05" value="1.55" /></label>
+          <label>3 年定存（%）<input id="d-3y" type="number" min="0" max="10" step="0.05" value="1.95" /></label>
+          <label>5 年定存（%）<input id="d-5y" type="number" min="0" max="10" step="0.05" value="2.00" /></label>
+          <label>3 年大额存单（≥20 万，%）<input id="d-3y-big" type="number" min="0" max="10" step="0.05" value="2.10" /></label>
+          <label>3 年储蓄国债（%，按年复利）<input id="d-3y-bond" type="number" min="0" max="10" step="0.05" value="2.50" /></label>
+          <label>5 年储蓄国债（%，按年复利）<input id="d-5y-bond" type="number" min="0" max="10" step="0.05" value="2.65" /></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-result">
+      <div class="card compact">
+        <h3>收益对比</h3>
+        <div style="overflow-x:auto;">
+          <table id="d-table">
+            <thead>
+              <tr>
+                <th style="text-align:left;">产品</th>
+                <th>期限</th>
+                <th>到期总额</th>
+                <th>利息</th>
+                <th>实际年化</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p style="font-size:12px;margin:8px 0 0;">
+          按当前输入利率计算到期收益。"实际年化"反映复利后的等效年化收益率，便于跨期限比较。
+          大额存单需 ≥ 起存金额（默认 20 万），不足时显示 "不达起存"。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅按你输入的利率做数学计算，不构成存款产品推荐。
+    实际利率请以银行实时公布与产品说明书为准；储蓄国债的发行利率以财政部当期公告为准。
+  </p>
+
+  <script>
+    import { compareDeposits, type DepositCompareItem } from "~/lib/deposit";
+    import { fmtCny } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny(n)}`;
+    const num = (id: string) => Number($<HTMLInputElement>(id).value) || 0;
+
+    function render(): void {
+      const principal = num("d-principal");
+      const items: DepositCompareItem[] = [
+        { name: "活期", annualRatePct: num("d-current"), years: 1 },
+        { name: "1 年定存", annualRatePct: num("d-1y"), years: 1 },
+        { name: "2 年定存", annualRatePct: num("d-2y"), years: 2 },
+        { name: "3 年定存", annualRatePct: num("d-3y"), years: 3 },
+        { name: "5 年定存", annualRatePct: num("d-5y"), years: 5 },
+        { name: "3 年大额存单", annualRatePct: num("d-3y-big"), years: 3, threshold: 200000 },
+        { name: "3 年储蓄国债", annualRatePct: num("d-3y-bond"), years: 3, compounding: "annual" },
+        { name: "5 年储蓄国债", annualRatePct: num("d-5y-bond"), years: 5, compounding: "annual" },
+      ];
+      const results = compareDeposits(principal, items);
+      const tbody = document.querySelector<HTMLTableSectionElement>("#d-table tbody")!;
+      const frag = document.createDocumentFragment();
+      // 按到期总额排序
+      results.sort((a, b) => b.futureValue - a.futureValue);
+      for (const r of results) {
+        const tr = document.createElement("tr");
+        const period = items.find((x) => x.name === r.name)?.years ?? 1;
+        tr.innerHTML = `<td style="text-align:left;">${r.name}</td><td>${period} 年</td>` +
+          (r.eligible
+            ? `<td>${cny(r.futureValue)}</td><td>${cny(r.totalInterest)}</td><td>${r.effectiveAnnualPct}%</td>`
+            : `<td colspan="3" style="color:var(--c-text-soft);text-align:center;">不达起存（≥¥${r.threshold?.toLocaleString()}）</td>`);
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='d-']").forEach((el) =>
+      el.addEventListener("input", render),
+    );
+    render();
+  </script>
+</Base>

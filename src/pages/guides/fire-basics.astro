@@ -1,0 +1,140 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="FIRE 入门：4% 法则、储蓄率与几年财务自由"
+  description="FIRE（财务独立、提前退休）不是口号，是一套可计算的财务模型。本文讲清 4% 法则的来源、为什么 FIRE 目标 = 年支出 × 25、储蓄率为什么是 FIRE 速度的核心、以及国内执行时该如何调整。"
+>
+  <h1>FIRE 入门：4% 法则、储蓄率与几年财务自由</h1>
+  <p style="color: var(--c-text-soft); font-size: 13px;">最后更新：2026-05-06 · 通用知识科普 · 不构成投资或退休规划建议</p>
+
+  <h2>一、FIRE 是什么，4% 从哪来</h2>
+  <p>
+    FIRE 是 <strong>Financial Independence, Retire Early</strong> 的缩写，源于 1990 年代美国的 Vicki Robin《Your Money or Your Life》和此后 Mr. Money Mustache 的博客推广。
+    它的核心命题不是"几岁退休"，而是<strong>什么条件下你的资产产生的被动收入足以覆盖支出，从而工资变成可选项</strong>。
+  </p>
+  <p>
+    4% 法则来自 1998 年三位 Trinity 大学教授的研究（Cooley, Hubbard, Walz），后来被称为 <strong>Trinity Study</strong>。
+    他们用美股 1926-1995 的历史数据回测：以 50/50 股债组合开始退休、每年按通胀调整后取出初始本金的 4%，在所有 30 年滚动窗口里，资产几乎从未归零。
+    这个 4% 被称为"安全提取率"（Safe Withdrawal Rate, SWR）。
+  </p>
+
+  <h2>二、FIRE 目标 = 年支出 × 25 的数学</h2>
+  <p>
+    如果你能稳定每年从资产里取出 4% 而本金长期不被耗尽，那么"取出的钱"必须等于"年支出"。
+    设资产为 P、年支出为 E：<code>E = P × 4% → P = E / 0.04 = E × 25</code>。
+    所以 FIRE 目标资产就是<strong>年支出的 25 倍</strong>。
+  </p>
+  <p>
+    举例：
+  </p>
+  <ul>
+    <li>年支出 12 万 → FIRE 目标 300 万</li>
+    <li>年支出 24 万 → FIRE 目标 600 万</li>
+    <li>年支出 36 万 → FIRE 目标 900 万</li>
+  </ul>
+  <p>
+    把 4% 换成更保守的 3%，倍数就变成 33 倍；3.5% 则是约 28.6 倍。
+    这一步在 <a href="/fire">FIRE 计算器 · 4% 法则目标</a> 直接换算，不用心算。
+  </p>
+
+  <h2>三、储蓄率：FIRE 速度的核心</h2>
+  <p>
+    Mr. Money Mustache 在 2012 年的经典文章 <em>The Shockingly Simple Math Behind Early Retirement</em> 里提出：
+    在合理回报率假设下，<strong>FIRE 年数几乎只取决于你的储蓄率</strong>，跟收入绝对值关系不大。
+  </p>
+  <p>
+    原因是双向作用：储蓄率越高，<strong>每年存得越多</strong>，同时<strong>需要积累的目标也越小</strong>（因为年支出更低）。
+    这两个效应相乘，使得 FIRE 年数对储蓄率非常敏感。常引用的对照（5% 实际收益、4% SWR）：
+  </p>
+  <ul>
+    <li>储蓄率 10% → 约 51 年</li>
+    <li>储蓄率 25% → 约 32 年</li>
+    <li>储蓄率 40% → 约 22 年</li>
+    <li>储蓄率 50% → 约 17 年</li>
+    <li>储蓄率 65% → 约 11 年</li>
+    <li>储蓄率 75% → 约 7 年</li>
+  </ul>
+  <p>
+    这意味着：从月薪 5 万但花光的状态，迁移到月薪 5 万存 2.5 万的状态，FIRE 路径会从"无解"缩短到 17 年。
+    收入翻倍但花销也跟着翻倍，FIRE 年数几乎不变；这就是消费升级的隐性代价。
+  </p>
+
+  <h2>四、国内执行的调整：为什么要把 4% 收紧到 3-3.5%</h2>
+  <p>
+    Trinity Study 的 4% 基于<strong>美股美债历史数据</strong>，假设条件包括：股票长期实际回报 ~6.5%、债券实际回报 ~2-3%、市场具备较强的均值回归。
+    放到国内的几个差异点值得注意：
+  </p>
+  <ul>
+    <li><strong>A 股波动更大</strong>：上证指数自 2007 年高点至今的 18 年实际回报远低于美股同期，长期 σ 也更高</li>
+    <li><strong>债券真实收益率较低</strong>：国债收益率减通胀后接近 0，缓冲作用弱于美债</li>
+    <li><strong>信用环境差异</strong>：刚兑打破后高息理财风险显著，过往的"无风险高息"假设不再成立</li>
+    <li><strong>跨境配置成本</strong>：QDII 额度、汇率波动、税务都会侵蚀实际回报</li>
+  </ul>
+  <p>
+    较常见的保守做法是把 SWR 从 4% 收紧到 <strong>3% 或 3.5%</strong>，对应 FIRE 目标 = 年支出 × 28.6 或 33。
+    Bengen 本人和 Michael Kitces 等研究者也在 2010 年代后陆续给出 3.3%-4.5% 的范围讨论，方向都是"看市场估值定 SWR"，不是死守 4%。
+  </p>
+
+  <h2>五、FIRE 不是单一目标：Lean / Standard / Fat / Coast / Barista</h2>
+  <p>
+    社区里 FIRE 演化出多个分支：
+  </p>
+  <ul>
+    <li><strong>Lean FIRE</strong>：极简生活，年支出在所在城市低分位（一线 8-12 万、二线 4-8 万），目标资产相对小</li>
+    <li><strong>Standard FIRE</strong>：维持当前中产生活水平，年支出 15-30 万为主</li>
+    <li><strong>Fat FIRE</strong>：保持高品质生活，年支出 50 万以上，目标资产 1500 万+</li>
+    <li><strong>Coast FIRE</strong>：到某岁数前积累足够本金，之后<strong>不再储蓄</strong>，仅靠现有资产复利就能在退休时达到 FIRE 目标。中间阶段只需赚到覆盖当下支出的工资即可</li>
+    <li><strong>Barista FIRE</strong>：资产覆盖大部分支出，剩余靠一份低压工作（兼职/咖啡店式）补齐，附带医保等福利</li>
+  </ul>
+  <p>
+    Coast 和 Barista 解构了"必须 100% 退休"的执念：
+    更现实的目标可能是<strong>赎回工作的强制性</strong>，而不是再也不工作。
+  </p>
+
+  <h2>六、实操：三张表 + 一个模拟器</h2>
+  <ol>
+    <li>
+      <strong>现金流表</strong>：每月收入、固定支出、可变支出三栏，半年至少更新一次。
+      没有现金流表就算不出真实储蓄率，所有 FIRE 推算都是空中楼阁。
+    </li>
+    <li>
+      <strong>净资产表</strong>：每季度记一次。包括现金、基金、股票、房产估值、负债。FIRE 进度 = 净资产 / FIRE 目标。
+    </li>
+    <li>
+      <strong>SWR 模拟器</strong>：用历史最差区间（如 1966-1995）做压力测试。
+      <a href="/fire">FIRE 计算器 · 现状→几年达 FIRE</a> 提供基础迭代，更细致的可用 cFIREsim、FICalc 这类工具做蒙特卡洛或历史回测。
+    </li>
+  </ol>
+
+  <h2>七、风险与常被低估的因子</h2>
+  <ul>
+    <li><strong>通胀</strong>：3% 通胀 30 年后购买力只剩 41%。FIRE 目标用今天的物价算，到达时需要乘上通胀系数</li>
+    <li><strong>长寿风险</strong>：30 年退休模型对 FIRE 在 35-40 岁退休的人不够用，可能要规划 50-60 年</li>
+    <li><strong>医疗</strong>：国内医保对重疾覆盖有限，FIRE 后医保连续性、商业重疾险、长护险都需提前布局</li>
+    <li><strong>市场顺序风险（Sequence of Returns Risk）</strong>：退休前几年遇到大熊市比退休后期遇到杀伤大得多。同样的平均回报，顺序不同结果差几倍</li>
+    <li><strong>家庭生命周期</strong>：子女教育、父母赡养、房屋更换，都会临时把年支出推高</li>
+  </ul>
+  <p>
+    一个稳妥的实操原则：FIRE 触达后<strong>不要立刻 100% 切换为提取模式</strong>。
+    保留 1-2 年现金缓冲、维持轻量收入、前 3-5 年若遇到大跌则降低当年提取，可以显著提升长期成功率。
+  </p>
+
+  <h2>八、操作清单</h2>
+  <ol>
+    <li>用 <a href="/fire">FIRE 计算器 · Tab 1</a> 算出你的 FIRE 目标资产（先用 4%，再用 3.5% 看保守版）</li>
+    <li>用 <a href="/fire">Tab 2</a> 输入当前资产、年储蓄、预期年化，看几年能到</li>
+    <li>用 <a href="/fire">Tab 3</a> 反过来看：把储蓄率提高 10 个点，FIRE 缩短几年</li>
+    <li>建一张净资产表，每季度更新一次进度</li>
+    <li>不追求一步到位，先把 Coast FIRE 当中间里程碑：到那天起，工资就是"可选"了</li>
+  </ol>
+
+  <p style="font-size: 13px; color: var(--c-text-soft); margin-top: 32px;">
+    本文为通用知识科普，不构成具体投资、退休规划或税务建议。FIRE 的数学模型简洁，但执行涉及税收、医保、房产、家庭等大量个体差异，
+    重大决策请结合自身情况，必要时咨询持牌财务规划师或税务师。
+  </p>
+
+  <p style="font-size: 13px;">
+    继续看：<a href="/fire">FIRE 计算器</a> · <a href="/compound">复利计算器</a> · <a href="/guides/compound-basics">复利入门</a> · <a href="/mortgage">房贷计算器</a>
+  </p>
+</Base>

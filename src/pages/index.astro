@@ -65,6 +65,18 @@ import Base from "~/layouts/Base.astro";
         <li>首套 / 二套 × 140㎡ 分档</li>
       </ul>
     </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/rent-vs-buy">租房 vs 买房</a></h3>
+      <p style="margin:4px 0;font-size:13px;">5/10/15/20/30 年长期账本对比：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>买房：首付 + 月供 + 持有成本 - 期末净值</li>
+        <li>租房：累计租金 - 首付投资终值</li>
+        <li>结论三态：buy / rent / tied</li>
+        <li>买房损益分界点（通常 5-7 年）</li>
+        <li>非财务因素提示</li>
+      </ul>
+    </div>
   </div>
 
   <h2>理财与规划</h2>
@@ -78,6 +90,54 @@ import Base from "~/layouts/Base.astro";
         <li><strong>目标反推</strong>：N 年后 X 万，每月需投多少</li>
         <li><strong>通胀调整</strong>：未来金额折算今日购买力</li>
         <li><strong>机会对比</strong>：投资 vs 不投资真实差距</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/fire">FIRE 财务自由倒推</a></h3>
+      <p style="margin:4px 0;font-size:13px;">3 Tab 估算财务自由路径：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li><strong>4% 法则</strong>：年支出 × 25 = FIRE 目标</li>
+        <li><strong>现状达标</strong>：现有资产 + 年储蓄 → 几年达成</li>
+        <li><strong>储蓄率对照</strong>：MMM 经典图表实时算</li>
+        <li>Lean / Standard / Fat FIRE 区分</li>
+        <li>国内调整：3-3.5% 安全提取率</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/pension">退休金计算器</a></h3>
+      <p style="margin:4px 0;font-size:13px;">职工社保 + 个人养老金账户：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>基础养老金 + 个人账户公式</li>
+        <li>缴费指数 / 计发月数完整支持</li>
+        <li>个人养老金账户 1.2 万抵税</li>
+        <li>退休时按 3% 单独计税</li>
+        <li>替代率估算与缺口提示</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/deposit">存款收益对比</a></h3>
+      <p style="margin:4px 0;font-size:13px;">同屏对比 8 种存款产品：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>活期 / 1-5 年定存</li>
+        <li>大额存单（≥20 万起存）</li>
+        <li>3-5 年储蓄国债（按年复利）</li>
+        <li>实际年化对齐方便横比</li>
+        <li>所有利率手填，反映实时数据</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;"><a href="/credit-card-irr">信用卡分期 IRR</a></h3>
+      <p style="margin:4px 0;font-size:13px;">揭穿"月费率 0.6%"≠ 年化 7.2%：</p>
+      <ul style="font-size:13px;color:var(--c-text-soft);margin:4px 0 0;padding-left:20px;">
+        <li>真实年化 IRR（二分法精确）</li>
+        <li>名义 vs 真实利率倍数</li>
+        <li>提前结清是否划算</li>
+        <li>违约金 vs 剩余手续费对比</li>
+        <li>消费贷利率横比</li>
       </ul>
     </div>
   </div>
@@ -95,6 +155,30 @@ import Base from "~/layouts/Base.astro";
     <div class="card">
       <h3 style="margin-top:0;font-size:14px;"><a href="/guides/prepayment">提前还款指南</a></h3>
       <p style="margin:0;font-size:13px;">合适时机、缩短年限 vs 减少月供怎么选、违约金陷阱。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/compound-basics">复利入门：72 法则 + 定投 vs 单笔</a></h3>
+      <p style="margin:0;font-size:13px;">复利的数学直觉、72 法则、起步早晚的杠杆。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/pension-basics">退休金入门：基础养老金 + 个人账户</a></h3>
+      <p style="margin:0;font-size:13px;">公式 + 缴费指数 + 替代率 + 个人养老金账户政策。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/fire-basics">FIRE 入门：4% 法则与储蓄率</a></h3>
+      <p style="margin:0;font-size:13px;">Trinity 研究、储蓄率对应年数、Lean / Coast / Fat FIRE。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/credit-card-irr-trap">月费率 0.6% ≠ 年化 7.2%</a></h3>
+      <p style="margin:0;font-size:13px;">信用卡分期真实利率：IRR 公式、对照表、何时分期合理。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/deposit-comparison">存款产品对比指南</a></h3>
+      <p style="margin:0;font-size:13px;">活期 / 定存 / 大额存单 / 储蓄国债 + 三桶配置思路。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:14px;"><a href="/guides/rent-vs-buy-decision">租房还是买房？长期账本</a></h3>
+      <p style="margin:0;font-size:13px;">关键变量、损益分界、非财务因素决策清单。</p>
     </div>
     <div class="card">
       <h3 style="margin-top:0;font-size:14px;"><a href="/faq">常见问题</a></h3>

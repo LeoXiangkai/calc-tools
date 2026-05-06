@@ -1,0 +1,195 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="存款产品对比：活期 / 定存 / 大额存单 / 储蓄国债怎么选"
+  description="活期、整存整取、零存整取、大额存单、储蓄国债，五种主流存款形态在起存额、期限、流动性、利率档次上的差异，以及如何按流动性需求做组合配置。"
+>
+  <h1>存款产品对比：活期 / 定存 / 大额存单 / 储蓄国债怎么选</h1>
+  <p style="color: var(--c-text-soft); font-size: 13px;">最后更新：2026-05-06 · 通用知识科普 · 不构成产品推荐</p>
+
+  <h2>一、五种主流存款形态总览</h2>
+  <p>
+    国内最常见的低风险存款类工具有五种：活期、整存整取（普通定期）、零存整取、大额存单、储蓄国债。
+    它们在<strong>起存门槛、期限、流动性、利率档次</strong>四个维度上差异明显。下表是一个粗略对比，具体数值以各银行/承销机构当期公告为准。
+  </p>
+
+  <div class="card">
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--c-border);">
+          <th style="text-align: left; padding: 6px;">类型</th>
+          <th style="text-align: left; padding: 6px;">起存额</th>
+          <th style="text-align: left; padding: 6px;">最短期限</th>
+          <th style="text-align: left; padding: 6px;">提前支取</th>
+          <th style="text-align: left; padding: 6px;">利率档次</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid var(--c-border);">
+          <td style="padding: 6px;">活期</td>
+          <td style="padding: 6px;">1 元</td>
+          <td style="padding: 6px;">无</td>
+          <td style="padding: 6px;">随存随取</td>
+          <td style="padding: 6px;">最低（约 0.1%）</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--c-border);">
+          <td style="padding: 6px;">整存整取</td>
+          <td style="padding: 6px;">50 元</td>
+          <td style="padding: 6px;">3 个月</td>
+          <td style="padding: 6px;">按活期重算</td>
+          <td style="padding: 6px;">中（按期限阶梯）</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--c-border);">
+          <td style="padding: 6px;">零存整取</td>
+          <td style="padding: 6px;">5 元/月起</td>
+          <td style="padding: 6px;">1 年</td>
+          <td style="padding: 6px;">按活期重算</td>
+          <td style="padding: 6px;">略低于整存整取</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--c-border);">
+          <td style="padding: 6px;">大额存单</td>
+          <td style="padding: 6px;">20 万 / 30 万</td>
+          <td style="padding: 6px;">1 个月</td>
+          <td style="padding: 6px;">部分支持转让</td>
+          <td style="padding: 6px;">高于同期定存 30–50 BP</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px;">储蓄国债</td>
+          <td style="padding: 6px;">100 元</td>
+          <td style="padding: 6px;">3 年</td>
+          <td style="padding: 6px;">分段计息+扣手续费</td>
+          <td style="padding: 6px;">通常高于同期定存</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    以上表格的"利率档次"只是<strong>相对位置</strong>。实际数字会随央行政策、银行揽储节奏、地区差异波动，
+    建议在 <a href="/deposit">存款比较器</a> 中输入当前实时利率自行测算。
+  </p>
+
+  <h2>二、整存整取 vs 大额存单：30–50 BP 差距背后的逻辑</h2>
+  <p>
+    同样 3 年期，大额存单利率往往比普通整存整取高 30–50 个基点（BP，1 BP = 0.01%）。看似"白给"，其实背后是<strong>流动性溢价</strong>。
+  </p>
+  <ul>
+    <li><strong>资金集中度</strong>：大额存单单笔起存 20 万或 30 万，对银行而言资金来得集中、稳定，运营成本低</li>
+    <li><strong>期限承诺</strong>：大额存单虽然名义上可以提前支取或转让，但提前操作会触发利率下调或转让折价，实际期限锁定性比定存更强</li>
+    <li><strong>额度受控</strong>：大额存单是<strong>有发行额度</strong>的产品，旺季常被秒抢，银行借此筛选愿意"长期锁定大资金"的客户</li>
+  </ul>
+  <p>
+    所以那 30–50 BP 不是免费午餐，而是<strong>用流动性换收益</strong>的对价。如果手头这 20 万 3 年内大概率不动，那就值得；如果还有动用可能，差距就被提前支取的损失反吃掉了。
+  </p>
+
+  <h2>三、储蓄国债的几个特殊优势</h2>
+  <p>
+    储蓄国债（电子式 / 凭证式）在普通投资者视角下有几个不太被关注但有意义的特征：
+  </p>
+  <ul>
+    <li><strong>到期一次性付息按年复利</strong>：电子式储蓄国债是按年计息、到期一次性还本付息，期间利息按当年票面利率参与下一年计息，与"每月把利息打入活期"的定存不同，复利效应更明显</li>
+    <li><strong>免征利息所得税</strong>：根据现行税法，国债利息收入免征个人所得税；普通存款利息目前虽然也暂免，但政策属性不同</li>
+    <li><strong>财政部信用背书</strong>：发行主体是财政部，信用层级在商业银行存款保险之上</li>
+    <li><strong>购买门槛低</strong>：100 元起购，对小额配置友好</li>
+  </ul>
+  <p>
+    代价是<strong>流动性更弱</strong>：3 年和 5 年是主力期限，提前兑取要按持有时间分段计息并扣 1‰ 手续费。所以国债更适合"明确这笔钱 3–5 年不用"的长期桶。
+  </p>
+
+  <h2>四、提前支取惩罚机制</h2>
+  <p>
+    定期类产品的核心约束是<strong>提前支取按活期利率重新计息</strong>。一笔 3 年期定存，约定利率 2.5%，存了 2 年 11 个月后急用提前支取：
+  </p>
+  <ul>
+    <li>不是按"已存满 2 年 11 个月"享受 2.5% 的 35/36</li>
+    <li>而是<strong>整段时间按活期 0.1% 左右重算</strong>，已经按定期发放的利息会被回收</li>
+  </ul>
+  <p>
+    部分银行的大额存单和"靠档计息"特色存款规则不同，会按已满期限的对应档次利率计息。但这种产品近年监管收紧，新签合同里这种条款越来越少，不能默认当成普惠规则。
+  </p>
+  <p>
+    实操中规避惩罚的常见做法：<strong>金额拆分 + 期限阶梯</strong>。把一笔 30 万拆成 10 万 + 10 万 + 10 万，分别存 1 年 / 2 年 / 3 年，到期一笔接一笔续作，急用时只动到期最近的那笔，其余不受影响。
+  </p>
+
+  <h2>五、利率走势对长期理财的影响（只讲机制，不预测）</h2>
+  <p>
+    LPR（贷款市场报价利率）和存款挂牌利率近几年整体处于下行周期。这对长期存款配置带来两个机制层面的影响：
+  </p>
+  <ul>
+    <li><strong>新发利率持续下调</strong>：今年存的 3 年期 2.5%，明年新存的同款可能只有 2.2%。"今天的利率"是有时间价值的</li>
+    <li><strong>长期锁定的吸引力上升</strong>：在下行预期下，长期限产品（5 年定存、5 年国债、3 年大额存单）的"锁定当前利率"功能价值更高；反之上行周期则相反</li>
+  </ul>
+  <p>
+    这里只描述机制：<strong>利率方向 → 长短期配置偏好</strong>。具体未来怎么走没人能精确预测，本文不做方向判断。
+    实际操作中更稳的做法是<strong>不依赖对未来利率的判断</strong>，而是按下面"流动性桶"的思路做组合，让组合本身能容忍利率的双向变化。
+  </p>
+
+  <h2>六、配置思路：流动性三桶</h2>
+  <p>
+    与其纠结"哪一种最划算"，不如按<strong>资金的使用窗口</strong>分桶配置：
+  </p>
+  <div class="card">
+    <h3 style="margin-top: 0;">桶 1 · 流动性桶（随时可用）</h3>
+    <ul>
+      <li>形态：活期 / 货币基金 / T+0 现金管理类</li>
+      <li>规模：覆盖 3–6 个月家庭基本开支</li>
+      <li>定位：应急、日常周转，不在乎收益</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top: 0;">桶 2 · 中期桶（1–3 年内可能动用）</h3>
+    <ul>
+      <li>形态：1 年 / 2 年整存整取，按到期日阶梯排开</li>
+      <li>规模：覆盖近期可预见支出（装修、教育、车辆置换）</li>
+      <li>定位：保本 + 适度收益，保留分批到期的灵活度</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top: 0;">桶 3 · 长期桶（3–5 年内大概率不动）</h3>
+    <ul>
+      <li>形态：3 年 / 5 年大额存单、5 年储蓄国债</li>
+      <li>规模：明确不需要的长期闲置资金</li>
+      <li>定位：锁定当前利率，赚取流动性溢价</li>
+    </ul>
+  </div>
+  <p>
+    三桶的比例没有标准答案，取决于家庭收入稳定性、未来支出确定性。一个粗略起点是：1 桶 20% / 2 桶 40% / 3 桶 40%，再按个人情况微调。
+  </p>
+
+  <h2>七、50 万存款保险上限怎么理解</h2>
+  <p>
+    根据《存款保险条例》，存款保险对<strong>同一存款人</strong>在<strong>同一家投保机构</strong>的所有人民币存款本息合计，提供<strong>最高 50 万元</strong>的偿付保障。要点：
+  </p>
+  <ul>
+    <li><strong>限额是按"人 × 银行"计</strong>：在 A 行存 50 万 + B 行存 50 万，分别独立享受 50 万保障</li>
+    <li><strong>覆盖品种</strong>：活期、定期、大额存单等存款类产品；不覆盖理财、基金、保险等非存款产品</li>
+    <li><strong>本息合计</strong>：50 万是本金 + 利息一起算，不是仅本金</li>
+    <li><strong>同一法人下的分支机构合并计算</strong>：在某行不同支行的存款不能拆开算成多个 50 万</li>
+  </ul>
+  <p>
+    实操含义：单家银行存款超过 50 万的部分，若发生极端风险事件不受保障。
+    超出部分的常见做法是<strong>分散到 2–3 家银行</strong>，每家保持在 50 万以内（含预期到期利息）。储蓄国债不属于存款保险范围，但其偿付主体是财政部，信用属性单独看待。
+  </p>
+
+  <h2>八、动手对比一下</h2>
+  <p>
+    打开 <a href="/deposit">存款比较器</a>，输入当前关注产品的<strong>实时利率</strong>、本金、期限，可以一次性看到：
+  </p>
+  <ul>
+    <li>到期总收益对比</li>
+    <li>折算后的实际年化（含复利和付息方式差异）</li>
+    <li>不同期限阶梯组合下的现金流分布</li>
+  </ul>
+  <p>
+    不要只看挂牌利率的字面差距，付息方式、复利节奏、提前支取规则一起算才是真实回报。
+  </p>
+
+  <p style="font-size: 13px; color: var(--c-text-soft); margin-top: 32px;">
+    本文为通用知识科普。各类产品的起存额、期限、利率、提前支取规则以发行机构当期公告为准；本文不构成具体产品推荐，决策前请结合自身资金安排，必要时咨询正规理财师。
+  </p>
+
+  <p style="font-size: 13px;">
+    继续看：<a href="/deposit">存款比较器</a> · <a href="/compound">复利计算器</a> · <a href="/guides/compound-basics">复利入门</a>
+  </p>
+</Base>

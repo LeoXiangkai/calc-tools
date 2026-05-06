@@ -1,0 +1,260 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  wide
+  title="FIRE 财务自由倒推工具"
+  description="FIRE 计算器：用 4% 法则倒推所需资产、用现状测算几年达 FIRE、用储蓄率估算财务自由速度。所有计算在浏览器本地完成。"
+>
+  <h1 style="margin-bottom:4px;">FIRE 财务自由倒推</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    用 4% 法则倒推目标资产，用现状估算几年达成，用储蓄率衡量 FIRE 速度。数据本地处理，不上传。
+    入门：<a href="/guides/fire-basics">FIRE 入门 · 4% 法则与储蓄率</a>
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button data-tab="target" role="tab" aria-selected="true">4% 法则目标</button>
+    <button data-tab="years" role="tab" aria-selected="false">现状 → 几年达 FIRE</button>
+    <button data-tab="rate" role="tab" aria-selected="false">储蓄率 → FIRE 年数</button>
+  </div>
+
+  {/* ==================== Tab 1: 4% 法则目标 ==================== */}
+  <section class="tab-panel active" data-panel="target">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>年支出（元）<input id="t-expense" type="number" min="1" step="1000" value="120000" /></label>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:13px;color:var(--c-text-soft);margin-bottom:4px;">安全提取率（SWR）</div>
+            <div class="btn-row">
+              <input type="radio" name="t-swr" id="t-swr-3" value="3" />
+              <label for="t-swr-3">3%（保守）</label>
+              <input type="radio" name="t-swr" id="t-swr-35" value="3.5" />
+              <label for="t-swr-35">3.5%</label>
+              <input type="radio" name="t-swr" id="t-swr-4" value="4" checked />
+              <label for="t-swr-4">4%（经典）</label>
+              <input type="radio" name="t-swr" id="t-swr-5" value="5" />
+              <label for="t-swr-5">5%（激进）</label>
+            </div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            4% 来自 1998 年 Trinity Study：基于美股 1926-1995 数据，4% 提取率在 30 年滚动窗口里几乎从未让本金归零。
+          </p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">FIRE 目标资产</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="t-fire">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">资产倍数（年支出的 N 倍）</div><div class="value" id="t-multiple">—</div></div>
+            <div><div class="label">折算月支出</div><div class="value" id="t-monthly">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">说明</div><div class="value" id="t-hint" style="font-size:13px;font-weight:400;color:var(--c-text-soft);">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 2: 现状 → 几年达 FIRE ==================== */}
+  <section class="tab-panel" data-panel="years">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>当前资产（元）<input id="y-assets" type="number" min="0" step="10000" value="500000" /></label>
+            <label>每年净储蓄（元）<input id="y-savings" type="number" min="0" step="1000" value="120000" /></label>
+            <label>预期投资年化（%）<input id="y-rate" type="number" min="0" max="30" step="0.1" value="6" /></label>
+            <label>FIRE 目标资产（元）<input id="y-fire" type="number" min="1" step="10000" value="3000000" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            年储蓄按"年末投入"计入复利。Tab 1 算出的目标资产可手动填进这里。
+          </p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">还需年数</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="y-years">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">达成时终值</div><div class="value" id="y-final">—</div></div>
+            <div><div class="label">累计储蓄</div><div class="value" id="y-contribution">—</div></div>
+            <div style="grid-column:1/-1;"><div class="label">累计投资回报</div><div class="value" id="y-return" style="color:var(--c-success);">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== Tab 3: 储蓄率 → FIRE 年数 ==================== */}
+  <section class="tab-panel" data-panel="rate">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>输入</h3>
+          <div class="form-grid">
+            <label>储蓄率（%）<input id="r-rate" type="number" min="10" max="90" step="1" value="50" /></label>
+            <label>预期投资年化（%）<input id="r-return" type="number" min="0" max="30" step="0.1" value="5" /></label>
+            <label>安全提取率（%）<input id="r-swr" type="number" min="2" max="6" step="0.1" value="4" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            储蓄率 = 净储蓄 / 税后收入。该模型由 Mr. Money Mustache 推广，从 0 资产起步、储蓄率与回报率不变的理想假设。
+          </p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">达 FIRE 年数</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="r-years">—</div>
+          <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px;" id="r-desc">—</div>
+        </div>
+        <div class="card compact">
+          <h3 style="margin-top:0;">常见储蓄率对照（同样回报率与 SWR）</h3>
+          <div style="overflow-x:auto;">
+            <table id="r-table">
+              <thead><tr><th>储蓄率</th><th>FIRE 年数</th><th>速度</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;color:var(--c-text-soft);">
+            经典结论：储蓄率每提高一档，FIRE 年数缩减不是线性、而是"双向加速"（多存的同时少花的）。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">计算口径与免责</summary>
+    <ul style="font-size:13px;color:var(--c-text-soft);margin:8px 0 0;">
+      <li><strong>FIRE 目标</strong>：年支出 ÷ 安全提取率 = 目标资产；4% 法则即 25 倍年支出</li>
+      <li><strong>几年达 FIRE</strong>：迭代 <code>资产 = 资产 × (1+r) + 年储蓄</code> 至触达目标，最多 100 年</li>
+      <li><strong>储蓄率模型</strong>：假设年支出 = 1 单位，年储蓄 = s/(1−s)，从 0 资产起步迭代到 1/SWR 倍年支出</li>
+      <li>Trinity Study 的 4% 基于美股 1926-1995 数据；近年研究（Bengen、Kitces）讨论 3.3%-4.5% 区间，国内 A 股波动更大、债券真实收益率较低，普遍建议保守至 3-3.5%</li>
+      <li>所有计算未考虑：税费、医疗费用、长寿风险、市场顺序风险（Sequence of Returns Risk）、汇率与跨境配置成本</li>
+    </ul>
+  </details>
+
+  <script>
+    import { calcFireTarget, calcFireYears, calcFireFromSavingsRate } from "~/lib/fire";
+    import { fmtCny } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny(n)}`;
+    const num = (id: string) => Number($<HTMLInputElement>(id).value) || 0;
+
+    // Tab switch
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
+      }),
+    );
+
+    // ---------- Tab 1: 4% 法则目标 ----------
+    function renderTarget(): void {
+      const annualExpense = num("t-expense");
+      const swr = Number(document.querySelector<HTMLInputElement>("input[name='t-swr']:checked")?.value ?? "4");
+      if (annualExpense <= 0 || swr <= 0) {
+        ["t-fire","t-multiple","t-monthly","t-hint"].forEach((id) => ($(id).textContent = "—"));
+        return;
+      }
+      const r = calcFireTarget({ annualExpense, withdrawalRatePct: swr });
+      $("t-fire").textContent = cny(r.fireNumber);
+      $("t-multiple").textContent = `${r.multiple.toFixed(1)} ×`;
+      $("t-monthly").textContent = cny(annualExpense / 12);
+      const hint =
+        swr >= 5 ? "5% 偏激进：长寿+市场低迷叠加时本金可能被耗尽，建议留 3-5 年现金缓冲"
+        : swr >= 4 ? "4% 是经典 Trinity 假设，但基于美股历史；国内可向下调"
+        : swr >= 3.5 ? "3.5% 较稳健，对应约 28.6 倍年支出"
+        : "3% 非常保守，约 33 倍年支出，适合早 FIRE / 长生命周期";
+      $("t-hint").textContent = hint;
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='t-']").forEach((el) => el.addEventListener("input", renderTarget));
+    document.querySelectorAll<HTMLInputElement>("input[name='t-swr']").forEach((el) => el.addEventListener("change", renderTarget));
+    renderTarget();
+
+    // ---------- Tab 2: 现状 → 几年达 FIRE ----------
+    function renderYears(): void {
+      const currentAssets = num("y-assets");
+      const annualSavings = num("y-savings");
+      const expectedReturnPct = num("y-rate");
+      const fireNumber = num("y-fire");
+      const r = calcFireYears({ currentAssets, annualSavings, expectedReturnPct, fireNumber });
+
+      if (r.yearsToFire === -1) {
+        $("y-years").textContent = "100 年内无解";
+        $("y-final").textContent = "—";
+        $("y-contribution").textContent = "—";
+        $("y-return").textContent = "—";
+        return;
+      }
+      if (r.yearsToFire === 0) {
+        $("y-years").textContent = "已达 FIRE";
+      } else {
+        $("y-years").textContent = `${r.yearsToFire} 年`;
+      }
+      $("y-final").textContent = cny(r.finalAssets);
+      $("y-contribution").textContent = cny(r.totalContribution);
+      $("y-return").textContent = cny(r.totalReturn);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='y-']").forEach((el) => el.addEventListener("input", renderYears));
+    renderYears();
+
+    // ---------- Tab 3: 储蓄率 → FIRE 年数 ----------
+    const COMMON_RATES = [25, 40, 50, 65, 75];
+    function renderRate(): void {
+      const savingsRatePct = num("r-rate");
+      const expectedReturnPct = num("r-return");
+      const withdrawalRatePct = num("r-swr");
+      const r = calcFireFromSavingsRate({ savingsRatePct, expectedReturnPct, withdrawalRatePct });
+      if (r.yearsToFire === -1) {
+        $("r-years").textContent = "无解";
+        $("r-desc").textContent = r.description;
+      } else {
+        $("r-years").textContent = `${r.yearsToFire} 年`;
+        $("r-desc").textContent = `节奏：${r.description}`;
+      }
+
+      const tbody = document.querySelector<HTMLTableSectionElement>("#r-table tbody")!;
+      const frag = document.createDocumentFragment();
+      for (const rate of COMMON_RATES) {
+        const row = calcFireFromSavingsRate({
+          savingsRatePct: rate,
+          expectedReturnPct,
+          withdrawalRatePct,
+        });
+        const tr = document.createElement("tr");
+        const yearsText = row.yearsToFire === -1 ? "—" : `${row.yearsToFire} 年`;
+        tr.innerHTML = `<td>${rate}%</td><td>${yearsText}</td><td>${row.description}</td>`;
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='r-']").forEach((el) => el.addEventListener("input", renderRate));
+    renderRate();
+  </script>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅为 FIRE 公式的演示与教学，所有"投资年化""提取率"参数均为用户自行设定的假设，
+    <strong>不代表任何金融产品的实际收益、不构成投资、退休或理财规划建议</strong>。
+    4% 法则源自基于美股历史数据的 Trinity Study，不能直接套用于国内市场；A 股波动更大、债券实际收益率较低，
+    国内长期建议向 3-3.5% 收紧。投资有风险，重大决策请咨询持牌金融机构或专业理财顾问。
+  </p>
+</Base>

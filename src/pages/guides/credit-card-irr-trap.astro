@@ -1,0 +1,171 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  title="分期“月费率 0.6%”≠ 年化 7.2%：信用卡 IRR 真相"
+  description="信用卡和消费贷分期的“月费率”话术为何会低估真实利率？用 IRR（内部收益率）换算后的实际年化常常是名义的 1.8 – 2 倍。附 3/12/24 期 × 多档月费率对照表，以及提前结清的隐藏成本说明。"
+>
+  <h1>分期“月费率 0.6%”≠ 年化 7.2%：信用卡 IRR 真相</h1>
+  <p style="color:var(--c-text-soft);font-size:14px;">
+    阅读时间约 8 分钟。文中所有数字可在 <a href="/credit-card-irr">信用卡分期 IRR 计算器</a> 实测。
+  </p>
+
+  <h2>一、银行话术里的“月费率”到底是什么</h2>
+  <p>
+    打开任何一张信用卡 App 的分期界面，最显眼的数字一般是“分期手续费率 0.6%/月”，
+    旁边附一句小字“折合年化 7.2%”。这两个数字本身没有错——
+    月费率乘以 12 确实等于 7.2%——但它隐去了一个关键事实：
+    <strong>这个 7.2% 不是你借这笔钱的真实成本</strong>。
+  </p>
+  <p>
+    真实成本要看 <strong>IRR（内部收益率，Internal Rate of Return）</strong>，
+    也叫 APR（实际年利率）。同样一笔分期，按 IRR 算，
+    月费率 0.6% × 12 期对应的真实年化通常落在 13% 上下，几乎是“名义年化”的 2 倍。
+  </p>
+
+  <h2>二、IRR 为什么比名义年化高</h2>
+  <p>
+    分期的还款结构是：<strong>本金等额拆分，手续费按全额本金每期收</strong>。
+    举个简化的例子，借 12000 元分 12 期，月费率 0.6%：
+  </p>
+  <ul>
+    <li>每期还本金 1000 元（12000 ÷ 12）</li>
+    <li>每期手续费 72 元（12000 × 0.6%）</li>
+    <li>每期共还 1072 元</li>
+  </ul>
+  <p>
+    问题在于：<strong>第二个月你实际已经只欠银行 11000 元了，但手续费仍按 12000 元算</strong>；
+    到第十一个月你只欠 1000 元，手续费还是按 12000 元算。
+    钱已经分期还回去了，利息却始终按最初的全额本金收——这就是真实利率被推高的根源。
+  </p>
+  <p>
+    IRR 的计算思路是把这种“资金占用随时间递减”反映出来：
+    用二分法求一个月利率 r，使得每期 1072 元的等额还款现值恰好等于 12000 元本金。
+    解出 r 之后再换算成年化 <code>(1 + r)^12 − 1</code>。
+  </p>
+
+  <h2>三、案例：12 期 × 月费率 0.6%</h2>
+  <p>用 <a href="/credit-card-irr">计算器</a>实测 10 万元、12 期、月费率 0.6%：</p>
+  <ul>
+    <li>每期还款 ≈ <strong>8 933 元</strong></li>
+    <li>总手续费 = <strong>7 200 元</strong></li>
+    <li>名义年化 = <strong>7.20%</strong>（月费率 × 12）</li>
+    <li>真实 IRR ≈ <strong>13.84%</strong></li>
+    <li>IRR / 名义 ≈ <strong>1.92 倍</strong></li>
+  </ul>
+  <p>
+    也就是说，账面写着 7.2%，但你借这 10 万元的真实资金成本接近 14%，
+    与一笔银行消费贷（5 – 8%）相比，明显偏贵。
+  </p>
+
+  <h2>四、不同期数 × 月费率对照表</h2>
+  <p>
+    把月费率换算成 IRR 不依赖本金大小（IRR 只与月费率和期数有关）。下表来自计算器实算：
+  </p>
+  <div class="card">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#fafafa;">
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--c-border);">期数</th>
+          <th style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">月费率 0.45%</th>
+          <th style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">月费率 0.60%</th>
+          <th style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">月费率 0.75%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid var(--c-border);">3 期</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">8.39%</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">11.32%</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">14.31%</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid var(--c-border);">12 期</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">10.28%</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">13.84%</td>
+          <td style="padding:8px;text-align:right;border-bottom:1px solid var(--c-border);">17.48%</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;">24 期</td>
+          <td style="padding:8px;text-align:right;">10.52%</td>
+          <td style="padding:8px;text-align:right;">14.10%</td>
+          <td style="padding:8px;text-align:right;">17.72%</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;color:var(--c-text-soft);" colspan="4">
+            参照名义年化：0.45% → 5.40% / 0.60% → 7.20% / 0.75% → 9.00%
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    可以看出两个规律：
+  </p>
+  <ul>
+    <li>期数越长，IRR 越接近某个上限（24 期已经几乎收敛，再拉长意义不大）</li>
+    <li>同一月费率，IRR 几乎是名义年化的 1.8 – 2 倍，并不会因为期数长而摊薄</li>
+  </ul>
+
+  <h2>五、提前结清的隐藏成本</h2>
+  <p>
+    “那我提前结清不就行了？”——多数情况下这条路不通：
+  </p>
+  <ul>
+    <li><strong>已收手续费不退</strong>：分期手续费按月收，已经过的月份不退</li>
+    <li><strong>违约金</strong>：常见做法是收剩余本金的 1% – 3%，部分卡 6 个月内提前结清要付 1 个月手续费</li>
+    <li><strong>免息分期</strong>：本来 0 手续费，提前结清反而要补付剩余手续费（部分活动的条款里写明）</li>
+  </ul>
+  <p>
+    判断是否值得提前结清的标准是：
+    <strong>剩余手续费 − 违约金 &gt; 0</strong>。可以在
+    <a href="/credit-card-irr">计算器的“是否提前结清”Tab</a> 直接算。
+    一般 <em>已还过一半以上期数</em> 的分期，提前结清的净节省往往不足以覆盖违约金。
+  </p>
+
+  <h2>六、什么时候分期是合理的</h2>
+  <p>分期不是绝对不能用，三种情况下相对合理：</p>
+  <ol>
+    <li><strong>真正的“免息分期”</strong>：商家或银行联合活动，0 手续费、0 违约金，且提前结清不补费</li>
+    <li><strong>3 个月内的短期周转</strong>：3 期 × 0.6% 的 IRR 约 11.3%，绝对成本只有约 1.8% 的总手续费，比短期借现金可能更省心</li>
+    <li><strong>分期赠送的额外权益足以抵消手续费</strong>：例如返现、积分换算后的实际折扣 ≥ 手续费</li>
+  </ol>
+  <p>
+    其他情况下，尤其是 12 期以上、月费率 ≥ 0.6% 的分期，
+    用一笔利率明确的消费贷或信用贷往往更便宜。
+  </p>
+
+  <h2>七、替代方案的成本对照</h2>
+  <p>同样借 10 万元用 1 年，按当前主流定价的粗略对照：</p>
+  <ul>
+    <li><strong>信用卡分期 12 期 × 0.6%</strong>：真实年化 ≈ 13.84%，总成本约 7 200 元</li>
+    <li><strong>银行消费贷</strong>：年化 5% – 8%（按等额本息），总利息约 2 700 – 4 400 元</li>
+    <li><strong>信用贷 / 工薪贷</strong>：资质好的客户年化 4% – 7%，总利息约 2 200 – 3 800 元</li>
+    <li><strong>对公经营贷</strong>：有营业执照场景，年化 3.5% – 5%，但用途、还款来源审核更严</li>
+  </ul>
+  <p>
+    具体能拿到的利率取决于个人资质（征信、流水、社保、负债率）。
+    对照的意义是让你知道：分期的真实成本对应着银行另一条更便宜的产品线，
+    并不是“没有别的选择”。
+  </p>
+
+  <h2>八、动手算一下</h2>
+  <p>
+    打开 <a href="/credit-card-irr">信用卡分期 IRR 计算器</a>，按账单上的本金、月费率、期数填入，
+    会看到三件事：
+  </p>
+  <ul>
+    <li>真实年化（IRR）和银行宣传的“名义年化”差多少倍</li>
+    <li>这笔分期一共要多花多少手续费</li>
+    <li>当前已还若干期时，提前结清是否真的划算</li>
+  </ul>
+  <p>
+    数学是中性的，IRR 只是一种把“按时间递减占用资金”反映出来的换算方式。
+    分期是否要用、要不要提前结清，最终取决于你的现金流和替代方案的可得性。
+  </p>
+
+  <p style="font-size:13px;color:var(--c-text-soft);margin-top:32px;">
+    本文为 calc-tools 原创内容。文中数值由 <a href="/credit-card-irr">计算器</a> 实算得出，各银行账单口径与活动条款可能不同，
+    具体金额以银行实际账单为准。本文不构成消费贷或信用卡使用建议。
+  </p>
+</Base>

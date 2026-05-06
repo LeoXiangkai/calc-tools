@@ -1,0 +1,202 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  wide
+  title="租房 vs 买房长期对比"
+  description="把买房总成本（首付 + 月供 + 房产税 + 维护 - 期末房产权益）与租房总成本（累计租金 - 首付投资收益）放在同一时间轴对比，看哪种方式长期更划算。"
+>
+  <h1 style="margin-bottom:4px;">租房 vs 买房长期对比</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    把买房总现金流（首付 + 月供 + 持有成本）与租房（累计租金 + 首付投资机会成本）放在同一时间轴比较，得出哪种方式期末净成本更低。
+  </p>
+
+  <div class="split" style="margin-top:8px;">
+    <div class="col-input">
+      <div class="card compact">
+        <h3>房产</h3>
+        <div class="form-grid">
+          <label>总价（万元）<input id="rb-price" type="number" min="1" step="1" value="500" /></label>
+          <label>首付比例（%）<input id="rb-down" type="number" min="0" max="100" step="1" value="30" /></label>
+          <label>贷款年限<input id="rb-loan-years" type="number" min="1" max="30" step="1" value="30" /></label>
+          <label>贷款利率（%）<input id="rb-rate" type="number" min="0" step="0.01" value="3.95" /></label>
+        </div>
+      </div>
+
+      <div class="card compact">
+        <h3>租房</h3>
+        <div class="form-grid">
+          <label>当前月租（元）<input id="rb-rent" type="number" min="0" step="100" value="6000" /></label>
+          <label>年化租金涨幅（%）<input id="rb-rent-growth" type="number" min="0" step="0.1" value="3" /></label>
+        </div>
+      </div>
+
+      <div class="card compact">
+        <h3>持有</h3>
+        <div class="form-grid">
+          <label>年化房价涨幅（%）<input id="rb-appr" type="number" step="0.1" value="3" /></label>
+          <label>房产税年化（%）<input id="rb-tax" type="number" min="0" step="0.1" value="0.5" /></label>
+          <label>维护费年化（%）<input id="rb-maint" type="number" min="0" step="0.1" value="0.5" /></label>
+        </div>
+      </div>
+
+      <div class="card compact">
+        <h3>投资</h3>
+        <div class="form-grid">
+          <label>首付投资年化回报（%）<input id="rb-inv" type="number" step="0.1" value="5" /></label>
+        </div>
+      </div>
+
+      <div class="card compact">
+        <h3>持有期</h3>
+        <div class="btn-row">
+          <input type="radio" name="rb-years" id="rb-y5" value="5" />
+          <label for="rb-y5">5 年</label>
+          <input type="radio" name="rb-years" id="rb-y10" value="10" checked />
+          <label for="rb-y10">10 年</label>
+          <input type="radio" name="rb-years" id="rb-y15" value="15" />
+          <label for="rb-y15">15 年</label>
+          <input type="radio" name="rb-years" id="rb-y20" value="20" />
+          <label for="rb-y20">20 年</label>
+          <input type="radio" name="rb-years" id="rb-y30" value="30" />
+          <label for="rb-y30">30 年</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-result">
+      <div class="card compact highlight">
+        <div style="font-size:12px;color:var(--c-text-soft);">长期对比结论</div>
+        <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="rb-rec">—</div>
+        <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px;" id="rb-advantage">—</div>
+      </div>
+
+      <div class="card compact">
+        <h3>买房</h3>
+        <div class="kv-grid">
+          <div><div class="label">首付</div><div class="value" id="rb-r-down">—</div></div>
+          <div><div class="label">累计月供</div><div class="value" id="rb-r-mortgage">—</div></div>
+          <div><div class="label">持有成本（税+维护）</div><div class="value" id="rb-r-holding">—</div></div>
+          <div><div class="label">期末房价</div><div class="value" id="rb-r-home-value">—</div></div>
+          <div><div class="label">期末剩余贷款</div><div class="value" id="rb-r-remaining">—</div></div>
+          <div><div class="label">期末房产净值</div><div class="value" id="rb-r-equity">—</div></div>
+          <div style="grid-column:1/-1;"><div class="label">买房净成本</div><div class="value" id="rb-r-buy-net">—</div></div>
+        </div>
+      </div>
+
+      <div class="card compact">
+        <h3>租房</h3>
+        <div class="kv-grid">
+          <div><div class="label">累计租金</div><div class="value" id="rb-r-rent">—</div></div>
+          <div><div class="label">首付投资终值</div><div class="value" id="rb-r-invested">—</div></div>
+          <div style="grid-column:1/-1;"><div class="label">租房净成本</div><div class="value" id="rb-r-rent-net">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">计算口径</summary>
+    <ul style="font-size:13px;color:var(--c-text-soft);margin:8px 0 0;">
+      <li><strong>买房净成本</strong> = 首付 + 累计月供 + 持有成本 − 期末房产净值（房价 − 剩余贷款）</li>
+      <li><strong>租房净成本</strong> = 累计租金 − 首付投资收益（首付一次性投入、月度复利；月供与房租差额按平均值近似）</li>
+      <li><strong>持有成本</strong>：按持有期内平均房价 ×（房产税% + 维护费%）× 年数估算</li>
+      <li><strong>结论判定</strong>：净成本差额绝对值小于总价的 2% 视为"打平"，避免在小波动里硬分高下</li>
+      <li>未计入：装修、家具、契税及交易税费、卖房税费、租房中介费等一次性支出</li>
+    </ul>
+  </details>
+
+  <p style="font-size:13px;margin-top:12px;">
+    继续看：<a href="/guides/rent-vs-buy-decision">租房还是买房？长期账本怎么算</a> · <a href="/mortgage">房贷计算器</a> · <a href="/transaction-tax">买房税费</a>
+  </p>
+
+  <script>
+    import { calcRentVsBuy } from "~/lib/rent-vs-buy";
+    import { fmtCny, fmtWan } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+    // 大于 1 万显示"X.XX 万"；否则显示带分位的元
+    const cny = (n: number): string => {
+      if (!Number.isFinite(n)) return "—";
+      const abs = Math.abs(n);
+      if (abs >= 10000) return `${n < 0 ? "-" : ""}¥${fmtWan(abs)} 万`;
+      return `${n < 0 ? "-" : ""}¥${fmtCny(abs)}`;
+    };
+
+    function render(): void {
+      const totalPrice = Number($<HTMLInputElement>("rb-price").value) * 10000;
+      const downPaymentPct = Number($<HTMLInputElement>("rb-down").value);
+      const loanYears = Number($<HTMLInputElement>("rb-loan-years").value);
+      const loanRatePct = Number($<HTMLInputElement>("rb-rate").value);
+      const monthlyRent = Number($<HTMLInputElement>("rb-rent").value);
+      const rentGrowthPct = Number($<HTMLInputElement>("rb-rent-growth").value);
+      const homeAppreciationPct = Number($<HTMLInputElement>("rb-appr").value);
+      const propertyTaxYearlyPct = Number($<HTMLInputElement>("rb-tax").value);
+      const maintenanceYearlyPct = Number($<HTMLInputElement>("rb-maint").value);
+      const investmentReturnPct = Number($<HTMLInputElement>("rb-inv").value);
+      const yearsToHold = Number(
+        document.querySelector<HTMLInputElement>("input[name='rb-years']:checked")?.value ?? "10",
+      );
+
+      const r = calcRentVsBuy({
+        totalPrice,
+        downPaymentPct,
+        loanYears,
+        loanRatePct,
+        monthlyRent,
+        rentGrowthPct,
+        homeAppreciationPct,
+        propertyTaxYearlyPct,
+        maintenanceYearlyPct,
+        investmentReturnPct,
+        yearsToHold,
+      });
+
+      const recEl = $("rb-rec");
+      const advEl = $("rb-advantage");
+      if (r.recommendation === "buy") {
+        recEl.textContent = "长期更划算：买房";
+      } else if (r.recommendation === "rent") {
+        recEl.textContent = "长期更划算：租房";
+      } else {
+        recEl.textContent = "两者接近，难分高下";
+      }
+      const adv = r.buyAdvantage;
+      if (Math.abs(adv) < 1) {
+        advEl.textContent = "净成本差额可忽略";
+      } else if (adv > 0) {
+        advEl.textContent = `买房比租房少花约 ${cny(Math.abs(adv))}（${yearsToHold} 年合计）`;
+      } else {
+        advEl.textContent = `租房比买房少花约 ${cny(Math.abs(adv))}（${yearsToHold} 年合计）`;
+      }
+
+      $("rb-r-down").textContent = cny(r.downPayment);
+      $("rb-r-mortgage").textContent = cny(r.totalMortgageCost);
+      $("rb-r-holding").textContent = cny(r.totalHoldingCost);
+      $("rb-r-home-value").textContent = cny(r.homeValueAtEnd);
+      $("rb-r-remaining").textContent = cny(r.remainingLoanAtEnd);
+      $("rb-r-equity").textContent = cny(r.buyEquityAtEnd);
+      $("rb-r-buy-net").textContent = cny(r.buyNetCost);
+
+      $("rb-r-rent").textContent = cny(r.totalRent);
+      $("rb-r-invested").textContent = cny(r.investedFinalValue);
+      $("rb-r-rent-net").textContent = cny(r.rentNetCost);
+    }
+
+    document
+      .querySelectorAll<HTMLElement>(
+        "#rb-price,#rb-down,#rb-loan-years,#rb-rate,#rb-rent,#rb-rent-growth,#rb-appr,#rb-tax,#rb-maint,#rb-inv,input[name='rb-years']",
+      )
+      .forEach((el) => {
+        el.addEventListener("input", render);
+        el.addEventListener("change", render);
+      });
+    render();
+  </script>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具基于简化的财务模型，未考虑学区、婚房、户籍、限购等非财务因素，也未计入交易税费、装修与家具支出。
+    模型对房价涨幅、租金涨幅、投资回报均按固定年化估算，真实市场波动会显著影响结论。本结果不构成购房或投资建议。
+  </p>
+</Base>

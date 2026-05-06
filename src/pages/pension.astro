@@ -1,0 +1,186 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base
+  wide
+  title="退休金计算器"
+  description="估算职工社保退休金 + 个人养老金账户抵税收益。基于公开养老金公式（基础养老金 + 个人账户）。"
+>
+  <h1 style="margin-bottom:4px;">退休金计算器</h1>
+  <p style="font-size:13px;margin:0 0 8px;">
+    估算社保退休金 + 个人养老金账户。结果按公开公式估算，实际以人社部门核定为准。
+    入门：<a href="/guides/pension-basics">退休金入门</a>
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button data-tab="basic" role="tab" aria-selected="true">职工养老金</button>
+    <button data-tab="personal" role="tab" aria-selected="false">个人养老金账户</button>
+  </div>
+
+  {/* Tab 1：职工养老金 */}
+  <section class="tab-panel active" data-panel="basic">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>当前情况</h3>
+          <div class="form-grid">
+            <label>当前社平工资（元/月）<input id="b-wage" type="number" min="1" step="100" value="8000" /></label>
+            <label>社平工资年化增长（%）<input id="b-growth" type="number" min="0" max="20" step="0.1" value="5" /></label>
+            <label>距退休年数<input id="b-years" type="number" min="0" max="50" step="1" value="20" /></label>
+            <label>总缴费年限（含到退休时）<input id="b-contrib-years" type="number" min="1" max="50" step="1" value="30" /></label>
+            <label>平均缴费指数（0.6-3.0）<input id="b-index" type="number" min="0.6" max="3" step="0.1" value="1.0" /></label>
+            <label>当前个人账户余额（元）<input id="b-balance" type="number" min="0" step="1000" value="50000" /></label>
+            <label>每月划入个人账户（元）<input id="b-monthly" type="number" min="0" step="50" value="800" /></label>
+            <label>个人账户记账利率（%）<input id="b-account-rate" type="number" min="0" max="15" step="0.1" value="5" /></label>
+            <label>退休年龄
+              <select id="b-retire-age">
+                <option value="50">50</option>
+                <option value="55">55</option>
+                <option value="60" selected>60</option>
+                <option value="65">65</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">月退休金估算</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="b-monthly-pension">—</div>
+          <div style="font-size:12px;color:var(--c-text-soft);margin-top:2px;" id="b-replacement">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">基础养老金</div><div class="value" id="b-basic">—</div></div>
+            <div><div class="label">个人账户养老金</div><div class="value" id="b-account-pen">—</div></div>
+            <div><div class="label">退休时社平工资</div><div class="value" id="b-retire-wage">—</div></div>
+            <div><div class="label">退休时账户余额</div><div class="value" id="b-account-end">—</div></div>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            "缴费指数" = 实际缴费基数 / 当年社平工资。按社平基数缴 = 1.0；按基数下限 60% 缴 = 0.6。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Tab 2：个人养老金账户 */}
+  <section class="tab-panel" data-panel="personal">
+    <div class="split">
+      <div class="col-input">
+        <div class="card compact">
+          <h3>账户参数</h3>
+          <div class="form-grid">
+            <label>每年缴存（≤12000）<input id="p-yearly" type="number" min="0" max="12000" step="500" value="12000" /></label>
+            <label>当前个税最高边际税率（%）
+              <select id="p-tax">
+                <option value="3">3%</option>
+                <option value="10" selected>10%</option>
+                <option value="20">20%</option>
+                <option value="25">25%</option>
+                <option value="30">30%</option>
+                <option value="35">35%</option>
+                <option value="45">45%</option>
+              </select>
+            </label>
+            <label>距退休年数<input id="p-years" type="number" min="1" max="50" step="1" value="20" /></label>
+            <label>账户内投资年化（%）<input id="p-return" type="number" min="0" max="15" step="0.1" value="5" /></label>
+            <label>领取时税率（%，2024 起 3%）<input id="p-withdraw-tax" type="number" min="0" max="20" step="0.5" value="3" /></label>
+          </div>
+          <p style="font-size:12px;margin:8px 0 0;">
+            缴存 12000/年抵税；退休领取时按 3% 综合税率单独计税。边际税率越高，节税效果越好。
+          </p>
+        </div>
+      </div>
+
+      <div class="col-result">
+        <div class="card compact highlight">
+          <div style="font-size:12px;color:var(--c-text-soft);">净收益（含抵税扣税）</div>
+          <div style="font-size:24px;font-weight:600;color:var(--c-success);" id="p-net">—</div>
+          <div style="font-size:12px;color:var(--c-text-soft);margin-top:2px;" id="p-eff-rate">—</div>
+        </div>
+        <div class="card compact">
+          <div class="kv-grid">
+            <div><div class="label">累计本金</div><div class="value" id="p-contrib">—</div></div>
+            <div><div class="label">累计抵税</div><div class="value" id="p-saved" style="color:var(--c-success);">—</div></div>
+            <div><div class="label">退休时账户余额</div><div class="value" id="p-final">—</div></div>
+            <div><div class="label">领取时缴税</div><div class="value" id="p-tax-pay" style="color:var(--c-danger);">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
+    <strong>免责声明</strong>：本工具仅基于公开养老金公式估算，实际退休金以社保经办机构核定为准。
+    各地缴费政策、社平工资、计发月数有差异。本工具不构成任何金融、税务或养老规划建议。
+  </p>
+
+  <script>
+    import { calcPension, calcPersonalPension, PAYOUT_MONTHS } from "~/lib/pension";
+    import { fmtCny } from "~/lib/mortgage";
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const cny = (n: number) => `¥${fmtCny(n)}`;
+    const num = (id: string) => Number($<HTMLInputElement>(id).value) || 0;
+
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tabs button[data-tab]");
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel[data-panel]");
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.setAttribute("aria-selected", "false"));
+        t.setAttribute("aria-selected", "true");
+        panels.forEach((p) =>
+          p.classList.toggle("active", p.dataset.panel === t.dataset.tab),
+        );
+      }),
+    );
+
+    function renderBasic(): void {
+      const r = calcPension({
+        currentAvgWage: num("b-wage"),
+        wageGrowthPct: num("b-growth"),
+        yearsToRetire: num("b-years"),
+        contributionYears: num("b-contrib-years"),
+        contributionIndex: num("b-index"),
+        personalAccountBalance: num("b-balance"),
+        monthlyContributionToAccount: num("b-monthly"),
+        accountInterestPct: num("b-account-rate"),
+        retireAge: Number($<HTMLSelectElement>("b-retire-age").value) as 50 | 55 | 60 | 65,
+      });
+      $("b-monthly-pension").textContent = cny(r.monthlyPension);
+      $("b-replacement").textContent = `相对退休时社平工资替代率 ${r.replacementPct}%`;
+      $("b-basic").textContent = cny(r.basicPension);
+      $("b-account-pen").textContent = cny(r.accountPension);
+      $("b-retire-wage").textContent = cny(r.retirementAvgWage);
+      $("b-account-end").textContent = cny(r.accountAtRetirement);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='b-']").forEach((el) =>
+      el.addEventListener("input", renderBasic),
+    );
+    $<HTMLSelectElement>("b-retire-age").addEventListener("change", renderBasic);
+    renderBasic();
+
+    function renderPersonal(): void {
+      const r = calcPersonalPension({
+        yearlyContribution: num("p-yearly"),
+        marginalTaxRatePct: num("p-tax"),
+        yearsToRetire: num("p-years"),
+        expectedAnnualReturnPct: num("p-return"),
+        withdrawTaxRatePct: num("p-withdraw-tax"),
+      });
+      $("p-net").textContent = cny(r.netGain);
+      $("p-eff-rate").textContent = `实际净节税率 ${r.effectiveTaxSavedPct}%（每元缴存）`;
+      $("p-contrib").textContent = cny(r.totalContribution);
+      $("p-saved").textContent = cny(r.taxSaved);
+      $("p-final").textContent = cny(r.finalBalance);
+      $("p-tax-pay").textContent = cny(r.withdrawTax);
+    }
+    document.querySelectorAll<HTMLInputElement>("[id^='p-']").forEach((el) =>
+      el.addEventListener("input", renderPersonal),
+    );
+    $<HTMLSelectElement>("p-tax").addEventListener("change", renderPersonal);
+    renderPersonal();
+  </script>
+</Base>
