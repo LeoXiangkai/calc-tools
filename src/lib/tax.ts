@@ -29,7 +29,7 @@ export interface TaxResult {
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-// 契税档位（2025-12 起执行，全国统一新政）
+// 契税档位（2024-12-01 起执行，全国统一新政）
 // 首套：≤140 ㎡ 1%，>140 ㎡ 1.5%
 // 二套：≤140 ㎡ 1%，>140 ㎡ 2%（北上广深历史上有 3% 上限，新政统一为 2%）
 function contractTaxRate(order: HouseOrder, area: number): number {

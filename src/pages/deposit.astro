@@ -17,14 +17,14 @@ import Base from "~/layouts/Base.astro";
         <h3>本金与利率（年化 %）</h3>
         <div class="form-grid">
           <label>本金（元）<input id="d-principal" type="number" min="0" max="100000000" step="1000" value="200000" /></label>
-          <label>活期（%）<input id="d-current" type="number" min="0" max="30" step="0.05" value="0.20" /></label>
-          <label>1 年定存（%）<input id="d-1y" type="number" min="0" max="30" step="0.05" value="1.50" /></label>
-          <label>2 年定存（%）<input id="d-2y" type="number" min="0" max="30" step="0.05" value="1.55" /></label>
-          <label>3 年定存（%）<input id="d-3y" type="number" min="0" max="30" step="0.05" value="1.95" /></label>
-          <label>5 年定存（%）<input id="d-5y" type="number" min="0" max="30" step="0.05" value="2.00" /></label>
-          <label>3 年大额存单（≥20 万，%）<input id="d-3y-big" type="number" min="0" max="30" step="0.05" value="2.10" /></label>
-          <label>3 年储蓄国债（%，按年复利）<input id="d-3y-bond" type="number" min="0" max="30" step="0.05" value="2.50" /></label>
-          <label>5 年储蓄国债（%，按年复利）<input id="d-5y-bond" type="number" min="0" max="30" step="0.05" value="2.65" /></label>
+          <label>活期（%）<input id="d-current" type="number" min="0" max="30" step="0.05" value="0.05" /></label>
+          <label>1 年定存（%）<input id="d-1y" type="number" min="0" max="30" step="0.05" value="0.95" /></label>
+          <label>2 年定存（%）<input id="d-2y" type="number" min="0" max="30" step="0.05" value="1.05" /></label>
+          <label>3 年定存（%）<input id="d-3y" type="number" min="0" max="30" step="0.05" value="1.25" /></label>
+          <label>5 年定存（%）<input id="d-5y" type="number" min="0" max="30" step="0.05" value="1.30" /></label>
+          <label>3 年大额存单（≥20 万，%）<input id="d-3y-big" type="number" min="0" max="30" step="0.05" value="1.55" /></label>
+          <label>3 年储蓄国债（%，按年复利）<input id="d-3y-bond" type="number" min="0" max="30" step="0.05" value="1.63" /></label>
+          <label>5 年储蓄国债（%，按年复利）<input id="d-5y-bond" type="number" min="0" max="30" step="0.05" value="1.70" /></label>
         </div>
         <p class="error-msg" id="d-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
       </div>
