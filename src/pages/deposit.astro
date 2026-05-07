@@ -65,6 +65,26 @@ import Base from "~/layouts/Base.astro";
     </div>
   </div>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>个人储蓄存款保险：50 万元限额（《存款保险条例》国务院令第 660 号）——
+        <a href="https://www.gov.cn/zhengce/content/2015-02/17/content_9499.htm" rel="noopener" target="_blank">国务院公开文本</a>
+      </li>
+      <li>储蓄国债（电子式）：按年复利、到期一次性还本付息——
+        <a href="https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/" rel="noopener" target="_blank">财政部当期发行公告</a>
+      </li>
+      <li>整存整取 / 大额存单 / 活期：按持有期单利结算，参考中国人民银行存款利率管理规定——
+        <a href="http://www.pbc.gov.cn/" rel="noopener" target="_blank">中国人民银行</a>
+      </li>
+      <li>各银行实际利率以中国工商银行 / 建设银行 / 交通银行等官网实时公告为准</li>
+      <li>存款利率市场化改革：央行已不再公布基准利率指导，由各行自行报价</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅按公开公式演示，最新利率与产品规则以发布机构实时公告为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅按你输入的利率做数学计算，不构成存款产品推荐。
     实际利率请以银行实时公布与产品说明书为准；储蓄国债的发行利率以财政部当期公告为准。

@@ -216,6 +216,21 @@ import Base from "~/layouts/Base.astro";
     render();
   </script>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>房贷公式同《房贷计算器》：参考人民银行公布的标准住房贷款还款方式</li>
+      <li>房产税试点办法（沪、渝两地）参考各地税务部门公告（默认税率仅作演示）</li>
+      <li>4% 提取率参考 Trinity Study (1998) — 基于美国历史数据，国内市场可保守至 3%-3.5%</li>
+      <li>当前 5 年期 LPR：以
+        <a href="https://www.chinamoney.com.cn/chinese/bkccpr/" rel="noopener" target="_blank">全国银行间同业拆借中心</a>
+        实时公布为准</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅按公开公式演示，不替代银行实际放款核算。最新利率以发布机构实时公告为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具基于简化的财务模型，未考虑学区、婚房、户籍、限购等非财务因素，也未计入交易税费、装修与家具支出。
     模型对房价涨幅、租金涨幅、投资回报均按固定年化估算，真实市场波动会显著影响结论。本结果不构成购房或投资建议。

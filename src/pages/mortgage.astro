@@ -536,6 +536,22 @@ import Base from "~/layouts/Base.astro";
     renderReprice();
   </script>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>等额本息 / 等额本金公式：参考人民银行公布的标准住房贷款还款方式</li>
+      <li>当前 5 年期 LPR：以
+        <a href="https://www.chinamoney.com.cn/chinese/bkccpr/" rel="noopener" target="_blank">全国银行间同业拆借中心</a>
+        实时公布为准（默认值仅占位）</li>
+      <li>公积金贷款利率（2025-05-08 调整）：5 年以上首套 2.6%，二套 3.075%（参考
+        <a href="https://www.pbc.gov.cn/" rel="noopener" target="_blank">人民银行</a>公告）</li>
+      <li>提前还款 / 重定价规则：参考各商业银行个人贷款合同约定</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅按公开公式演示，不替代银行实际放款核算。最新利率以发布机构实时公告为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅为公开公式的演示与教学，不构成金融、投资、贷款或理财建议。
     实际放款金额、月供与利息以银行账单为准。重大决策请咨询持牌金融机构或专业顾问。

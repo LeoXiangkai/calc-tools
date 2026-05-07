@@ -123,6 +123,20 @@ import Base from "~/layouts/Base.astro";
     </div>
   </section>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>基础养老金 + 个人账户养老金公式：依国务院《关于完善企业职工基本养老保险制度的决定》（国发〔2005〕38 号）<a href="https://www.gov.cn/zwgk/2005-12/14/content_127311.htm" rel="noopener" target="_blank">原文</a></li>
+      <li>计发月数表（40-70 岁）：人社部 2005 年公布，沿用至今</li>
+      <li>缴费年限须满 15 年方可按月领取：依《中华人民共和国社会保险法》第十六条 <a href="https://www.gov.cn/flfg/2010-10/28/content_1732964.htm" rel="noopener" target="_blank">原文</a></li>
+      <li>个人养老金账户 12000/年税前扣除：依财政部、税务总局公告 2024 年第 21 号 <a href="https://www.chinatax.gov.cn/chinatax/n810341/c5230615/content.html" rel="noopener" target="_blank">原文</a></li>
+      <li>退休领取按 3% 单独计税（2024-12 起）：同上公告</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅基于公开税法 / 养老金公式估算，最终结果以税务机关 / 社保经办机构核定为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅基于公开养老金公式估算，实际退休金以社保经办机构核定为准。
     各地缴费政策、社平工资、计发月数有差异。本工具不构成任何金融、税务或养老规划建议。

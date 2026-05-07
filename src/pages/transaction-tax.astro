@@ -162,6 +162,20 @@ import Base from "~/layouts/Base.astro";
     render();
   </script>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>契税分档（2024-12-01 起，全国统一）：按财政部、税务总局公告 2024 年第 16 号规定，详见
+        <a href="https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/202411/t20241112_3942986.htm" rel="noopener" target="_blank">财政部公告全文</a></li>
+      <li>增值税及附加：满 2 年免征住宅交易增值税（参考财政部、税务总局规定）</li>
+      <li>个税满五唯一免征：依《个人所得税法实施条例》第六条</li>
+      <li>印花税：住宅交易自 2008-11 至今免征</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅按公开税率演示，各地税务机关执行细则可能略有差异，最终税额以税务机关核定为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅为公开税率的演示与教学，不提供税务咨询、税务代理服务。
     各地税务机关执行细则可能略有差异，最终税额以税务机关核定为准。

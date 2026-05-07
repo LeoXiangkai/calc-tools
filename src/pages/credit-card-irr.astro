@@ -240,6 +240,24 @@ import Base from "~/layouts/Base.astro";
     renderAll();
   </script>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>真实年化（IRR）公式：内部收益率（Internal Rate of Return），用 PV = M × [1 - (1+r)^(-n)] / r 二分求解</li>
+      <li>实际利率公示要求：依《商业银行互联网贷款管理暂行办法》第十六条——
+        <a href="http://www.gov.cn/zhengce/zhengceku/2020-07/17/content_5527807.htm" rel="noopener" target="_blank">国务院政策文件库</a>
+      </li>
+      <li>消费贷利率上限：依最高人民法院《关于审理民间借贷案件适用法律若干问题的规定》（LPR 4 倍）——
+        <a href="https://www.court.gov.cn/" rel="noopener" target="_blank">最高人民法院</a>
+      </li>
+      <li>各行分期手续费规则：以发卡行账单或客服公布为准；提前结清规则各行差异较大</li>
+      <li>信用卡服务规范：依《商业银行信用卡业务监督管理办法》（银监会令〔2011〕第 2 号）</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅按公开公式演示，最新利率与产品规则以发布机构实时公告为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅为公开公式（IRR / 二分求解）的演示与教学，不构成贷款、消费分期或信用卡使用建议。
     各银行账单口径、违约金规则与免息活动存在差异，最终金额以银行账单为准。

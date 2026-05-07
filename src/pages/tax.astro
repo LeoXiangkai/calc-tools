@@ -476,6 +476,21 @@ import Base from "~/layouts/Base.astro";
     renderBusiness();
   </script>
 
+  <details class="card compact" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:14px;">政策依据 / 数据来源</summary>
+    <ul style="font-size:12px;color:var(--c-text-soft);margin:8px 0 0;padding-left:18px;">
+      <li>综合所得税率表（7 档）：依《中华人民共和国个人所得税法》附件一</li>
+      <li>累计预扣预缴法（2019 起）：参考国家税务总局公告 2018 年第 56 号 <a href="https://www.chinatax.gov.cn/chinatax/n810341/n810755/c3954556/content.html" rel="noopener" target="_blank">原文</a></li>
+      <li>年终奖单独计税延续至 2027-12-31：依财政部、税务总局公告 2023 年第 30 号 <a href="http://szs.mof.gov.cn/zhengcefabu/202308/t20230828_3902552.htm" rel="noopener" target="_blank">原文</a></li>
+      <li>7 项专项附加扣除（子女教育/婴幼儿照护/赡养老人 2023-08 调整）：依国务院国发〔2023〕13 号 <a href="https://www.gov.cn/zhengce/content/202308/content_6900126.htm" rel="noopener" target="_blank">原文</a></li>
+      <li>经营所得税率表（5 档）：依个税法附件二</li>
+      <li>劳务/稿酬/特许权扣除口径：参考国家税务总局公告 2018 年第 56 号</li>
+    </ul>
+    <p style="font-size:11px;margin:8px 0 0;color:var(--c-text-soft);">
+      本工具仅基于公开税法 / 养老金公式估算，最终结果以税务机关 / 社保经办机构核定为准。
+    </p>
+  </details>
+
   <p style="margin-top:24px;padding:12px;background:#fafafa;border:1px solid var(--c-border);border-radius:6px;font-size:12px;color:var(--c-text-soft);">
     <strong>免责声明</strong>：本工具仅为个税法规公式的演示与教学，不提供税务咨询、税务代理、纳税筹划服务。
     实际纳税情况以税务机关核定为准。具体涉税事项请咨询税务机关或注册税务师。
