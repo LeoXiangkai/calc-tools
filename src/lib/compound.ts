@@ -32,14 +32,16 @@ export interface LumpSumResult {
 }
 
 export function calcLumpSum(input: LumpSumInput): LumpSumResult {
-  const { principal: P, annualRatePct, years, compounding = "monthly" } = input;
+  const { principal: P, annualRatePct, compounding = "monthly" } = input;
+  // 入口对 years 做 round，确保 yearly 表与 futureValue 在非整数年时一致
+  const years = Math.round(input.years);
   if (!Number.isFinite(P) || P <= 0 || !Number.isFinite(years) || years <= 0) {
     return { futureValue: 0, totalInterest: 0, multiple: 0, yearly: [] };
   }
   const periodsPerYear = compounding === "monthly" ? 12 : 1;
   const r = annualRatePct / 100 / periodsPerYear;
   const yearly: YearlyRow[] = [];
-  for (let y = 1; y <= Math.floor(years); y++) {
+  for (let y = 1; y <= years; y++) {
     const n = y * periodsPerYear;
     const fv = P * Math.pow(1 + r, n);
     yearly.push({
@@ -75,7 +77,9 @@ export interface DcaResult {
 }
 
 export function calcDca(input: DcaInput): DcaResult {
-  const { monthlyContribution: M, annualRatePct, years, initialPrincipal = 0 } = input;
+  const { monthlyContribution: M, annualRatePct, initialPrincipal = 0 } = input;
+  // 入口 round years，让 yearly 表与 futureValue 在非整数年时一致
+  const years = Math.round(input.years);
   if (!Number.isFinite(M) || M < 0 || !Number.isFinite(years) || years <= 0) {
     return { futureValue: 0, totalContribution: 0, totalInterest: 0, yearly: [] };
   }

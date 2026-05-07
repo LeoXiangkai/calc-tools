@@ -216,7 +216,7 @@ export function calcUniformYear(input: UniformYearInput): {
     });
     cumIncome = r.cumulativeIncome;
     cumDeduction = r.cumulativeDeduction;
-    cumWithheld = r.cumulativeTax;
+    cumWithheld += r.thisMonthWithhold;
   }
   return {
     schedule,

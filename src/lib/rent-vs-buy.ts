@@ -82,7 +82,7 @@ export function calcRentVsBuy(input: RentVsBuyInput): RentVsBuyResult {
 
   const downPayment = totalPrice * downPaymentPct / 100;
   const principal = totalPrice - downPayment;
-  const months = Math.min(yearsToHold, loanYears) * 12;
+  const months = Math.round(Math.min(yearsToHold, loanYears) * 12);
 
   // 买房：月供 + 持有成本
   const m = calcMortgage({
@@ -97,10 +97,21 @@ export function calcRentVsBuy(input: RentVsBuyInput): RentVsBuyResult {
   const remainingLoanAtEnd =
     yearsToHold >= loanYears ? 0 : (m.schedule[months - 1]?.remaining ?? 0);
 
-  // 持有成本（按平均房价估算）
-  const avgHomeValue = totalPrice * (1 + Math.pow(1 + homeAppreciationPct / 100, yearsToHold)) / 2;
-  const totalHoldingCost =
-    (propertyTaxYearlyPct + maintenanceYearlyPct) / 100 * avgHomeValue * yearsToHold;
+  // 持有成本：逐年累加（避免首末算术平均的偏差）
+  let totalHoldingCost = 0;
+  {
+    let homeValue = totalPrice;
+    const yearsInt = Math.floor(yearsToHold);
+    const fracYear = yearsToHold - yearsInt;
+    for (let y = 1; y <= yearsInt; y++) {
+      homeValue *= 1 + homeAppreciationPct / 100;
+      totalHoldingCost += (propertyTaxYearlyPct + maintenanceYearlyPct) / 100 * homeValue;
+    }
+    if (fracYear > 0) {
+      homeValue *= 1 + (homeAppreciationPct / 100) * fracYear;
+      totalHoldingCost += (propertyTaxYearlyPct + maintenanceYearlyPct) / 100 * homeValue * fracYear;
+    }
+  }
 
   // 期末房价 + 净值
   const homeValueAtEnd = totalPrice * Math.pow(1 + homeAppreciationPct / 100, yearsToHold);
@@ -108,29 +119,33 @@ export function calcRentVsBuy(input: RentVsBuyInput): RentVsBuyResult {
   const buyTotalCash = downPayment + totalMortgageCost + totalHoldingCost;
   const buyNetCost = buyTotalCash - buyEquityAtEnd;
 
-  // 租房：累计租金（年金递增）
+  // 租房 + 投资：逐月模拟
+  // 起点：首付投入金融市场；每月按月利率复利，再加 (月供 - 当月租金) 差额
+  // 月供仅在贷款期内计入，超出贷款期后置 0
+  const monthlyReturn = investmentReturnPct / 100 / 12;
+  const monthsTotal = Math.round(yearsToHold * 12);
+  const loanMonths = loanYears * 12;
+  let investedBalance = downPayment;
   let totalRent = 0;
   let currentRent = monthlyRent;
-  for (let y = 0; y < yearsToHold; y++) {
-    totalRent += currentRent * 12;
-    currentRent *= 1 + rentGrowthPct / 100;
+  for (let mi = 1; mi <= monthsTotal; mi++) {
+    // 月初投资先按月利率增长
+    investedBalance *= 1 + monthlyReturn;
+    // 计入月供（贷款期内恒定为 firstMonthPayment；等额本息）
+    const monthlyPayment = mi <= loanMonths ? m.firstMonthPayment : 0;
+    // 月度差额计入投资账户：月供 - 当月租金
+    investedBalance += monthlyPayment - currentRent;
+    totalRent += currentRent;
+    // 每满 12 个月租金按年涨幅上调
+    if (mi % 12 === 0) {
+      currentRent *= 1 + rentGrowthPct / 100;
+    }
   }
-
-  // 不买房时，把首付 + (月供 - 租金) 差额投资
-  // 简化：首付一次性投入，月度复利
-  const r = investmentReturnPct / 100 / 12;
-  const n = yearsToHold * 12;
-  const factor = r === 0 ? 1 : Math.pow(1 + r, n);
-  // 首付未来值
-  const downInvested = downPayment * factor;
-  // 月度差额（月供 - 月租金）的累计未来值（简化：按起始月租平均，有正/负）
-  const avgMonthlyRent = (monthlyRent + currentRent) / 2;
-  const monthlySurplus = m.firstMonthPayment - avgMonthlyRent;
-  const surplusInvested =
-    r === 0 ? monthlySurplus * n : monthlySurplus * (factor - 1) / r;
-  const investedFinalValue = Math.max(0, downInvested + surplusInvested);
-  const rentNetCost = totalRent - (investedFinalValue - downPayment); // 租房成本扣掉投资收益
-  // 注：rentNetCost 可能为负（投资收益超过累计租金，即不买房纯赚）
+  // 允许 investedBalance 为负（首付被高租金耗尽，账户欠债，含义清晰）
+  const investedFinalValue = investedBalance;
+  // 租房净成本 = 累计租金 - (投资账户增值 - 起初首付)
+  // 当 investedFinalValue < downPayment 时，差额为负，rentNetCost 反而比 totalRent 还大（合理）
+  const rentNetCost = totalRent - (investedFinalValue - downPayment);
 
   const buyAdvantage = rentNetCost - buyNetCost;
   let recommendation: RentVsBuyResult["recommendation"];

@@ -17,8 +17,6 @@ export interface TaxInput {
   originalPrice?: number; // 原值（用于个税差额计算）
   sellerHoldYears?: SellerHoldYears;
   sellerOnlyHouse?: SellerOnlyHouse;
-  // 是否北上广深（影响二套契税与 144 平上限判断的细节）
-  isTier1City?: boolean;
 }
 
 export interface TaxResult {

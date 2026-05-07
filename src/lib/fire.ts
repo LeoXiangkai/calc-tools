@@ -101,6 +101,6 @@ export function calcFireFromSavingsRate(input: FireSavingsRateInput): FireSaving
   }
   return {
     yearsToFire: years >= 100 ? -1 : years,
-    description: years <= 10 ? "极快" : years <= 20 ? "较快" : years <= 30 ? "正常" : "偏慢",
+    description: years <= 15 ? "极快" : years <= 25 ? "较快" : years <= 35 ? "正常" : "偏慢",
   };
 }

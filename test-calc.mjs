@@ -128,6 +128,68 @@ approx("减少月供 新月供 < 旧月供", pp2.newMonthlyPayment < pp2.oldMont
 // 缩短年限节省利息一般大于减少月供
 approx("缩短年限 节省 > 减少月供 节省", pp1.interestSaved > pp2.interestSaved ? 1 : 0, 1, 0);
 
+// P1 修复回归 1：reduce-payment 在 prepay 远超剩余本金时一次性结清
+// 100万/30年/3.95%, 第350月还50万（远超剩余本金）, 减少月供策略
+const ppPayoff = calcPrepay({
+  principal: 1_000_000,
+  years: 30,
+  annualRatePct: 3.95,
+  method: "equal-installment",
+  prepayAtMonth: 350,
+  prepayAmount: 500_000,
+  strategy: "reduce-payment",
+});
+// 必须返回 reduce-payment 输出 shape，不能返回 monthsSaved/newRemainingMonths
+eq("reduce-payment 一次性结清 newMonthlyPayment = 0", ppPayoff.newMonthlyPayment, 0);
+eq("reduce-payment 一次性结清 不返回 monthsSaved", ppPayoff.monthsSaved, undefined);
+eq("reduce-payment 一次性结清 不返回 newRemainingMonths", ppPayoff.newRemainingMonths, undefined);
+approx("reduce-payment 一次性结清 oldMonthlyPayment > 0", ppPayoff.oldMonthlyPayment > 0 ? 1 : 0, 1, 0);
+// interestSaved 不能为负（不应有 -0.04 的 rounding noise）
+approx("reduce-payment 一次性结清 interestSaved >= 0", ppPayoff.interestSaved >= 0 ? 1 : 0, 1, 0);
+
+// P1 修复回归 2：等额本金缩短年限累计精度（P/n 不能整除）
+// P=1_000_003 / 7y / 5%, 第6月还50万, 缩短年限
+// 原始 P/n = 11904.797619...，round2 后是 11904.80
+// 第6月后剩余 ≈ 928574.27, 还50万后 ≈ 428574.27
+// ceil(428574.27 / 11904.797619) = 37（基于原始 P/n）
+const ppPrincipalPrec = calcPrepay({
+  principal: 1_000_003,
+  years: 7,
+  annualRatePct: 5,
+  method: "equal-principal",
+  prepayAtMonth: 6,
+  prepayAmount: 500_000,
+  strategy: "shorten-term",
+});
+approx("等额本金缩短年限 newRemainingMonths = 37", ppPrincipalPrec.newRemainingMonths, 37, 0);
+// monthsSaved + newRemainingMonths + k = 总月数 84
+approx(
+  "等额本金缩短年限 月数守恒",
+  ppPrincipalPrec.monthsSaved + ppPrincipalPrec.newRemainingMonths + 6,
+  84,
+  0,
+);
+approx("等额本金缩短年限 interestSaved >= 0", ppPrincipalPrec.interestSaved >= 0 ? 1 : 0, 1, 0);
+
+// P1 修复回归 3：大本金不应触发 0.01 绝对阈值导致早退
+// P=1e8 / 30y / 3.95%, 第1月还5000w（一半）, 缩短年限
+const ppHuge = calcPrepay({
+  principal: 1e8,
+  years: 30,
+  annualRatePct: 3.95,
+  method: "equal-installment",
+  prepayAtMonth: 1,
+  prepayAmount: 5e7,
+  strategy: "shorten-term",
+});
+// 应能正常算出剩余月数（>0），不应被 0.01 绝对阈值早退
+approx("大本金 newRemainingMonths > 0", ppHuge.newRemainingMonths > 0 ? 1 : 0, 1, 0);
+// 还了一半本金，monthsSaved 应非常显著（远 > 0）
+approx("大本金 monthsSaved > 100", ppHuge.monthsSaved > 100 ? 1 : 0, 1, 0);
+// newRemainingMonths 应小于原贷款剩余月数（359 = 360-1）
+approx("大本金 newRemainingMonths < 359", ppHuge.newRemainingMonths < 359 ? 1 : 0, 1, 0);
+approx("大本金 interestSaved >= 0", ppHuge.interestSaved >= 0 ? 1 : 0, 1, 0);
+
 // ===== calcRepricing =====
 console.log("\n=== calcRepricing ===");
 // 100万/30年/4.5%，第13月利率降到 3.95%
@@ -247,6 +309,10 @@ approx("全年税 33480", y2.totalTax, 33480, 0.01);
 approx("1月应纳", y2.schedule[0].thisMonthWithhold, 630, 0.01);
 // 2月累计 4200-2520=1680，本月 1680-630=1050
 approx("2月本月预扣", y2.schedule[1].thisMonthWithhold, 1050, 0.01);
+// cumWithheld 语义校验：前 3 月 thisMonthWithhold 累加 = 第 3 月 cumulativeTax
+// M1=630 + M2=1050 + M3=(3780-1680)=2100 → 累加 3780 = M3.cumulativeTax 3780
+const sum3 = y2.schedule.slice(0, 3).reduce((s, r) => s + r.thisMonthWithhold, 0);
+approx("前 3 月预扣累加 = 第 3 月累计税", sum3, y2.schedule[2].cumulativeTax, 0.01);
 
 // ===== 个税：年度汇算 =====
 console.log("\n=== calcAnnualSettlement ===");
@@ -367,6 +433,16 @@ approx("0% 利率 总利息 = 0", lump0.totalInterest, 0, 0.01);
 const lumpBad = calcLumpSum({ principal: -100, annualRatePct: 5, years: 10 });
 approx("负本金 → 全 0", lumpBad.futureValue, 0, 0);
 
+// 非整数年：入口 round → 10.5 变 11，yearly 长度 = 11，且 FV 与 yearly 末行对齐
+const lumpFrac = calcLumpSum({ principal: 100000, annualRatePct: 8, years: 10.5, compounding: "monthly" });
+approx("years=10.5 → yearly 长度 = 11（入口 round）", lumpFrac.yearly.length, 11, 0);
+approx(
+  "years=10.5 → FV 与 yearly 末行 endingBalance 一致",
+  Math.abs(lumpFrac.futureValue - lumpFrac.yearly[lumpFrac.yearly.length - 1].endingBalance) < 1 ? 1 : 0,
+  1,
+  0,
+);
+
 // ===== 复利：定投 =====
 console.log("\n=== calcDca ===");
 // 月投 3000、年化 8%、30年（月末投入起息）：FV ≈ 4,471,078
@@ -379,6 +455,10 @@ approx("总收益 ≈ 447-108 ≈ 339万", dca.totalInterest, 3391078, 1);
 const dcaInit = calcDca({ monthlyContribution: 3000, annualRatePct: 8, years: 30, initialPrincipal: 50000 });
 approx("初始5万+月投3000 30年 FV ≈ 501.8万", dcaInit.futureValue, 5017864, 5);
 approx("累计本金 = 50000+108万 = 113万", dcaInit.totalContribution, 1130000, 1);
+
+// 非整数年：入口 round → 10.5 变 11，yearly 长度 = 11
+const dcaFrac = calcDca({ monthlyContribution: 3000, annualRatePct: 8, years: 10.5 });
+approx("calcDca years=10.5 → yearly 长度 = 11", dcaFrac.yearly.length, 11, 0);
 
 // ===== 复利：目标反推 =====
 console.log("\n=== calcGoal ===");
@@ -446,8 +526,36 @@ approx("替代率 ≈ 45.74%", pen.replacementPct, 45.74, 0.1);
 eq("60 岁计发月数 = 139", PAYOUT_MONTHS[60], 139);
 
 // 缴费年限越短退休金越少（30 → 15 年砍半）
-const penShort = calcPension({ ...{ currentAvgWage: 8000, wageGrowthPct: 5, yearsToRetire: 20, contributionIndex: 1, personalAccountBalance: 50000, monthlyContributionToAccount: 800, accountInterestPct: 5, retireAge: 60 }, contributionYears: 15 });
+const penBase = { currentAvgWage: 8000, wageGrowthPct: 5, yearsToRetire: 20, contributionYears: 30, contributionIndex: 1, personalAccountBalance: 50000, monthlyContributionToAccount: 800, accountInterestPct: 5, retireAge: 60 };
+const penShort = calcPension({ ...penBase, contributionYears: 15 });
 approx("缴 15 年比 30 年的基础养老金少一半左右", penShort.basicPension * 2 - pen.basicPension, 0, 100);
+
+// 缴费 <15 年应有 warning 且 eligibleForBasicPension=false
+const pen10 = calcPension({ ...penBase, contributionYears: 10 });
+eq("缴费 10 年 eligibleForBasicPension=false", pen10.eligibleForBasicPension, false);
+approx("缴费 10 年 warnings 数 ≥ 1", pen10.warnings.length >= 1 ? 1 : 0, 1, 0);
+
+// 缴费正好 15 年 eligible=true
+const pen15 = calcPension({ ...penBase, contributionYears: 15 });
+eq("缴费 15 年 eligibleForBasicPension=true", pen15.eligibleForBasicPension, true);
+approx("缴费 15 年无缴费不足 warning", pen15.warnings.filter((w) => w.includes("不足 15 年")).length, 0, 0);
+
+// 58 岁退休 → 计发月数 152
+eq("58 岁计发月数 = 152", PAYOUT_MONTHS[58], 152);
+const pen58 = calcPension({ ...penBase, retireAge: 58, contributionYears: 30 });
+// 58 岁的 accountPension 应 ≈ 60 岁的 × (139/152)
+approx("58 岁 accountPension = 60 岁 × 139/152", pen58.accountPension, pen.accountPension * (139 / 152), 1);
+
+// 退休年龄不在表里（如 33）应有 warning
+const penOff = calcPension({ ...penBase, retireAge: 33 });
+approx("退休年龄 33 触发计发月数 warning", penOff.warnings.filter((w) => w.includes("不在标准计发月数表")).length, 1, 0);
+
+// 个人替代率：缴费指数 1.0 时与替代率相等
+approx("个人替代率（缴费指数 1.0）= 替代率", pen.personalReplacementPct, pen.replacementPct, 0.01);
+
+// 缴费指数 2.0 时，个人替代率应为替代率的一半
+const penHigh = calcPension({ ...penBase, contributionIndex: 2 });
+approx("缴费指数 2.0 个人替代率 ≈ 替代率/2", penHigh.personalReplacementPct, penHigh.replacementPct / 2, 0.01);
 
 // 个人养老金账户：12000/年 × 20年 × 边际20% × 5%回报，3% 退休税
 console.log("\n=== calcPersonalPension ===");
@@ -469,7 +577,7 @@ approx("3% 边际税率几乎不节税（应小于 0）", lowEffective < 0 ? 1 :
 
 // ===== 存款 =====
 console.log("\n=== calcDeposit ===");
-const d1 = calcDeposit({ principal: 200000, annualRatePct: 1.5, years: 1 });
+const d1 = calcDeposit({ principal: 200000, annualRatePct: 1.5, years: 1, compounding: "simple" });
 approx("20万 1.5% 1年 → 利息 3000", d1.totalInterest, 3000, 0.5);
 approx("simple 1 年 实际年化 = 名义", d1.effectiveAnnualPct, 1.5, 0.01);
 
@@ -477,9 +585,22 @@ const d3y = calcDeposit({ principal: 200000, annualRatePct: 2.5, years: 3, compo
 approx("20万 2.5% 3年按年复利 → FV ≈ 215378", d3y.futureValue, 215378.13, 1);
 approx("按年复利 3 年实际年化 = 2.5%", d3y.effectiveAnnualPct, 2.5, 0.01);
 
+// years = 0 → 返回本金，利息 0（不再被旧版本早返清零）
+const d0 = calcDeposit({ principal: 200000, annualRatePct: 1.5, years: 0, compounding: "simple" });
+approx("years=0 → FV = 本金", d0.futureValue, 200000, 0.01);
+approx("years=0 → 利息 = 0", d0.totalInterest, 0, 0);
+
+// 储蓄国债 5 年 3% 按年复利 vs simple：复利 FV 必须显著高于 simple
+const dBondAnnual = calcDeposit({ principal: 100000, annualRatePct: 3, years: 5, compounding: "annual" });
+const dBondSimple = calcDeposit({ principal: 100000, annualRatePct: 3, years: 5, compounding: "simple" });
+// annual: 100000 × 1.03^5 ≈ 115927.41；simple: 115000
+approx("5年3%储蓄国债 annual FV ≈ 115927", dBondAnnual.futureValue, 115927.41, 1);
+approx("5年3%储蓄国债 simple FV = 115000", dBondSimple.futureValue, 115000, 0.5);
+approx("annual 必须显著高于 simple（差额 > 500）", dBondAnnual.futureValue - dBondSimple.futureValue > 500 ? 1 : 0, 1, 0);
+
 const cmp = compareDeposits(100000, [
-  { name: "1y 定存", annualRatePct: 1.5, years: 1 },
-  { name: "1y 大额", annualRatePct: 1.9, years: 1, threshold: 200000 },
+  { name: "1y 定存", annualRatePct: 1.5, years: 1, compounding: "simple" },
+  { name: "1y 大额", annualRatePct: 1.9, years: 1, compounding: "simple", threshold: 200000 },
 ]);
 eq("不达起存 大额存单标记 eligible=false", cmp[1].eligible, false);
 approx("达起存 1y 定存 利息 1500", cmp[0].totalInterest, 1500, 0.5);
@@ -497,6 +618,14 @@ approx("IRR 是名义的 1.85x 左右", ir.irrMultiple, 1.9, 0.1);
 const ir24 = calcInstallmentIrr({ principal: 10000, monthlyFeePct: 0.45, months: 24 });
 approx("24期 0.45% 名义 5.4%", ir24.nominalAprPct, 5.4, 0.01);
 approx("24期 0.45% 真实 IRR 约 10.4%", ir24.irrAnnualPct, 10.4, 0.6);
+
+// 月费率 = 0：免息分期，月供 = 本金/期数，名义/IRR 均为 0
+const ir0 = calcInstallmentIrr({ principal: 12000, monthlyFeePct: 0, months: 12 });
+approx("0% 月费率 月供 = 本金/期数 = 1000", ir0.monthlyPayment, 1000, 0.01);
+approx("0% 月费率 总手续费 = 0", ir0.totalFee, 0, 0);
+approx("0% 月费率 名义年化 = 0", ir0.nominalAprPct, 0, 0);
+approx("0% 月费率 IRR = 0（不再收敛到 5e-7 量级）", ir0.irrAnnualPct, 0, 0);
+approx("0% 月费率 IRR 倍数 = 0", ir0.irrMultiple, 0, 0);
 
 // 提前结清：剩余手续费 vs 违约金
 console.log("\n=== calcEarlyPayoff ===");
@@ -535,10 +664,17 @@ console.log("\n=== calcFireFromSavingsRate ===");
 // 50% 储蓄率 → ~17 年（MMM 经典数）
 const sf50 = calcFireFromSavingsRate({ savingsRatePct: 50 });
 approx("50% 储蓄率 ≈ 17 年", sf50.yearsToFire, 17, 1);
+eq("50% 储蓄率 description = 较快", sf50.description, "较快");
 
 // 75% 储蓄率 → ~7 年
 const sf75 = calcFireFromSavingsRate({ savingsRatePct: 75 });
 approx("75% 储蓄率 ≈ 7 年", sf75.yearsToFire, 7, 1);
+eq("75% 储蓄率 description = 极快", sf75.description, "极快");
+
+// 25% 储蓄率 → ~32 年，应在"正常"区间（>25 且 ≤35）
+const sf25 = calcFireFromSavingsRate({ savingsRatePct: 25 });
+approx("25% 储蓄率 ≈ 32 年", sf25.yearsToFire, 32, 1);
+eq("25% 储蓄率 description = 正常", sf25.description, "正常");
 
 // ===== 租 vs 买 =====
 console.log("\n=== calcRentVsBuy ===");
@@ -577,6 +713,109 @@ const rbBoom = calcRentVsBuy({
   yearsToHold: 10,
 });
 eq("房价涨 6% → 推荐 buy", rbBoom.recommendation, "buy");
+
+// 极端：月租 50000 远超月供 ~3318（500 万房 / 30 年 / 3.95% / 30% 首付）
+// 月供 = (5_000_000 - 1_500_000) ≈ 350 万本金 → 等额本息月供 ≈ 16608
+// 这里我们故意设月租 50000 让"月供 - 月租"持续大幅为负，验证投资账户被耗尽
+const rbHighRent = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 50000,
+  rentGrowthPct: 3,
+  homeAppreciationPct: 2,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 5,
+  yearsToHold: 10,
+});
+console.log(
+  `极端高租金：totalRent=${rbHighRent.totalRent.toFixed(0)}, investedFinal=${rbHighRent.investedFinalValue.toFixed(0)}, rentNetCost=${rbHighRent.rentNetCost.toFixed(0)}, buyNetCost=${rbHighRent.buyNetCost.toFixed(0)}`,
+);
+// 投资账户应被耗尽变负（首付 150万被巨额负差额抵消）
+approx("极端高租金 → investedFinalValue < 0（账户耗尽欠债）", rbHighRent.investedFinalValue < 0 ? 1 : 0, 1, 0);
+// rentNetCost 不应等于荒谬值 totalRent + downPayment（旧 bug 的 clamp 0 后果）
+approx(
+  "rentNetCost 不应是 totalRent+downPayment 这种 clamp 0 的荒谬值",
+  Math.abs(rbHighRent.rentNetCost - (rbHighRent.totalRent + rbHighRent.downPayment)) > 100000 ? 1 : 0,
+  1,
+  0,
+);
+// 应推荐 buy（租远贵于买）
+eq("极端高租金 → 推荐 buy", rbHighRent.recommendation, "buy");
+
+// 0% 投资回报：首付不增长；同时月供 - 月租金的差额逐月累加（无复利）
+// 关键断言：当且仅当差额 = 0 时 investedFinalValue == downPayment
+// 取一个月供 = 月租的极简组合：本金 0（全款）→ 月供 0；月租也 0
+// 但用户期望验证"投资率=0 时 investedFinalValue ≈ downPayment（首付不增长）"
+// 在 monthlyPayment - rent 不为 0 时，investedFinalValue 会偏离 downPayment
+// 使用 monthlyRent = m.firstMonthPayment 这种刚好相抵的设置最干净，但无法预算
+// 更直接的做法：让 yearsToHold 极小（1 个月）+ rent ≈ 月供，差额接近 0
+// 这里采用：investmentReturnPct=0 + monthlyRent 设成与首月月供同号同量级，
+// 实际验证"首付那部分（150 万）不增长"用 yearsToHold = 0 边界已被早返回拦截
+// 改取 yearsToHold = 10、investmentReturnPct = 0：investedFinalValue = downPayment + Σ(月供 - 当月租金)
+// 取 monthlyRent = m.firstMonthPayment（= 16607.6...）让差额 ≈ 0；但 rent 会涨
+// 简化为 rentGrowthPct = 0 让差额恒等
+const rb0 = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 16607.59, // ≈ 月供（350 万 / 30 年 / 3.95%），让 monthlyPayment - rent ≈ 0
+  rentGrowthPct: 0,
+  homeAppreciationPct: 2,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 0,
+  yearsToHold: 10,
+});
+console.log(
+  `0% 投资 + 月租≈月供 + 涨幅 0：investedFinal=${rb0.investedFinalValue.toFixed(2)}, downPayment=${rb0.downPayment}`,
+);
+// 0% 利率 + 月差额≈0 → investedFinalValue 应非常接近 downPayment（首付不增长）
+// 容差 300：因为 monthlyRent 取 firstMonthPayment 的两位小数近似（~0.005 偏差 × 120 月 ≈ 0.6 元）
+// 加上 calcMortgage 内部 round 与外部 round 的细微差异，10 年累计差几百元属正常
+approx("0% 投资回报且月差额≈0 → investedFinalValue ≈ downPayment", rb0.investedFinalValue, rb0.downPayment, 300);
+
+// yearsToHold = 0.7（非整数年）：months = round(0.7 × 12) = 8，验证不崩
+const rbFrac = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 8000,
+  rentGrowthPct: 3,
+  homeAppreciationPct: 2,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 5,
+  yearsToHold: 0.7,
+});
+console.log(
+  `非整数年（0.7）：totalMortgageCost=${rbFrac.totalMortgageCost.toFixed(2)}, totalRent=${rbFrac.totalRent.toFixed(2)}, remainingLoanAtEnd=${rbFrac.remainingLoanAtEnd.toFixed(2)}`,
+);
+// 8 个月月供 ≈ 16607.59 × 8 ≈ 132861
+approx("0.7 年（8 个月）总月供 ≈ 132861", rbFrac.totalMortgageCost, 132861, 100);
+// 不应崩、不应是 0
+approx("0.7 年 totalMortgageCost 非 0 不崩", rbFrac.totalMortgageCost > 0 ? 1 : 0, 1, 0);
+
+// 持有期 = 贷款年限（30 年 = 30 年）边界：remainingLoanAtEnd 应为 0
+const rbBoundary = calcRentVsBuy({
+  totalPrice: 5_000_000,
+  downPaymentPct: 30,
+  loanYears: 30,
+  loanRatePct: 3.95,
+  monthlyRent: 8000,
+  rentGrowthPct: 3,
+  homeAppreciationPct: 2,
+  propertyTaxYearlyPct: 0.5,
+  maintenanceYearlyPct: 0.5,
+  investmentReturnPct: 5,
+  yearsToHold: 30,
+});
+console.log(`持有=贷款=30 年边界：remainingLoanAtEnd=${rbBoundary.remainingLoanAtEnd}`);
+approx("持有 = 贷款年限 → remainingLoanAtEnd ≈ 0", rbBoundary.remainingLoanAtEnd, 0, 1);
 
 // ===== 汇总 =====
 console.log(`\n${passed}/${passed + failed} passed${failed ? ", " + failed + " FAILED" : ""}`);

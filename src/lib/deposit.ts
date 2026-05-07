@@ -4,7 +4,7 @@ export interface DepositInput {
   principal: number; // 本金（元）
   annualRatePct: number; // 年化利率（%）
   years: number; // 期限（年）
-  compounding?: "simple" | "annual"; // 储蓄国债复利按年计；定存到期一次性结算可视作 simple
+  compounding: "simple" | "annual"; // 必填：储蓄国债复利按年计；定存到期一次性结算用 simple
 }
 
 export interface DepositResult {
@@ -16,9 +16,13 @@ export interface DepositResult {
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export function calcDeposit(input: DepositInput): DepositResult {
-  const { principal, annualRatePct, years, compounding = "simple" } = input;
-  if (principal <= 0 || annualRatePct < 0 || years <= 0) {
-    return { futureValue: 0, totalInterest: 0, effectiveAnnualPct: 0 };
+  const { principal, annualRatePct, years, compounding } = input;
+  const zero = { futureValue: 0, totalInterest: 0, effectiveAnnualPct: 0 };
+  if (principal <= 0 || annualRatePct < 0 || years < 0) {
+    return zero;
+  }
+  if (years === 0) {
+    return { futureValue: round2(principal), totalInterest: 0, effectiveAnnualPct: 0 };
   }
   const r = annualRatePct / 100;
   const fv =
@@ -39,7 +43,7 @@ export interface DepositCompareItem {
   name: string;
   annualRatePct: number;
   years: number;
-  compounding?: "simple" | "annual";
+  compounding: "simple" | "annual"; // 必填
   threshold?: number; // 起存金额
 }
 

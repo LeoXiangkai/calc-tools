@@ -21,6 +21,8 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 // 用二分法求 IRR：n 期等额还款 M，本金 P，使
 // P = M × [1 - (1+r)^(-n)] / r 成立时的月利率 r
 function solveMonthlyIrr(principal: number, monthlyPayment: number, n: number): number {
+  // 还款总额不够本金 → 无解
+  if (monthlyPayment * n < principal) return NaN;
   let lo = 0.0;
   let hi = 1.0; // 月利率上限 100%
   // 单调函数：r 越大，PV 越小
@@ -46,12 +48,31 @@ export function calcInstallmentIrr(input: InstallmentInput): InstallmentResult {
       irrMultiple: 0,
     };
   }
+  // 月费率为 0 时短路：无利息分期，IRR 必为 0
+  if (monthlyFeePct === 0) {
+    return {
+      monthlyPayment: round2(principal / months),
+      totalFee: 0,
+      nominalAprPct: 0,
+      irrAnnualPct: 0,
+      irrMultiple: 0,
+    };
+  }
   const monthlyFee = principal * monthlyFeePct / 100;
   const monthlyPrincipal = principal / months;
   const monthlyPayment = monthlyPrincipal + monthlyFee;
   const totalFee = monthlyFee * months;
   const nominalAprPct = monthlyFeePct * 12;
   const monthlyIrr = solveMonthlyIrr(principal, monthlyPayment, months);
+  if (!Number.isFinite(monthlyIrr)) {
+    return {
+      monthlyPayment: round2(monthlyPayment),
+      totalFee: round2(totalFee),
+      nominalAprPct: round2(nominalAprPct),
+      irrAnnualPct: 0,
+      irrMultiple: 0,
+    };
+  }
   const irrAnnualPct = (Math.pow(1 + monthlyIrr, 12) - 1) * 100;
   const irrMultiple = nominalAprPct > 0 ? irrAnnualPct / nominalAprPct : 0;
   return {

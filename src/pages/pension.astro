@@ -43,12 +43,8 @@ import Base from "~/layouts/Base.astro";
           <h3>退休设置</h3>
           <div class="form-grid">
             <label>退休年龄
-              <select id="b-retire-age">
-                <option value="50">50</option>
-                <option value="55">55</option>
-                <option value="60" selected>60</option>
-                <option value="65">65</option>
-              </select>
+              <input id="b-retire-age" type="number" min="40" max="70" step="1" value="60" />
+              <small style="color:var(--c-text-soft);font-size:11px;display:block;margin-top:2px;">支持 40-70 岁；常见：女工人 50 / 女干部 55 / 男 60，延迟退休改革后可能 58 / 62 等</small>
             </label>
           </div>
           <p class="error-msg" id="b-error" style="color:var(--c-danger);margin:8px 0 0;min-height:18px;font-size:12px;"></p>
@@ -60,6 +56,9 @@ import Base from "~/layouts/Base.astro";
           <div style="font-size:12px;color:var(--c-text-soft);">月退休金估算</div>
           <div style="font-size:24px;font-weight:600;color:var(--c-accent);" id="b-monthly-pension">—</div>
           <div style="font-size:12px;color:var(--c-text-soft);margin-top:2px;" id="b-replacement">—</div>
+        </div>
+        <div class="card compact" id="b-warnings" style="background:#fff3cd;border-color:#ffc107;display:none;">
+          <div style="font-size:13px;color:#856404;" id="b-warnings-text"></div>
         </div>
         <div class="card compact">
           <div class="kv-grid">
@@ -154,15 +153,20 @@ import Base from "~/layouts/Base.astro";
       const years = num("b-years");
       const contribYears = num("b-contrib-years");
       const index = num("b-index");
+      const retireAge = num("b-retire-age");
       const errEl = $("b-error");
+      const warnEl = $("b-warnings");
+      const warnTextEl = $("b-warnings-text");
       const reset = () => {
         ["b-monthly-pension","b-replacement","b-basic","b-account-pen","b-retire-wage","b-account-end"]
           .forEach((id) => ($(id).textContent = "—"));
+        warnEl.style.display = "none";
       };
       if (wage <= 0) { errEl.textContent = "请输入大于 0 的当前社平工资"; reset(); return; }
       if (years < 1) { errEl.textContent = "距退休年数至少为 1"; reset(); return; }
       if (contribYears < 1) { errEl.textContent = "总缴费年限至少为 1 年"; reset(); return; }
       if (index < 0.6 || index > 3) { errEl.textContent = "缴费指数应在 0.6 - 3.0 之间"; reset(); return; }
+      if (retireAge < 40 || retireAge > 70) { errEl.textContent = "退休年龄应在 40 - 70 之间"; reset(); return; }
       errEl.textContent = "";
       const r = calcPension({
         currentAvgWage: wage,
@@ -173,19 +177,25 @@ import Base from "~/layouts/Base.astro";
         personalAccountBalance: num("b-balance"),
         monthlyContributionToAccount: num("b-monthly"),
         accountInterestPct: num("b-account-rate"),
-        retireAge: Number($<HTMLSelectElement>("b-retire-age").value) as 50 | 55 | 60 | 65,
+        retireAge,
       });
       $("b-monthly-pension").textContent = cny(r.monthlyPension);
-      $("b-replacement").textContent = `相对退休时社平工资替代率 ${r.replacementPct}%`;
+      $("b-replacement").textContent =
+        `相对社平 ${r.replacementPct}% / 相对退休前个人收入约 ${r.personalReplacementPct}%`;
       $("b-basic").textContent = cny(r.basicPension);
       $("b-account-pen").textContent = cny(r.accountPension);
       $("b-retire-wage").textContent = cny(r.retirementAvgWage);
       $("b-account-end").textContent = cny(r.accountAtRetirement);
+      if (r.warnings && r.warnings.length > 0) {
+        warnEl.style.display = "block";
+        warnTextEl.innerHTML = r.warnings.map((w) => `⚠️ ${w}`).join("<br>");
+      } else {
+        warnEl.style.display = "none";
+      }
     }
     document.querySelectorAll<HTMLInputElement>("[id^='b-']").forEach((el) =>
       el.addEventListener("input", renderBasic),
     );
-    $<HTMLSelectElement>("b-retire-age").addEventListener("change", renderBasic);
     renderBasic();
 
     function renderPersonal(): void {

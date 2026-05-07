@@ -182,12 +182,25 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
   const newPrincipal = remainingPrincipal - prepay;
   const r = input.annualRatePct / 100 / 12;
 
-  if (newPrincipal <= 0) {
-    // 一次性还清
+  if (newPrincipal <= 0.01) {
+    // 一次性还清：按用户选择的 strategy 返回对应字段 shape，保持类型一致
+    const interestSaved = Math.max(
+      0,
+      round2(base.totalInterest - paidInterest),
+    );
+    if (input.strategy === "reduce-payment") {
+      return {
+        baseTotalInterest: base.totalInterest,
+        newTotalInterest: round2(paidInterest),
+        interestSaved,
+        oldMonthlyPayment: base.schedule[0].payment,
+        newMonthlyPayment: 0, // 已结清，不再月供
+      };
+    }
     return {
       baseTotalInterest: base.totalInterest,
       newTotalInterest: round2(paidInterest),
-      interestSaved: round2(base.totalInterest - paidInterest),
+      interestSaved,
       monthsSaved: base.schedule.length - k,
       newRemainingMonths: 0,
     };
@@ -195,6 +208,9 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
 
   if (input.strategy === "shorten-term") {
     // 缩短年限：等额本息保持原月供，等额本金保持原本金部分
+    // 提前还款只缩短不延长，剩余月数不会超过原贷款剩余月数
+    const MAX_MONTHS = base.schedule.length - k;
+    const REMAINING_THRESHOLD = input.principal * 1e-9;
     if (input.method === "equal-installment") {
       const monthly = base.schedule[0].payment;
       // 求解 n 使 newPrincipal = monthly * (1-(1+r)^-n)/r
@@ -202,24 +218,42 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
       let remaining = newPrincipal;
       let m = 0;
       let interestPart = 0;
-      while (remaining > 0.01 && m < 360 * 2) {
+      while (remaining > REMAINING_THRESHOLD && m < MAX_MONTHS) {
         m++;
         const i = remaining * r;
         const p = Math.min(monthly - i, remaining);
         remaining -= p;
         interestPart += i;
       }
+      // 边界：一次性结清（newPrincipal 极小时 m=0），返回 shorten-term 输出 shape
+      if (m === 0) {
+        return {
+          baseTotalInterest: base.totalInterest,
+          newTotalInterest: round2(paidInterest),
+          interestSaved: Math.max(0, round2(base.totalInterest - paidInterest)),
+          monthsSaved: base.schedule.length - k,
+          newRemainingMonths: 0,
+        };
+      }
       return {
         baseTotalInterest: base.totalInterest,
         newTotalInterest: round2(paidInterest + interestPart),
-        interestSaved: round2(base.totalInterest - paidInterest - interestPart),
+        interestSaved: Math.max(
+          0,
+          round2(base.totalInterest - paidInterest - interestPart),
+        ),
         monthsSaved: base.schedule.length - k - m,
         newRemainingMonths: m,
       };
     }
     // 等额本金缩短年限：每月本金部分不变，重新计算剩余月数
-    const principalPerMonth = base.schedule[0].principal;
-    const remainingMonths = Math.ceil(newPrincipal / principalPerMonth);
+    // 用原始 P/n（未经 round2），避免 round 后累计偏差
+    const n = Math.round(input.years * 12);
+    const principalPerMonth = input.principal / n;
+    const remainingMonths = Math.min(
+      MAX_MONTHS,
+      Math.ceil(newPrincipal / principalPerMonth),
+    );
     let remaining = newPrincipal;
     let interestPart = 0;
     for (let m = 0; m < remainingMonths; m++) {
@@ -230,7 +264,10 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
     return {
       baseTotalInterest: base.totalInterest,
       newTotalInterest: round2(paidInterest + interestPart),
-      interestSaved: round2(base.totalInterest - paidInterest - interestPart),
+      interestSaved: Math.max(
+        0,
+        round2(base.totalInterest - paidInterest - interestPart),
+      ),
       monthsSaved: base.schedule.length - k - remainingMonths,
       newRemainingMonths: remainingMonths,
     };
@@ -248,7 +285,10 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
     return {
       baseTotalInterest: base.totalInterest,
       newTotalInterest: round2(paidInterest + interestPart),
-      interestSaved: round2(base.totalInterest - paidInterest - interestPart),
+      interestSaved: Math.max(
+        0,
+        round2(base.totalInterest - paidInterest - interestPart),
+      ),
       newMonthlyPayment: round2(newMonthly),
       oldMonthlyPayment: base.schedule[0].payment,
     };
@@ -264,7 +304,10 @@ export function calcPrepay(input: PrepayInput): PrepayResult | null {
   return {
     baseTotalInterest: base.totalInterest,
     newTotalInterest: round2(paidInterest + interestPart),
-    interestSaved: round2(base.totalInterest - paidInterest - interestPart),
+    interestSaved: Math.max(
+      0,
+      round2(base.totalInterest - paidInterest - interestPart),
+    ),
     newMonthlyPayment: round2(newPrincipalPerMonth + newPrincipal * r),
     oldMonthlyPayment: base.schedule[0].payment,
   };

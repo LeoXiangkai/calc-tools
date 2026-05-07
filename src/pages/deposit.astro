@@ -89,12 +89,12 @@ import Base from "~/layouts/Base.astro";
       }
       errEl.textContent = "";
       const items: DepositCompareItem[] = [
-        { name: "活期", annualRatePct: num("d-current"), years: 1 },
-        { name: "1 年定存", annualRatePct: num("d-1y"), years: 1 },
-        { name: "2 年定存", annualRatePct: num("d-2y"), years: 2 },
-        { name: "3 年定存", annualRatePct: num("d-3y"), years: 3 },
-        { name: "5 年定存", annualRatePct: num("d-5y"), years: 5 },
-        { name: "3 年大额存单", annualRatePct: num("d-3y-big"), years: 3, threshold: 200000 },
+        { name: "活期", annualRatePct: num("d-current"), years: 1, compounding: "simple" },
+        { name: "1 年定存", annualRatePct: num("d-1y"), years: 1, compounding: "simple" },
+        { name: "2 年定存", annualRatePct: num("d-2y"), years: 2, compounding: "simple" },
+        { name: "3 年定存", annualRatePct: num("d-3y"), years: 3, compounding: "simple" },
+        { name: "5 年定存", annualRatePct: num("d-5y"), years: 5, compounding: "simple" },
+        { name: "3 年大额存单", annualRatePct: num("d-3y-big"), years: 3, compounding: "simple", threshold: 200000 },
         { name: "3 年储蓄国债", annualRatePct: num("d-3y-bond"), years: 3, compounding: "annual" },
         { name: "5 年储蓄国债", annualRatePct: num("d-5y-bond"), years: 5, compounding: "annual" },
       ];
