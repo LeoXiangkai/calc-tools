@@ -65,6 +65,33 @@ import Base from "~/layouts/Base.astro";
         </div>
 
         <details class="card compact">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px;">查看分期明细（年度汇总）</summary>
+          <p style="font-size:12px;color:var(--c-text-soft);margin:8px 0;">
+            按年聚合：每年还款合计、利息合计、本金合计、年末剩余本金。可截图分享。
+          </p>
+          <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:6px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px;">等额本息</div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                <table id="b-ei-year-table">
+                  <thead><tr><th>年度</th><th>当年还款</th><th>当年利息</th><th>当年本金</th><th>年末余额</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px;">等额本金</div>
+              <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                <table id="b-ep-year-table">
+                  <thead><tr><th>年度</th><th>当年还款</th><th>当年利息</th><th>当年本金</th><th>年末余额</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="card compact">
           <summary style="cursor:pointer;font-weight:600;font-size:14px;">按月明细（等额本息 / 等额本金）</summary>
           <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;">
             <div>
@@ -377,6 +404,26 @@ import Base from "~/layouts/Base.astro";
       };
       fillTable("b-ei-table", ei.schedule);
       fillTable("b-ep-table", ep.schedule);
+
+      const fillYearTable = (id: string, rows: typeof ei.schedule) => {
+        const tbody = document.querySelector<HTMLTableSectionElement>(`#${id} tbody`)!;
+        const frag = document.createDocumentFragment();
+        const yearCount = Math.ceil(rows.length / 12);
+        for (let y = 0; y < yearCount; y++) {
+          const slice = rows.slice(y * 12, (y + 1) * 12);
+          if (slice.length === 0) continue;
+          const sumPay = slice.reduce((s, r) => s + r.payment, 0);
+          const sumInt = slice.reduce((s, r) => s + r.interest, 0);
+          const sumPri = slice.reduce((s, r) => s + r.principal, 0);
+          const lastRemaining = slice[slice.length - 1].remaining;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>第 ${y + 1} 年</td><td>${fmtCny(sumPay)}</td><td>${fmtCny(sumInt)}</td><td>${fmtCny(sumPri)}</td><td>${fmtCny(lastRemaining)}</td>`;
+          frag.appendChild(tr);
+        }
+        tbody.replaceChildren(frag);
+      };
+      fillYearTable("b-ei-year-table", ei.schedule);
+      fillYearTable("b-ep-year-table", ep.schedule);
     }
 
     [bTotalPrice, bDownRatio].forEach((el) => el.addEventListener("input", () => { syncBasicPrincipal(); renderBasic(); }));
